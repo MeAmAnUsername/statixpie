@@ -1,0 +1,49 @@
+module pp
+
+imports
+
+  libstratego-gpp
+  libspoofax/sdf/pp
+  libspoofax/editor/refactoring/-
+  pp/statixpie-parenthesize
+  pp/statixpie-pp
+
+rules
+
+  editor-format:
+    (node, _, ast, path, project-path) -> (filename, result)
+    with
+      ext      := <get-extension> path
+    ; filename := <guarantee-extension(|$[pp.[ext]])> path
+    ; result   := <pp-debug> node
+
+rules
+  
+  pp-statixpie-string =
+    parenthesize-statixpie
+    ; prettyprint-statixpie-start-symbols
+    ; !V([], <id>)
+    ; box2text-string(|120)
+      
+  pp-partial-statixpie-string =
+    parenthesize-statixpie
+    ; prettyprint-statixpie
+    ; !V([], <id>)
+    ; box2text-string(|120)
+    
+  pp-partial-statixpie-string(|sort) =
+    parenthesize-statixpie
+    ; prettyprint-statixpie(|sort)
+    ; !V([], <id>)
+    ; box2text-string(|120)  
+      
+  pp-debug :
+    ast -> result
+    with
+       result := <pp-statixpie-string> ast
+    <+ <bottomup(try(not(is-string); not(is-list); not(pp-statixpie-string); debug(!"cannot pp ")))> ast
+    ;  result := ""
+
+rules
+  
+  construct-textual-change = construct-textual-change(pp-partial-statixpie-string, parenthesize, override-reconstruction, resugar)
