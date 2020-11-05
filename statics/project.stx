@@ -1,0 +1,17 @@
+module statics/project
+
+imports
+
+  signatures/statixpie-sig
+  statics/file
+
+rules
+
+  projectOk : scope
+
+  projectOk(s).
+
+  fileOk : scope * Start
+
+  fileOk(s, program) :-
+    programOk(s, program).

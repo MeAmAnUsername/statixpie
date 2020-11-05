@@ -6,7 +6,8 @@ imports
 
 rules
 
-  programOk : Start 
+  programOk : scope * Start 
 
-  programOk(Program(Module(mods), imports, defs)) :-
+  programOk(s, Program(Module(mods), imports, defs)) :-
+    false | error "testing",
     true.
