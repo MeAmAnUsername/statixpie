@@ -1,0 +1,12 @@
+module statics/file
+
+imports
+
+  signatures/statixpie-sig
+
+rules
+
+  programOk : Start 
+
+  programOk(Program(Module(mods), imports, defs)) :-
+    true.

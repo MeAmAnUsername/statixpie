@@ -10,6 +10,10 @@ imports
   func_def
   func_body
 
+context-free sorts
+
+  Start
+
 context-free start-symbols
 
   Start
