@@ -3,10 +3,13 @@ module statics/file
 imports
 
   signatures/statixpie-sig
+  statics/def
 
 rules
 
   programOk : Start 
 
-  programOk(Program(Module(mods), imports, defs)) :-
-    true.
+  programOk(Program(Module(mods), imports, defs)) :- {s_file}
+    // todo module, imports
+    new s_file,
+    defsOk(s_file, defs).

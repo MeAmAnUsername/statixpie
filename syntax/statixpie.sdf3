@@ -13,6 +13,9 @@ imports
 context-free sorts
 
   Start
+  Module
+  Import
+  Def
 
 context-free start-symbols
 
