@@ -1,0 +1,32 @@
+module statics/type
+
+imports
+
+  signatures/type-sig
+  statics/base
+
+signature
+  constructors
+    UnitType : TYPE
+    BoolType : TYPE
+    IntType : TYPE
+    StrType : TYPE
+    PathType : TYPE
+    NullType : TYPE
+    TopType : TYPE
+    
+    FuncType : list(TYPE) * TYPE -> TYPE
+
+rules
+
+  typeOf : scope * Type -> TYPE
+
+  typeOf(_, BaseType2Type(UnitTy())) = UnitType().
+  typeOf(_, BaseType2Type(BoolTy())) = BoolType().
+  typeOf(_, BaseType2Type(IntTy()))  = IntType().
+  typeOf(_, BaseType2Type(StrTy()))  = StrType().
+  typeOf(_, BaseType2Type(PathTy())) = PathType().
+
+  // todo: dataty, ImportTy (refactor), TupleTy, ListTy, SupplierTy, FuncTy, NullableTy
+
+  typeOk : scope * TYPE

@@ -1,0 +1,53 @@
+module statics/func_def
+
+imports
+
+  signatures/statixpie-sig
+  signatures/func_def-sig
+  statics/base
+  statics/type
+  statics/func_body
+
+rules
+
+  funcDefOk : scope * FuncDef
+  
+  funcDefOk(s_mod, FuncDef(FuncHead(name, Params(params), type_out), impl)) :- {param_tys s_func out_ty_expected}
+    new s_func,
+    s_func -P-> s_mod,
+    paramsOk(s_mod, s_func, params) == param_tys,
+    typeOf(s_mod, type_out) == out_ty_expected,
+    !func[name, FuncType(param_tys, out_ty_expected)] in s_mod,
+    funcImplOk(s_func, impl, out_ty_expected),
+    resolveFunc(s_mod, name) == _ | error $[Duplicate function [name]] @name.
+  
+  paramOk : scope * scope * Param -> TYPE
+  paramsOk maps paramOk(*, *, list(*)) = list(*)
+  
+  paramOk(s_mod, _, Param(lexical_type)) = semantic_type :-
+    typeOf(s_mod, lexical_type) == semantic_type.
+
+  paramOk(s_mod, s_func, p@NParam(name, lexical_type)) = semantic_type :-
+    typeOf(s_mod, lexical_type) == semantic_type,
+    declareVal(s_func, name, semantic_type, InputValKind()).
+
+  funcImplOk : scope * FuncImpl * TYPE
+  
+  // todo: JavaForeignFuncImpl, JavaForeignConstructorImpl, PieForeignFuncImpl
+  
+  funcImplOk(s_func_outer, PieFuncImpl(Exp2PieFuncBody(exp), keyFunc), expected_type) :- {s_func_inner actual_type}
+    // todo: set FuncDef kind to PieFuncKind(), ask Hendrik
+    // todo: set FuncDef moduleList
+    new s_func_inner,
+    s_func_inner -P-> s_func_outer,
+    typeOfExp(s_func_inner, exp) == actual_type,
+    subtype(actual_type, expected_type) | error $[Type mismatch: expected [expected_type], got [actual_type]] @exp,
+    optionalKeyFuncOk(s_func_outer, keyFunc).
+
+  keyFuncOk : scope * PieKeyFunc
+  optionalKeyFuncOk maps keyFuncOk(*, list(*))
+  
+  keyFuncOk(s_func_outer, PieKeyFunc(Exp2PieFuncBody(exp))) :- {s_keyfunc}
+    new s_keyfunc,
+    s_keyfunc -P-> s_func_outer,
+    typeOfExp(s_keyfunc, exp) == _.

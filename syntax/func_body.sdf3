@@ -5,6 +5,20 @@ imports
   lex/literal
   type
 
+context-free sorts
+
+  Exp
+  Block
+  Binder
+  Bind
+  Ref
+  StamperPart
+  StampKind
+  FilterPart
+  Filter
+  Bool
+  StrPart
+
 context-free syntax // PIE function body
 
   PieFuncBody = Exp

@@ -1,0 +1,13 @@
+module statics/func_body
+
+imports
+
+  signatures/func_body-sig
+  statics/base
+  statics/type
+
+rules
+
+  typeOfExp : scope * Exp -> TYPE
+  
+  typeOfExp(s, IntLit(_)) = IntType().

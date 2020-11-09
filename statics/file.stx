@@ -3,13 +3,24 @@ module statics/file
 imports
 
   signatures/statixpie-sig
-  statics/def
+  signatures/lex/literal-sig
+  signatures/type-sig
+  statics/func_def
 
 rules
 
-  programOk : Start 
+  programOk : Start
 
   programOk(Program(Module(mods), imports, defs)) :- {s_file}
     // todo module, imports
     new s_file,
     defsOk(s_file, defs).
+
+  defOk : scope * Def
+  defsOk maps defOk(*, list(*))
+
+  defOk(s_mod, FuncDef2Def(funcDef)) :-
+    funcDefOk(s_mod, funcDef).
+// todo: implement dataDefOk, enable this rule.
+//  defOk(s_mod, DataDef2Def(dataDef)) :-
+//    dataDefOk(s_mod, dataDef).

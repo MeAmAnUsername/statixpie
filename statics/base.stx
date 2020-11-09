@@ -1,0 +1,66 @@
+module statics/base
+
+imports
+
+  signatures/lex/literal-sig
+
+rules // operations on types
+
+  subtype  : TYPE * TYPE
+  lub      : TYPE * TYPE -> TYPE
+  
+  subtype(T, T).
+  lub(T, T) = T.
+
+signature
+  sorts
+    TYPE
+    ValKind
+
+  relations
+    val : VALID -> TYPE
+    func : FUNCID -> TYPE
+
+  constructors
+    InputValKind : ValKind
+
+signature
+  name-resolution
+    labels P
+
+rules
+
+  /**
+   * Declare a value [name] with type [TYPE] and ValKind [kind] in scope [s]
+   */
+  declareVal : scope * string * TYPE * ValKind
+  declareVal(s, name, type, kind) :-
+    !val[name, type] in s,
+    @name.kind := kind,
+    resolveVal(s, name) == [(_, (_, _))]
+      | error $[Duplicate definition of value [name]],
+    @name.type := type.
+
+  /**
+   * Resolve a value [name] in scope [s]
+   */
+  resolveVal : scope * string -> list((path * (string * TYPE)))
+  resolveVal(s, name) = occs :-
+    query val
+      filter P*
+         and { name' :- name' == name }
+         min $ < P
+         and true
+          in s |-> occs.
+
+  /**
+   * Resolve a function [name] in scope [s]
+   */
+  resolveFunc : scope * string -> list((path * (string * TYPE)))
+  resolveFunc(s, name) = occs :-
+    query func
+      filter P*
+         and { name' :- name' == name }
+         min $ < P
+         and true
+          in s |-> occs.

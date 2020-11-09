@@ -4,6 +4,12 @@ imports
 
   lex/literal
 
+context-free sorts
+
+  BaseType
+  TypeMod
+  Type
+
 context-free syntax
 
   BaseType.UnitTy     = <unit>
