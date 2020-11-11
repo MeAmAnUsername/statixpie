@@ -36,3 +36,7 @@ context-free syntax
 
   Def = DataDef
   Def = FuncDef
+
+template options
+
+  keyword -/- [a-zA-Z0-9\-\_]
