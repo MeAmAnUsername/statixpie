@@ -1,0 +1,8 @@
+module test
+
+language statixpie
+
+test parse [[
+module foo
+
+]] parse succeeds
