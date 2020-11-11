@@ -17,6 +17,7 @@ pardonedLanguages:
 - SDF
 language:
   sdf:
+    jsglr-version: v2
     pretty-print: statixpie
     sdf2table: java
     placeholder:
