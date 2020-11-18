@@ -18,6 +18,7 @@ context-free sorts
   Filter
   Bool
   StrPart
+  PathPart
 
 context-free syntax // PIE function body
 

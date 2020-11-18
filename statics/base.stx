@@ -4,40 +4,67 @@ imports
 
   signatures/lex/literal-sig
 
-rules // operations on types
-
-  subtype  : TYPE * TYPE
-  lub      : TYPE * TYPE -> TYPE
-  
-  subtype(T, T).
-  lub(T, T) = T.
-
 signature
   sorts
-    TYPE
-    ValKind
+    TYPE // A semantic type (as opposed to the lexical, non-all caps Type)
+    ValKind // The kind of a value. Used by code generation.
+    BOOLEAN // For logic in this statix spec.
 
   relations
     val : VALID -> TYPE
     func : FUNCID -> TYPE
+    context : string -> TYPE
 
   constructors
     InputValKind : ValKind
+    LocalValKind : ValKind
+    TRUE : BOOLEAN
+    FALSE : BOOLEAN
 
 signature
   name-resolution
     labels P
 
-rules
+rules // Logic functions
+
+  /**
+   * Logical and. Called andB because `and` is apparently a keyword.
+   */
+  andB : BOOLEAN * BOOLEAN -> BOOLEAN
+  andB(FALSE(), _) = FALSE().
+  andB(_, FALSE()) = FALSE().
+  andB(TRUE(), TRUE()) = TRUE().
+  andB(a, b) = FALSE() :- false | error $[Bug in Statix spec: no matching rule for andB([a], [b]).].
+  
+  /**
+   * return TRUE() if all values in the list are TRUE().
+   */
+  allTrue : list(BOOLEAN) -> BOOLEAN
+  allTrue([]) = TRUE().
+  allTrue([FALSE()|_]) = FALSE().
+  allTrue([TRUE()|rest]) = allTrue(rest).
+
+  orB : BOOLEAN * BOOLEAN -> BOOLEAN
+  orB(TRUE(), _) = TRUE().
+  orB(_, TRUE()) = TRUE().
+  orB(FALSE(), FALSE()) = FALSE().
+  orB(a, b) = FALSE() :- false | error $[Bug in Statix spec: no matching rule for orB([a], [b]).].
+  
+  notB : BOOLEAN -> BOOLEAN
+  notB(TRUE()) = FALSE().
+  notB(FALSE()) = TRUE().
+
+rules // Declararing and resolving
 
   /**
    * Declare a value [name] with type [TYPE] and ValKind [kind] in scope [s]
    */
   declareVal : scope * string * TYPE * ValKind
   declareVal(s, name, type, kind) :-
+    {occs} try { false } | note $[Declare val [name] in [s]: occs=[occs]], // todo: remove
     !val[name, type] in s,
     @name.kind := kind,
-    resolveVal(s, name) == [(_, (_, _))]
+    occs@resolveVal(s, name) == [_]
       | error $[Duplicate definition of value [name]],
     @name.type := type.
 
@@ -46,12 +73,21 @@ rules
    */
   resolveVal : scope * string -> list((path * (string * TYPE)))
   resolveVal(s, name) = occs :-
+    try { false } | note $[Resolve val [name] in [s]: occs=[occs]], // todo: remove
     query val
       filter P*
          and { name' :- name' == name }
          min $ < P
          and true
           in s |-> occs.
+
+  resolveUniqueVal : scope * string -> TYPE
+  resolveUniqueVal(s, name) = ty :- {occs}
+    resolveVal(s, name) == occs,
+    occs == [(_, (name, ty))],
+    // If there are multiple, the declaration will give an error.
+    try { occs != [] } | error $[Cannot resolve [name]].
+
 
   /**
    * Resolve a function [name] in scope [s]
@@ -64,3 +100,32 @@ rules
          min $ < P
          and true
           in s |-> occs.
+
+  /**
+   * resolve a function [name] to a unique declaration in scope [s]
+   */
+  resolveUniqueFunc : scope * string -> TYPE
+  resolveUniqueFunc(s, name) = ty :- {occs}
+    resolveFunc(s, name) == occs,
+    occs == [(_, (name, ty))],
+    // If there are multiple, the declaration will give an error.
+    try { occs != [] } | error $[Could not resolve function [name]].
+
+
+  setContextType : scope * string * TYPE
+  setContextType(s, name, ty) :-
+    !context[name, ty] in s,
+    true. // todo
+//    getContextType(s, name) == _
+//      | error $[Context value [name] is already set in [s]].
+
+  getContextType : scope * string -> TYPE
+  getContextType(s, name) = ty :- {occs}
+    query context
+      filter P*
+         and { name' :- name' == name }
+         min $ < P
+         and true
+          in s |-> occs,
+    occs == [(_, (name, ty))],
+    try { occs != [] } | error $[cannot get context value [name] in [s]].

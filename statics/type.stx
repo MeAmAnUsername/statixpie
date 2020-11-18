@@ -15,18 +15,108 @@ signature
     NullType : TYPE
     TopType : TYPE
     
+    NullableType : TYPE -> TYPE
+    ListType : TYPE -> TYPE
+    TupleType : list(TYPE) -> TYPE
+    SupplierType : TYPE -> TYPE
     FuncType : list(TYPE) * TYPE -> TYPE
+
+rules // operations on types
+
+  subtype : TYPE * TYPE
+  subtypes maps subtype(list(*), list(*))
+  subtype(T1, T2) :- isSubtype(T1, T2) == TRUE().
+
+  isSubtype : TYPE * TYPE -> BOOLEAN
+  isSubtype(T, T) = TRUE().
+  isSubtype(NullType(), NullableType(_)) = TRUE().
+  isSubtype(T, NullableType(T)) = TRUE().
+// doesn't work  isSubtype(ListType(T1), ListType(T2)) = TRUE() :- T1 == T2. // to aid unification of wildcard element type for an empty list.
+  isSubtype(_, _) = FALSE().
+
+//  isSubtype : TYPE * TYPE -> BOOLEAN
+//  isSubtype(T1, T2) = res :- isSubtype2(T1, T2, res).
+//
+//  isSubtype2 : TYPE * TYPE * BOOLEAN
+//  isSubtype2(T, T, TRUE()).
+//  isSubtype2(NullType(), NullableType(_), TRUE()).
+//  isSubtype2(T, NullableType(T), TRUE()).
+//  isSubtype2(_, _, FALSE()).
+  
+  /**
+   * Returns the first element in the list that is TRUE(), or the default otherwise.
+   */
+  firstTrueT : list((BOOLEAN * TYPE)) * TYPE -> TYPE
+  firstTrueT([], T) = T.
+  firstTrueT([(FALSE(), _)|rest], T) = firstTrueT(rest, T).
+  firstTrueT([(TRUE(), T)|_], _) = T.
+
+  makeNullable : TYPE -> TYPE
+  makeNullable(NullType()) = NullType().
+  makeNullable(T@NullableType(_)) = T.
+  makeNullable(T) = NullableType(T).  
+
+  lub : TYPE * TYPE -> TYPE
+  listLub : list(TYPE) -> TYPE
+  lub(NullType(), T) = makeNullable(T).
+  lub(T, NullType()) = makeNullable(T).
+  lub(T1, T2) = firstTrueT([
+    (isSubtype(T1, T2), T2),
+    (isSubtype(T2, T1), T1)],
+    TopType()).
+  
+  listLub([]) = TopType().
+  listLub([T]) = T.
+  listLub([T1|[T2|[]]]) = lub(T1, T2).
+  listLub([T1|[T2|rest]]) = listLub([lub(T1, T2) | rest]).
+  
+  /**
+   * Holds if the two types are comparable using unsound, stricter semantics.
+   * This disregards the possibilty for two
+   * incomparable but Nullable values to both be null.
+   */
+  unsoundComparable : TYPE * TYPE -> BOOLEAN
+  listUnsoundComparable maps unsoundComparable(list(*), list(*)) = list(*)
+  unsoundComparable(TupleType(T1s), TupleType(T2s)) = allTrue(listUnsoundComparable(T1s, T2s)).
+  unsoundComparable(ListType(T1), ListType(T2)) = unsoundComparable(T1, T2).
+  unsoundComparable(SupplierType(T1), SupplierType(T2)) = unsoundComparable(T1, T2).
+  unsoundComparable(T1, T2) = orB(isSubtype(T1, T2), isSubtype(T2, T1)).
+
+  /**
+   * Holds if the two types are comparable using technically correct semantics.
+   * This comparable is sound in that it holds for every two types that share
+   * values, i.e. that could be equal.
+   * The extra cases where this will hold are two nullable types (can both be
+   * null) or two list types (can both be empty).
+   */
+  soundComparable : TYPE * TYPE -> BOOLEAN
+  listSoundComparable maps soundComparable(list(*), list(*)) = list(*)
+  soundComparable(TupleType(T1s), TupleType(T2s)) = allTrue(listSoundComparable(T1s, T2s)).
+  soundComparable(ListType(_), ListType(_)) = TRUE(). // if both lists are empty they are equal.
+  soundComparable(SupplierType(T1), SupplierType(T2)) = soundComparable(T1, T2).
+  soundComparable(NullableType(_), NullableType(_)) = TRUE(). // both values could be `null`
+  soundComparable(T1, T2) = orB(isSubtype(T1, T2), isSubtype(T2, T1)).
+
+  soundButNotUnsoundComparable : TYPE * TYPE -> BOOLEAN
+  soundButNotUnsoundComparable(T1, T2) =
+    andB(
+      soundComparable(T1, T2),
+      notB(unsoundComparable(T1, T2))
+    ).
 
 rules
 
   typeOf : scope * Type -> TYPE
+  typesOf maps typeOf(*, list(*)) = list(*)
 
   typeOf(_, BaseType2Type(UnitTy())) = UnitType().
   typeOf(_, BaseType2Type(BoolTy())) = BoolType().
   typeOf(_, BaseType2Type(IntTy()))  = IntType().
   typeOf(_, BaseType2Type(StrTy()))  = StrType().
   typeOf(_, BaseType2Type(PathTy())) = PathType().
-
-  // todo: dataty, ImportTy (refactor), TupleTy, ListTy, SupplierTy, FuncTy, NullableTy
-
-  typeOk : scope * TYPE
+  // todo: DataTy
+  // todo: ImportTy
+  typeOf(s, BaseType2Type(TupleTy(tys))) = TupleType(typesOf(s, tys)).
+  typeOf(s, BaseType2Type(ListTy(ty))) = ListType(typeOf(s, ty)).
+  // todo: SupplierTy
+  typeOf(s, TypeMod2Type(NullableTy(ty))) = NullableType(typeOf(s, BaseType2Type(ty))).
