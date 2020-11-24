@@ -68,7 +68,7 @@ rules
   typeOfExp(s, Add(exp_left, exp_right)) = ty :- {ty_left ty_right}
     typeOfExp(s, exp_left) == ty_left,
     typeOfExp(s, exp_right) == ty_right,
-    typeOfAdd(ty_left, ty_right) == ty.
+    typeOfAdd(ty_left, ty_right) == ty | error $[Type mismatch: cannot add [ty_left] to [ty_right]].
 
   typeOfAdd : TYPE * TYPE -> TYPE
   typeOfAdd(IntType()  , IntType()  ) = IntType().
@@ -85,11 +85,11 @@ rules
     typeOfExp(s, exp_body) == _.
 
   typeOfExp(s, IfElse(exp_cond, exp_true, exp_false)) = ty :- {ty_cond ty_true ty_false}
-    expectSubtype(s, exp_cond, BoolType()) | error $[Type mismatch: expected boolean type, got [ty_cond]] @exp_cond,
+    expectSubtype(s, exp_cond, BoolType()),
     typeOfExp(s, exp_true) == ty_true,
     typeOfExp(s, exp_false) == ty_false,
     lub(ty_true, ty_false) == ty,
-    try { ty != TopType() } | warning $[Type mismatch: true branch and false branch combine to the top type. Are you sure?].
+    try { ty != TopType() } | warning $[Type mismatch: true branch ([ty_true]) and false branch ([ty_false]) combine to the top type. Are you sure?].
 
  typeOfExp(s, ListComprehension(exp_map, binder, exp_list)) = ListType(ty_map) :- {ty_list s_comprehension ty_arg}
    ty_list@typeOfExp(s, exp_list) == ListType(ty_arg) | error $[Type mismatch: expected list type, got [ty_list]] @exp_list,
