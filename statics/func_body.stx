@@ -95,8 +95,14 @@ rules
     lub(ty_true, ty_false) == ty,
     try { ty != TopType() } | warning $[Type mismatch: true branch ([ty_true]) and false branch ([ty_false]) combine to the top type. Are you sure?].
 
- typeOfExp(s, ListComprehension(exp_map, binder, exp_list)) = ListType(ty_map) :- {ty_list s_comprehension ty_arg}
-   ty_list@typeOfExp(s, exp_list) == ListType(ty_arg) | error $[Type mismatch: expected list type, got [ty_list]] @exp_list,
+ typeOfExp(s, ListComprehension(exp_map, binder, exp_list)) = ListType(ty_map) :- {ty_list expected_ty s_comprehension ty_arg}
+   ty_list == typeOfExp(s, exp_list),
+   subtype(ty_list, expected_ty@ListType(ty_arg)) | error $[Type mismatch: expected [expected_ty], got [ty_list]] @exp_list,
+   try { ty_list != EmptyListType() } | warning $[Dead code: list comprehension over empty list] @exp_list,
+   // todo: better error messages
+   // If not a list: expected a list
+   // If Empty list: dead code
+   // If non-empty list but wrong element type: wrong element type
    new s_comprehension,
    s_comprehension -P-> s,
    typeOfBinder(s_comprehension, ty_arg, binder) == _,

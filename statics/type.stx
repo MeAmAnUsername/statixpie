@@ -24,15 +24,29 @@ signature
 
 rules // operations on types
 
+  /**
+   * subtype(T1, T2)
+   * Holds if type T1 is a non-strict subtype of type T2.
+   * Fails with error if T1 is not a subtype of T2.
+   * Will unify unbound variables if possible.
+   */
   subtype : TYPE * TYPE
   subtypes maps subtype(list(*), list(*))
-  subtype(T1, T2) :- isSubtype(T1, T2) == TRUE().
+  subtype(T, T).
+  subtype(NullType(), NullableType(_)).
+  subtype(T, NullableType(T)).
+  subtype(EmptyListType(), ListType(_)).
 
+  /**
+   * subtype(T1, T2)
+   * Returns TRUE() if type T1 is a non-strict subtype of type T2, FALSE() otherwise.
+   * May fail on unbound variables.
+   */
   isSubtype : TYPE * TYPE -> BOOLEAN
   isSubtype(T, T) = TRUE().
   isSubtype(NullType(), NullableType(_)) = TRUE().
   isSubtype(T, NullableType(T)) = TRUE().
-  isSubtype(EmptyListType(), ListType(T)) = TRUE().
+  isSubtype(EmptyListType(), ListType(_)) = TRUE().
   isSubtype(_, _) = FALSE().
  
   /**
