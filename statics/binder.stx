@@ -30,4 +30,4 @@ rules
   typeOfBind(s, actual_ty, TBind(name, expected_ty_exp)) = expected_ty :-
     typeOf(s, expected_ty_exp) == expected_ty,
     declareVal(s, name, expected_ty, LocalValKind()),
-    subtype(actual_ty, expected_ty) | error $[Type mismatch: expected [expected_ty], got [actual_ty]] @expected_ty_exp.
+    subtype(actual_ty, expected_ty) | error $[Type mismatch: cannot assign actual type [actual_ty] to declared type [expected_ty]] @expected_ty_exp.
