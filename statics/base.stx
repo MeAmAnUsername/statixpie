@@ -61,7 +61,8 @@ rules // Declararing and resolving
    */
   declareVal : scope * string * TYPE * ValKind
   declareVal(s, name, type, kind) :-
-    {occs} try { false } | note $[Declare val [name] in [s]: occs=[occs]], // todo: remove
+    {occs} // todo: remove
+//    try { false } | note $[Declare val [name] in [s]: occs=[occs]], // todo: remove
     !val[name, type] in s,
     @name.kind := kind,
     occs@resolveVal(s, name) == [_]
@@ -73,7 +74,7 @@ rules // Declararing and resolving
    */
   resolveVal : scope * string -> list((path * (string * TYPE)))
   resolveVal(s, name) = occs :-
-    try { false } | note $[Resolve val [name] in [s]: occs=[occs]], // todo: remove
+//    try { false } | note $[Resolve val [name] in [s]: occs=[occs]], // todo: remove
     query val
       filter P*
          and { name' :- name' == name }
