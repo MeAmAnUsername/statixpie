@@ -17,28 +17,24 @@ signature
     
     NullableType : TYPE -> TYPE
     ListType : TYPE -> TYPE
+    EmptyListType : TYPE
     TupleType : list(TYPE) -> TYPE
     SupplierType : TYPE -> TYPE
     FuncType : list(TYPE) * TYPE -> TYPE
 
 rules // operations on types
 
-  // Note: rules of subtype and isSubtype are duplicated (instead of just
-  // delegating subtype to isSubtype) to aid unification
   subtype : TYPE * TYPE
   subtypes maps subtype(list(*), list(*))
-  subtype(T, T).
-  subtype(NullType(), NullableType(_)).
-  subtype(T, NullableType(T)).
-  // todo: add TupleType? (e.g. TupleType(int, string) < TupleType(number, string))
-  //       This makes sense within the DSL but is difficult with Java.
+  subtype(T1, T2) :- isSubtype(T1, T2) == TRUE().
 
   isSubtype : TYPE * TYPE -> BOOLEAN
   isSubtype(T, T) = TRUE().
   isSubtype(NullType(), NullableType(_)) = TRUE().
   isSubtype(T, NullableType(T)) = TRUE().
+  isSubtype(EmptyListType(), ListType(T)) = TRUE().
   isSubtype(_, _) = FALSE().
-  
+ 
   /**
    * Returns the first element in the list that is TRUE(), or the default otherwise.
    */
@@ -56,6 +52,8 @@ rules // operations on types
   listLub : list(TYPE) -> TYPE
   lub(NullType(), T) = makeNullable(T).
   lub(T, NullType()) = makeNullable(T).
+  lub(EmptyListType(), ListType(T)) = ListType(T).
+  lub(ListType(T), EmptyListType()) = ListType(T).
   lub(T1, T2) = firstTrueT([
     (isSubtype(T1, T2), T2),
     (isSubtype(T2, T1), T1)],
