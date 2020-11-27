@@ -34,10 +34,10 @@ rules
 
   typeOfExp(s, ToNullable(exp)) = NullableType(ty) :-
     typeOfExp(s, exp) == ty,
-    ty != NullableType(_) | error $[Type mismatch: expected non-nullable type, got [ty]] @exp.
+    ty != NullableType(_) | error $[Type mismatch: cannot make [ty] nullable] @exp.
 
   typeOfExp(s, ToNonNullable(exp)) = ty :-
-    typeOfExp(s, exp) == NullableType(ty) | error $[Type mismatch: expected nullable type, got [ty]] @exp.
+    typeOfExp(s, exp) == NullableType(ty) | error $[Type mismatch: cannot make [ty] non-nullable] @exp.
 
   typeOfExp(s, Not(exp)) = BoolType() :- {ty}
     expectSubtype(s, exp, BoolType()).
