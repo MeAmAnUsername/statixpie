@@ -83,11 +83,12 @@ rules // Declararing and resolving
           in s |-> occs.
 
   resolveUniqueVal : scope * string -> TYPE
-  resolveUniqueVal(s, name) = ty :- {occs}
+  resolveUniqueVal(s, name) = ty :- {occs name'}
     resolveVal(s, name) == occs,
-    occs == [(_, (name, ty))],
+    occs == [(_, (name', ty))],
+    @name.ref := name',
     // If there are multiple, the declaration will give an error.
-    try { occs != [] } | error $[Cannot resolve [name]].
+    try { occs != [] } | error $[Cannot resolve [name]] @name.
 
 
   /**
@@ -106,11 +107,12 @@ rules // Declararing and resolving
    * resolve a function [name] to a unique declaration in scope [s]
    */
   resolveUniqueFunc : scope * string -> TYPE
-  resolveUniqueFunc(s, name) = ty :- {occs}
+  resolveUniqueFunc(s, name) = ty :- {occs name'}
     resolveFunc(s, name) == occs,
-    occs == [(_, (name, ty))],
+    occs == [(_, (name', ty))],
+    @name.ref := name',
     // If there are multiple, the declaration will give an error.
-    try { occs != [] } | error $[Could not resolve function [name]].
+    try { occs != [] } | error $[Could not resolve function [name]] @name.
 
 
   setContextType : scope * string * TYPE
@@ -128,5 +130,5 @@ rules // Declararing and resolving
          min $ < P
          and true
           in s |-> occs,
-    occs == [(_, (name, ty))],
+    occs == [(_, (_, ty))],
     try { occs != [] } | error $[cannot get context value [name] in [s]].
