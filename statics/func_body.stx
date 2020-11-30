@@ -10,14 +10,19 @@ imports
 
 rules
 
-  typeOfExp : scope * Exp -> TYPE
+  typeOfExp     : scope * Exp -> TYPE
+  typeOfExpImpl : scope * Exp -> TYPE
   typeOfExps maps typeOfExp(*, list(*)) = list(*)
+  
+  typeOfExp(s, exp) = ty :-
+    ty == typeOfExpImpl(s, exp),
+    @exp.type := ty.
 
 // Blocks
 
-  typeOfExp(s, Block2Exp(EmptyBlock())) = UnitType().
+  typeOfExpImpl(s, Block2Exp(EmptyBlock())) = UnitType().
 
-  typeOfExp(s, Block2Exp(Block(exps))) = ty :- {s_block}
+  typeOfExpImpl(s, Block2Exp(Block(exps))) = ty :- {s_block}
     new s_block,
     s_block -P-> s,
     typeOfBlockExps(s_block, exps) == ty.
@@ -32,14 +37,14 @@ rules
 
 // Unary expressions
 
-  typeOfExp(s, ToNullable(exp)) = NullableType(ty) :-
+  typeOfExpImpl(s, ToNullable(exp)) = NullableType(ty) :-
     typeOfExp(s, exp) == ty,
     ty != NullableType(_) | error $[Type mismatch: cannot make [ty] nullable] @exp.
 
-  typeOfExp(s, ToNonNullable(exp)) = ty :-
+  typeOfExpImpl(s, ToNonNullable(exp)) = ty :-
     typeOfExp(s, exp) == NullableType(ty) | error $[Type mismatch: cannot make [ty] non-nullable] @exp.
 
-  typeOfExp(s, Not(exp)) = BoolType() :- {ty}
+  typeOfExpImpl(s, Not(exp)) = BoolType() :- {ty}
     expectSubtype(s, exp, BoolType()).
 
 // Binary expressions
@@ -55,18 +60,18 @@ rules
     typeOfExp(s, exp_right) == ty_right,
     comparable(ty_left, ty_right) | error $[Cannot compare [ty_left] to [ty_right]] @exp.
 
-  typeOfExp(s, e@Eq(l, r)) = comparableOk(s, l, r, e).
-  typeOfExp(s, e@Neq(l, r)) = comparableOk(s, l, r, e).
+  typeOfExpImpl(s, e@Eq(l, r)) = comparableOk(s, l, r, e).
+  typeOfExpImpl(s, e@Neq(l, r)) = comparableOk(s, l, r, e).
 
-  typeOfExp(s, Lor(exp_left, exp_right)) = BoolType() :- {ty_left ty_right}
+  typeOfExpImpl(s, Lor(exp_left, exp_right)) = BoolType() :- {ty_left ty_right}
     expectSubtype(s, exp_left, BoolType()),
     expectSubtype(s, exp_right, BoolType()).
 
-  typeOfExp(s, Land(exp_left, exp_right)) = BoolType() :- {ty_left ty_right}
+  typeOfExpImpl(s, Land(exp_left, exp_right)) = BoolType() :- {ty_left ty_right}
     expectSubtype(s, exp_left, BoolType()),
     expectSubtype(s, exp_right, BoolType()).
 
-  typeOfExp(s, Add(exp_left, exp_right)) = ty :- {ty_left ty_right}
+  typeOfExpImpl(s, Add(exp_left, exp_right)) = ty :- {ty_left ty_right}
     typeOfExp(s, exp_left) == ty_left,
     typeOfExp(s, exp_right) == ty_right,
     typeOfAdd(ty_left, ty_right) == ty | error $[Type mismatch: cannot add [ty_left] to [ty_right]].
@@ -85,18 +90,18 @@ rules
 
 // Control flow
 
-  typeOfExp(s, If(exp_cond, exp_body)) = UnitType() :- {ty_cond}
+  typeOfExpImpl(s, If(exp_cond, exp_body)) = UnitType() :- {ty_cond}
     expectSubtype(s, exp_cond, BoolType()),
     typeOfExp(s, exp_body) == _.
 
-  typeOfExp(s, IfElse(exp_cond, exp_true, exp_false)) = ty :- {ty_cond ty_true ty_false}
+  typeOfExpImpl(s, IfElse(exp_cond, exp_true, exp_false)) = ty :- {ty_cond ty_true ty_false}
     expectSubtype(s, exp_cond, BoolType()),
     typeOfExp(s, exp_true) == ty_true,
     typeOfExp(s, exp_false) == ty_false,
     lub(ty_true, ty_false) == ty,
     try { ty != TopType() } | warning $[Type mismatch: true branch ([ty_true]) and false branch ([ty_false]) combine to the top type. Are you sure?].
 
- typeOfExp(s, ListComprehension(exp_map, binder, exp_list)) = ListType(ty_map) :- {ty_list expected_ty s_comprehension ty_arg}
+ typeOfExpImpl(s, ListComprehension(exp_map, binder, exp_list)) = ListType(ty_map) :- {ty_list expected_ty s_comprehension ty_arg}
    ty_list == typeOfExp(s, exp_list),
    subtype(ty_list, expected_ty@ListType(ty_arg)) | error $[Type mismatch: expected [expected_ty], got [ty_list]] @exp_list,
    try { ty_list != EmptyListType() } | warning $[Dead code: list comprehension over empty list] @exp_list,
@@ -111,11 +116,11 @@ rules
 
 // Value declaration and use.
   
-  typeOfExp(s, ValDec(binder, exp)) = declared_ty :- {actual_ty}
+  typeOfExpImpl(s, ValDec(binder, exp)) = declared_ty :- {actual_ty}
     typeOfExp(s, exp) == actual_ty,
     typeOfBinder(s, actual_ty, binder) == declared_ty.
 
-  typeOfExp(s, Ref2Exp(Ref(name))) = resolveUniqueVal(s, name).
+  typeOfExpImpl(s, Ref2Exp(Ref(name))) = resolveUniqueVal(s, name).
 
 // Calls
 
@@ -131,15 +136,15 @@ rules
     resolveUniqueFunc(s_data, name) == FuncType(param_tys, out_ty),
     expectSubtypes(s, arg_exps, param_tys).
 
-  typeOfExp(s, Call(name, arg_exps)) = typeOfCall(s, s, name, arg_exps).
+  typeOfExpImpl(s, Call(name, arg_exps)) = typeOfCall(s, s, name, arg_exps).
 
-  typeOfExp(s, QCall(exp, name, arg_exps)) = ty :- {exp_ty s_data}
+  typeOfExpImpl(s, QCall(exp, name, arg_exps)) = ty :- {exp_ty s_data}
     typeOfExp(s, exp) == exp_ty,
     false | error "todo: QCall statics",
     // getScopeFromType(exp_ty) == s_data, // todo
     typeOfCall(s, s_data, name, arg_exps) == ty.
 
-  typeOfExp(s, ImportCall(moduleList, name, arg_exps)) = ty :- {s_data}
+  typeOfExpImpl(s, ImportCall(moduleList, name, arg_exps)) = ty :- {s_data}
     // todo: resolve module list to s_data
     false | error "todo: ImportCall statics",
     typeOfCall(s, s_data, name, arg_exps) == ty.
@@ -168,48 +173,48 @@ rules
   filterOk(s, Extensions(exp)) :- expectSubtype(s, exp, ListType(StrType())).
 
 
-  typeOfExp(s, RequiresPath(exp, filter, stamper)) = UnitType() :- {exp_ty}
+  typeOfExpImpl(s, RequiresPath(exp, filter, stamper)) = UnitType() :- {exp_ty}
     expectSubtype(s, exp, PathType()),
     optionalFilterOk(s, filter),
     optionalStamperOk(s, stamper).
 
-  typeOfExp(s, GeneratesPath(exp, stamper)) = UnitType() :-
+  typeOfExpImpl(s, GeneratesPath(exp, stamper)) = UnitType() :-
     expectSubtype(s, exp, PathType()),
     optionalStamperOk(s, stamper).
 
-  typeOfExp(s, ListPath(exp, filter)) = ListType(PathType()) :-
+  typeOfExpImpl(s, ListPath(exp, filter)) = ListType(PathType()) :-
     expectSubtype(s, exp, PathType()),
     optionalFilterOk(s, filter).
 
-  typeOfExp(s, WalkPath(exp, filter)) = ListType(PathType()) :-
+  typeOfExpImpl(s, WalkPath(exp, filter)) = ListType(PathType()) :-
     expectSubtype(s, exp, PathType()),
     optionalFilterOk(s, filter).
 
-  typeOfExp(s, ReadPath(exp)) = NullableType(StrType()) :-
+  typeOfExpImpl(s, ReadPath(exp)) = NullableType(StrType()) :-
     expectSubtype(s, exp, PathType()).
   
-  typeOfExp(s, ExistsPath(exp)) = BoolType() :-
+  typeOfExpImpl(s, ExistsPath(exp)) = BoolType() :-
     expectSubtype(s, exp, PathType()).
   
 // Early return and failure
 
-  typeOfExp(s, Return(exp)) = UnitType() :- {expected_ty}
+  typeOfExpImpl(s, Return(exp)) = UnitType() :- {expected_ty}
     getContextType(s, "func_return_ty") == expected_ty,
     expectSubtype(s, exp, expected_ty).
     
-  typeOfExp(s, Fail(exp)) = UnitType() :-
+  typeOfExpImpl(s, Fail(exp)) = UnitType() :-
     expectSubtype(s, exp, StrType()).
 
 // literals
 
-  typeOfExp(s, UnitLit())  = UnitType().
-  typeOfExp(s, BoolLit(_)) = BoolType().
-  typeOfExp(s, IntLit(_))  = IntType().
-  typeOfExp(s, NullLit())  = NullType().
-  typeOfExp(s, TupleLit(exps)) = TupleType(typeOfExps(s, exps)).  
+  typeOfExpImpl(s, UnitLit())  = UnitType().
+  typeOfExpImpl(s, BoolLit(_)) = BoolType().
+  typeOfExpImpl(s, IntLit(_))  = IntType().
+  typeOfExpImpl(s, NullLit())  = NullType().
+  typeOfExpImpl(s, TupleLit(exps)) = TupleType(typeOfExps(s, exps)).  
   
-  typeOfExp(s, ListLit([])) = EmptyListType().
-  typeOfExp(s, ListLit(exps)) = ListType(listLub(typeOfExps(s, exps))).
+  typeOfExpImpl(s, ListLit([])) = EmptyListType().
+  typeOfExpImpl(s, ListLit(exps)) = ListType(listLub(typeOfExps(s, exps))).
 
 // String literals
 
@@ -219,7 +224,7 @@ rules
   strPartOk(s, StrInterpRef(Ref(name))) :- resolveUniqueVal(s, name) == _.
   strPartOk(s, StrInterpExp(exp)) :- typeOfExp(s, exp) == _.
 
-  typeOfExp(s, StrLit(parts)) = StrType() :- strPartsOk(s, parts).
+  typeOfExpImpl(s, StrLit(parts)) = StrType() :- strPartsOk(s, parts).
 
 // Path literals
 
@@ -229,4 +234,4 @@ rules
   pathPartOk(s, PathInterpRef(Ref(name))) :- resolveUniqueVal(s, name) == _.
   pathPartOk(s, PathInterpExp(exp)) :- typeOfExp(s, exp) == _.
 
-  typeOfExp(s, PathLit(_, parts)) = PathType() :- pathPartsOk(s, parts).
+  typeOfExpImpl(s, PathLit(_, parts)) = PathType() :- pathPartsOk(s, parts).
