@@ -53,8 +53,7 @@ rules
   comparableOk(s, exp_left, exp_right, exp) = BoolType() :- {ty_left ty_right}
     typeOfExp(s, exp_left) == ty_left,
     typeOfExp(s, exp_right) == ty_right,
-    soundComparable(ty_left, ty_right) == TRUE()| error $[Cannot compare [ty_left] to [ty_right]] @exp,
-    try { soundButNotUnsoundComparable(ty_left, ty_right) == FALSE() } | warning $[Types can only be equal if they are null] @exp.
+    comparable(ty_left, ty_right) | error $[Cannot compare [ty_left] to [ty_right]] @exp.
 
   typeOfExp(s, e@Eq(l, r)) = comparableOk(s, l, r, e).
   typeOfExp(s, e@Neq(l, r)) = comparableOk(s, l, r, e).

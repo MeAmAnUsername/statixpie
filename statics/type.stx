@@ -79,38 +79,16 @@ rules // operations on types
   listLub([T1|[T2|rest]]) = listLub([lub(T1, T2) | rest]).
   
   /**
-   * Holds if the two types are comparable using unsound, stricter semantics.
-   * This disregards the possibilty for two
-   * incomparable but Nullable values to both be null.
+   * Holds if the two types are comparable.
+   * This disregards the possibilty for two incomparable but Nullable values to
+   * both be null and the possibilty for two list types to both be empty lists.
    */
-  unsoundComparable : TYPE * TYPE -> BOOLEAN
-  listUnsoundComparable maps unsoundComparable(list(*), list(*)) = list(*)
-  unsoundComparable(TupleType(T1s), TupleType(T2s)) = allTrue(listUnsoundComparable(T1s, T2s)).
-  unsoundComparable(ListType(T1), ListType(T2)) = unsoundComparable(T1, T2).
-  unsoundComparable(SupplierType(T1), SupplierType(T2)) = unsoundComparable(T1, T2).
-  unsoundComparable(T1, T2) = orB(isSubtype(T1, T2), isSubtype(T2, T1)).
-
-  /**
-   * Holds if the two types are comparable using technically correct semantics.
-   * This comparable is sound in that it holds for every two types that share
-   * values, i.e. that could be equal.
-   * The extra cases where this will hold are two nullable types (can both be
-   * null) or two list types (can both be empty).
-   */
-  soundComparable : TYPE * TYPE -> BOOLEAN
-  listSoundComparable maps soundComparable(list(*), list(*)) = list(*)
-  soundComparable(TupleType(T1s), TupleType(T2s)) = allTrue(listSoundComparable(T1s, T2s)).
-  soundComparable(ListType(_), ListType(_)) = TRUE(). // if both lists are empty they are equal.
-  soundComparable(SupplierType(T1), SupplierType(T2)) = soundComparable(T1, T2).
-  soundComparable(NullableType(_), NullableType(_)) = TRUE(). // both values could be `null`
-  soundComparable(T1, T2) = orB(isSubtype(T1, T2), isSubtype(T2, T1)).
-
-  soundButNotUnsoundComparable : TYPE * TYPE -> BOOLEAN
-  soundButNotUnsoundComparable(T1, T2) =
-    andB(
-      soundComparable(T1, T2),
-      notB(unsoundComparable(T1, T2))
-    ).
+  comparable : TYPE * TYPE
+  listComparable maps comparable(list(*), list(*))
+  comparable(TupleType(T1s), TupleType(T2s)) :- listComparable(T1s, T2s).
+  comparable(ListType(T1), ListType(T2)) :- comparable(T1, T2).
+  comparable(SupplierType(T1), SupplierType(T2)) :- comparable(T1, T2).
+  comparable(T1, T2) :- orB(isSubtype(T1, T2), isSubtype(T2, T1)) == TRUE().
 
 rules
 
