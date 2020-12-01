@@ -5,6 +5,10 @@ imports
   lex/literal
   type
 
+template options
+
+  keyword -/- [a-zA-Z0-9\-\_]
+
 context-free sorts
 
   Exp

@@ -10,6 +10,10 @@ imports
   func_def
   func_body
 
+template options
+
+  keyword -/- [a-zA-Z0-9\-\_]
+
 context-free sorts
 
   Start
@@ -36,7 +40,3 @@ context-free syntax
 
   Def = DataDef
   Def = FuncDef
-
-template options
-
-  keyword -/- [a-zA-Z0-9\-\_]

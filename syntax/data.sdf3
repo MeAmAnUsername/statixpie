@@ -5,6 +5,10 @@ imports
   lex/literal
   func_def
   
+template options
+
+  keyword -/- [a-zA-Z0-9\-\_]
+
 context-free syntax // Data definition
 
   DataDef.DataDef = <<DataDefMods> data <TYPEID><SuperType> = <DataImpl>>
