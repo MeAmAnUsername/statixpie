@@ -170,6 +170,9 @@ lexical restrictions
 
 context-free priorities // Expression priorities
 
+  // Solves ambiguity between single element tuples and brackets
+  Exp.TupleLit <1> .> {Exp ","}+ = Exp,
+
   { right:
     Exp.Not
   } > { right:
