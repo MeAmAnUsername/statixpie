@@ -14,8 +14,7 @@ rules
   typeOfExpImpl : scope * Exp -> TYPE
   typeOfExps maps typeOfExp(*, list(*)) = list(*)
   
-  typeOfExp(s, exp) = ty :-
-    ty == typeOfExpImpl(s, exp),
+  typeOfExp(s, exp) = ty@typeOfExpImpl(s, exp) :-
     @exp.type := ty.
 
 // Blocks
