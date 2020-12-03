@@ -81,10 +81,11 @@ rules
   typeOfAdd(PathType()     , PathType()     ) = PathType().
   typeOfAdd(PathType()     , StrType()      ) = PathType().
   typeOfAdd(ListType(T)    , ListType(T)    ) = ListType(T).
+  typeOfAdd(ListType(T)    , EmptyListType()) = ListType(T) :- try {false} | warning $[concatenating an empty list is a no-op].
   typeOfAdd(ListType(T)    , NullType()     ) = ListType(makeNullable(T)).
   typeOfAdd(ListType(T1)   , T2             ) = ListType(T1) :- subtype(T2, T1).
   typeOfAdd(EmptyListType(), ListType(T)    ) = ListType(T).
-  typeOfAdd(EmptyListType(), EmptyListType()) = EmptyListType().
+  typeOfAdd(EmptyListType(), EmptyListType()) = EmptyListType() :- try {false} | warning $[concatenating an empty list is a no-op].
   typeOfAdd(EmptyListType(), T              ) = ListType(T).
 
 // Control flow
