@@ -87,6 +87,7 @@ rules // Declararing and resolving
     resolveVal(s, name) == occs,
     occs == [(_, (name', ty))],
     @name.ref := name',
+    @name.type := ty,
     // If there are multiple, the declaration will give an error.
     try { occs != [] } | error $[Cannot resolve [name]] @name.
 
@@ -111,6 +112,7 @@ rules // Declararing and resolving
     resolveFunc(s, name) == occs,
     occs == [(_, (name', ty))],
     @name.ref := name',
+    @name.type := ty,
     // If there are multiple, the declaration will give an error.
     try { occs != [] } | error $[Could not resolve function [name]] @name.
 

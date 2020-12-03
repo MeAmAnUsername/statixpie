@@ -19,12 +19,14 @@ rules
 
 // Blocks
 
-  typeOfExpImpl(s, Block2Exp(EmptyBlock())) = UnitType().
+  typeOfExpImpl(s, Block2Exp(b@EmptyBlock())) = UnitType() :-
+    @b.type := UnitType().
 
-  typeOfExpImpl(s, Block2Exp(Block(exps))) = ty :- {s_block}
+  typeOfExpImpl(s, Block2Exp(b@Block(exps))) = ty :- {s_block}
     new s_block,
     s_block -P-> s,
-    typeOfBlockExps(s_block, exps) == ty.
+    typeOfBlockExps(s_block, exps) == ty,
+    @b.type := ty.
 
   typeOfBlockExps : scope * list(Exp) -> TYPE
   typeOfBlockExps(s, [exp | exps@[_|_]]) = ty :-
@@ -120,7 +122,8 @@ rules
     typeOfExp(s, exp) == actual_ty,
     typeOfBinder(s, actual_ty, binder) == declared_ty.
 
-  typeOfExpImpl(s, Ref2Exp(Ref(name))) = resolveUniqueVal(s, name).
+  typeOfExpImpl(s, Ref2Exp(r@Ref(name))) = ty@resolveUniqueVal(s, name) :-
+    @r.type := ty.
 
 // Calls
 
