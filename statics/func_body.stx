@@ -137,7 +137,7 @@ rules
   typeOfCall : scope * scope * string * list(Exp) -> TYPE
   typeOfCall(s, s_data, name, arg_exps) = out_ty :- {param_tys arg_tys}
     resolveUniqueFunc(s_data, name) == FuncType(param_tys, out_ty),
-    expectSubtypes(s, arg_exps, param_tys).
+    expectSubtypes(s, arg_exps, param_tys) | error $[Unexpected number of arguments].
 
   typeOfExpImpl(s, Call(name, arg_exps)) = typeOfCall(s, s, name, arg_exps).
 
