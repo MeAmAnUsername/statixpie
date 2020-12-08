@@ -79,7 +79,7 @@ rules // Declararing and resolving
       filter P*
          and { name' :- name' == name }
          min $ < P
-         and true
+         and false 
           in s |-> occs.
 
   resolveUniqueVal : scope * string -> TYPE
@@ -101,7 +101,7 @@ rules // Declararing and resolving
       filter P*
          and { name' :- name' == name }
          min $ < P
-         and true
+         and false
           in s |-> occs.
 
   /**
