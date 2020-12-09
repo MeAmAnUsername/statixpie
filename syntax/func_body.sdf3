@@ -52,8 +52,8 @@ context-free syntax // Binary expressions
 
 context-free syntax // Control flow
 
-  Exp.If     = <if(<Exp>) <Exp>>            {left}
-  Exp.IfElse = <if(<Exp>) <Exp> else <Exp>> {left}
+  Exp.If     = <if(<Exp>) <Exp>>
+  Exp.IfElse = <if(<Exp>) <Exp> else <Exp>>
 
   Exp.ListComprehension = <[<Exp> | <Binder> \<- <Exp>]> {left}
 
@@ -217,9 +217,10 @@ context-free priorities // Expression priorities
   } > { non-assoc:
     Exp.Return
     Exp.Fail
-  } > { left:
-    Exp.If
+  } > {
     Exp.IfElse
+  } > {
+    Exp.If
   }
 
 lexical syntax // Reject keywords
