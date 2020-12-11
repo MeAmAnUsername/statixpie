@@ -7,7 +7,7 @@ imports
 
 template options
 
-  keyword -/- [a-zA-Z0-9\-\_]
+  keyword -/- [a-zA-Z0-9\-\_\"\/\.\[\!\+]
 
 context-free sorts
 
