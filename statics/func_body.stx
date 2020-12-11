@@ -36,9 +36,8 @@ rules
 // Control flow
 
   typeOfExpImpl(s, IfElse(exp_cond, exp_true, exp_false)) = ty :- {ty_cond ty_true ty_false}
-    expectSubtype(s, exp_cond, BoolType()),
-    typeOfExp(s, exp_true) == ty_true,
-    typeOfExp(s, exp_false) == ty_false,
+    IntType() == ty_true,
+    IntType() == ty_false,
     lub(ty_true, ty_false) == ty,
     try { ty != TopType() } | warning $[Type mismatch: true branch ([ty_true]) and false branch ([ty_false]) combine to the top type. Are you sure?].
 
