@@ -226,6 +226,7 @@ context-free priorities // Expression priorities
 lexical syntax // Reject keywords
 
   FUNCID = "return"    {reject}
+  FUNCID = "fail"      {reject}
   FUNCID = "requires"  {reject}
   FUNCID = "generates" {reject}
   FUNCID = "list"      {reject}
