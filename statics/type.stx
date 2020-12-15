@@ -32,10 +32,10 @@ rules // operations on types
    */
   subtype : TYPE * TYPE
   subtypes maps subtype(list(*), list(*))
-  subtype(T, T).
   subtype(NullType(), NullableType(_)).
   subtype(T, NullableType(T)).
   subtype(EmptyListType(), ListType(_)).
+  subtype(T1, T2) :- T1 == T2.
 
   /**
    * isSubtype(T1, T2)
@@ -43,12 +43,17 @@ rules // operations on types
    * May fail on unbound variables.
    */
   isSubtype : TYPE * TYPE -> BOOLEAN
-  isSubtype(T, T) = TRUE().
   isSubtype(NullType(), NullableType(_)) = TRUE().
   isSubtype(T, NullableType(T)) = TRUE().
   isSubtype(EmptyListType(), ListType(_)) = TRUE().
-  isSubtype(_, _) = FALSE().
- 
+  isSubtype(T1, T2) = isSubtypeHelper(T1, T2).
+
+  // this rule is here to prevent "overlapping rules" error
+  // on isSubtype(T, NullableType(T))
+  isSubtypeHelper : TYPE * TYPE -> BOOLEAN
+  isSubtypeHelper(T, T) = TRUE().
+  isSubtypeHelper(_, _) = FALSE().
+
   /**
    * Returns the first element in the list that is TRUE(), or the default otherwise.
    */
