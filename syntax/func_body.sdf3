@@ -11,6 +11,7 @@ template options
 
 context-free sorts
 
+  PieFuncBody
   Exp
   Block
   Binder

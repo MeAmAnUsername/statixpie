@@ -9,6 +9,15 @@ template options
 
   keyword -/- [a-zA-Z0-9\-\_]
 
+context-free sorts
+
+  DataDef
+  DataDefMod
+  DataDefMods
+  SuperType
+  DataImpl
+  JavaDataMemb
+
 context-free syntax // Data definition
 
   DataDef.DataDef = <<DataDefMods> data <TYPEID><SuperType> = <DataImpl>>
