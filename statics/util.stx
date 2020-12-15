@@ -12,9 +12,21 @@ rules
   /**
    * expect Exp [exp] to be a subtype of type [expected_ty] in scope [s]
    * give an error otherwise
+   * returns the updated scope
    */
-  expectSubtype : scope * Exp * TYPE
-  expectSubtypes maps expectSubtype(*, list(*), list(*))
-  expectSubtype(s, exp, expected_ty) :- {actual_ty}
-    typeOfExp(s, exp) == actual_ty,
+  expectSubtype : scope * Exp * TYPE -> scope
+  expectSubtype(s1, exp, expected_ty) = s2 :- {actual_ty}
+    typeOfExp(s1, exp) == (s2, actual_ty),
     subtype(actual_ty, expected_ty) | error $[Type mismatch: expected [expected_ty] type, got [actual_ty]] @exp.
+
+  /**
+   * Expect Exps [exps] to have types [tys]. This version passes along scopes from one expression to the next.
+   * Also takes a string argument [err], this will be used for the error message in case two lists have different lengths.
+   */
+  expectSubtypesPassScopes : scope * list(Exp) * list(TYPE) * string -> scope
+  expectSubtypesPassScopes(s, [], [], _) = s.
+  expectSubtypesPassScopes(s1, [exp | exps], [ty | tys], err) = s3 :- {s2}
+    expectSubtype(s1, exp, ty) == s2,
+    expectSubtypesPassScopes(s2, exps, tys, err) == s3.
+  expectSubtypesPassScopes(s, [], types@[_|_], err) = s :- false | error $[[err]; remaining types: [types]].
+  expectSubtypesPassScopes(s, exps@[_|_],  [], err) = s :- false | error $[[err]; remaining expressions: [exps]].
