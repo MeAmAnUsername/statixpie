@@ -93,6 +93,18 @@ rules // Declararing and resolving
 
 
   /**
+   * Declare a value [name] with type [TYPE] and ValKind [kind] in scope [s]
+   */
+  declareFunc : scope * string * TYPE
+  declareFunc(s, name, type) :-
+    {occs} // todo: remove
+//    try { false } | note $[Declare func [name] in [s]: occs=[occs]], // todo: remove
+    !func[name, type] in s,
+    occs@resolveFunc(s, name) == [_]
+      | error $[Duplicate definition of function [name]],
+    @name.type := type.
+
+  /**
    * Resolve a function [name] in scope [s]
    */
   resolveFunc : scope * string -> list((path * (string * TYPE)))
