@@ -38,7 +38,7 @@ rules // operations on types
   subtype(EmptyListType(), ListType(_)).
 
   /**
-   * subtype(T1, T2)
+   * isSubtype(T1, T2)
    * Returns TRUE() if type T1 is a non-strict subtype of type T2, FALSE() otherwise.
    * May fail on unbound variables.
    */
