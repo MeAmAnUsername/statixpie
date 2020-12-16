@@ -28,6 +28,7 @@ context-free start-symbols
   // for testing grammar
   Exp
   DataDef
+  Type
 
 context-free syntax
 
