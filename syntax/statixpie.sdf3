@@ -24,7 +24,10 @@ context-free sorts
 context-free start-symbols
 
   Start
-  Exp // for testing grammar
+
+  // for testing grammar
+  Exp
+  DataDef
 
 context-free syntax
 
