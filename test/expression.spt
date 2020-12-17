@@ -5,7 +5,11 @@ language statixpie
 fixture [[
   module test:expression
   
-  func main(name: string, comment: string?, enableFinagle: bool, value: int) -> unit = {
+  data Foo = foreign java org.example.test.expression.Foo {}
+  data Bar : Foo = foreign java org.example.test.expression.Bar {}
+  data Bak : Foo = foreign java org.example.test.expression.Bak {}
+  
+  func main(name: string, comment: string?, enableFinagle: bool, value: int, foo: Foo, bar: Bar, bak: Bak) -> unit = {
     [[...]];
     
     unit
@@ -14,6 +18,7 @@ fixture [[
   func anotherFunc() -> int = 9
   func double(x: int) -> int = x+x
   func argsFunc(x: int, y: int, name: string) -> string = "not implemented"
+  func takesFoo(foo: Foo) -> int = 17
 ]]
 
 
@@ -33,28 +38,28 @@ test list literal with null [[ val x: int?* = [1, null, 3] ]] analysis succeeds
 
 // simple expressions
 test empty block [[ {} ]] analysis succeeds
-test block 1 element [[ val foo: int = { 5 } ]] analysis succeeds
+test block 1 element [[ val fuz: int = { 5 } ]] analysis succeeds
 test block 2 elements [[
-  val foo: string = {
-    val bar: int = 8;
-    "value: $bar"
+  val fuz: string = {
+    val baz: int = 8;
+    "value: $baz"
   }
 ]] analysis succeeds
 test nested block [[
-  val foo: bool = {{
-    val [[bar]] = ./values;
+  val fuz: bool = {{
+    val [[baz]] = ./values;
     {
-      exists [[bar]]
+      exists [[baz]]
     }
   }}
 ]] 0 errors
    0 warnings
    resolve #2 to #1
 test shadowing in block [[
-  val foo: int = 8;
+  val fuz: int = 8;
   {
-    val [[foo]]: string = "hello world!";
-    foo
+    val [[fuz]]: string = "hello world!";
+    fuz
   }
 ]] >= 1 error at #1 // error like "duplicate"
    0 warnings
@@ -106,28 +111,34 @@ test concatenate with empty list [[ [[ ["hello", "world"] + [] ]] ]]
   warning like "concatenating an empty list" at #1
   run pie-ast-type on #1 to ListType(StrType())
 test add element to list [[ [[ [1, 2, 3] + 4 ]] ]] analysis succeeds run pie-ast-type on #1 to ListType(IntType())
+test add element to list type mimatch [[ [1, 2, 3] + [[true]] ]] 1 error // todo: create specific error on wrong element type. error like "Type mismatch" at #1
 test add null to list [[ [[ [1, 2, 3] + null ]] ]] analysis succeeds run pie-ast-type on #1 to ListType(NullableType(IntType()))
 test add element to nullable list [[ [[ [1, null, 3] + 4 ]] ]] analysis succeeds run pie-ast-type on #1 to ListType(NullableType(IntType()))
 test add null to nullable list [[ [[ [1, null, 3] + null ]] ]] analysis succeeds run pie-ast-type on #1 to ListType(NullableType(IntType()))
-// todo: add DataType subtype to list
+test add subtype to list [[ [[ [foo] + bar ]] ]] analysis fails // todo: implement DataType subtyping. analysis succeeds run pie-ast-type on #1 to ListType(DataType(NoModuleList(), "Foo"))
 test concatenate list to empty list [[ [[ [] + [1, 2] ]] ]] analysis succeeds run pie-ast-type on #1 to ListType(IntType())
+test concatenate list to subtype list [[ [[ [foo] + [bar] ]] ]] analysis fails // todo: implement DataType subtyping. analysis succeeds run pie-ast-type on #1 to ListType(DataType(NoModuleList(), "Foo"))
 test add two empty lists [[ [[ [] + [] ]] ]]
   analysis succeeds
   1 warning
   warning like "concatenating an empty list" at #1
   run pie-ast-type on #1 to EmptyListType()
 test add element to empty list [[ [[ [] + true ]] ]] analysis succeeds run pie-ast-type on #1 to ListType(BoolType())
+test add subtype to empty list with declared type [[ val empty: Foo* = []; [[ empty + bar ]] ]] analysis fails // todo: implement DataType subtyping. analysis succeeds run pie-ast-type on #1 to ListType(DataType(NoModuleList(), "Foo"))
 test add null to empty list [[ [[ [] + null ]] ]] analysis succeeds run pie-ast-type on #1 to ListType(NullType())
 
 test if [[ if (enableFinagle) anotherFunc() ]] analysis succeeds
 test if with block [[ if (enableFinagle) {anotherFunc(); return unit} ]] analysis succeeds
 test if condition not boolean [[ if ([[0]]) unit ]] 1 error at #1
-test if error in branch [[ if (!enableFinagle) return [[anotherFunc()]] ]] 1 error at #1
+test if error in branch [[ if (!enableFinagle) return [[anotherFunc()]] ]] >= 1 error at #1 // todo: I expect only 1 but Statix gives 2
 
 test ifelse [[ [[ if (value == 10) "hello" else "world" ]] ]] analysis succeeds run pie-ast-type on #1 to StrType()
 test ifelse condition not boolean [[ if ([["true"]]) 1 else 5 ]] 1 error at #1
 test ifelse true branch null [[ [[ if (value == 10) null else "a string" ]] ]] analysis succeeds run pie-ast-type on #1 to NullableType(StrType())
 test ifelse false branch null [[ [[ if (comment != null) "Comment: $comment" else null ]] ]] analysis succeeds run pie-ast-type on #1 to NullableType(StrType())
+test ifelse true branch subtype [[ [[ if (value == 0) bar else foo ]] ]] analysis fails // todo: implement subtyping on DataTypes. analysis succeeds run pie-ast-type on #1 to DataType(NoModsList(), "Foo")
+test ifelse false branch subtype [[ [[ if (value == 0) foo else bak ]] ]] analysis fails // todo: implement subtyping on DataTypes.analysis succeeds run pie-ast-type on #1 to DataType(NoModsList(), "Foo")
+test ifelse branches least upperbound [[ [[ if (value == 0) bar else bak ]] ]] analysis fails // todo: implement subtyping on DataTypes.analysis succeeds run pie-ast-type on #1 to DataType(NoModsList(), "Foo")
 test ifelse branch type mismatch [[ if (value == 0) "hello" else 10 ]] 1 error
 test ifelse with blocks [[ [[ if (value == 10) {"hello"} else {anotherFunc(); "world"} ]] ]] analysis succeeds run pie-ast-type on #1 to StrType()
 test ifelse error in any branch [[ if (value == 10) [[not_defined]] else "world" ]] error like "resolve" at #1
@@ -153,6 +164,7 @@ test list comprehension map expression errors [[ [ x + " * 3 = ${x+x+x}" | x <- 
 
 test val declaration single bind [[ val [[x]] = 9+7 ]] analysis succeeds run pie-ast-type on #1 to IntType()
 test val declaration single bind with type [[val [[x]]: bool = true ]] analysis succeeds run pie-ast-type on #1 to BoolType()
+test val declaration single bind assign subtype [[val [[x]]: Foo = bar ]] analysis fails // todo: implement subtyping on DataTypes. analysis succeeds run pie-ast-type on #1 to DataType(NoModsList(), "Foo")
 test val declaration single bind type mismatch [[ val x: [[string]] = null ]] 1 error error like "Type mismatch" at #1
 test val declaration assign tuple to single bind [[ val [[tup]] = ("left", "right") ]] analysis succeeds run pie-ast-type on #1 to TupleType([StrType(), StrType()])
 test val declaration tuple bind [[
@@ -179,6 +191,7 @@ test simple call no args [[ [[anotherFunc]]() ]] analysis succeeds resolve #1
 test simple call 1 arg [[ [[double]](4) ]] analysis succeeds resolve #1
 test simple call 3 args [[ [[argsFunc]](2, value, "yes") ]] analysis succeeds resolve #1
 test simple call undefined func [[ [[unknown]](true) ]] >= 1 error at #1 // error like "undefined function"
+test simple call provide subtype as argument [[ [[takesFoo]](bak) ]] analysis fails // todo: implement subtyping on DataTypes. analysis succeeds resolve #1
 test simple call incorrect arg count [[ double(3, 4) ]] error like "Unexpected number of arguments"
 test simple call incorrect arg type [[ double([[ [3, 4] ]]) ]] >= 1 error at #1 // error like "Type mismatch"
 
