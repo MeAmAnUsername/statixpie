@@ -158,8 +158,7 @@ rules
 
   typeOfExpImpl(s1, QCall(exp, name, arg_exps)) = (s3, ty) :- {s2 exp_ty s_data}
     typeOfExp(s1, exp) == (s2, exp_ty),
-    false | error "todo: QCall statics",
-    // getScopeFromType(exp_ty) == s_data, // todo
+    getScopeFromType(s2, exp_ty) == s_data,
     typeOfCall(s2, s_data, name, arg_exps) == (s3, ty).
 
   typeOfExpImpl(s, ImportCall(moduleList, name, arg_exps)) = ty :- {s_data}

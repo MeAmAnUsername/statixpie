@@ -115,10 +115,10 @@ rules // Declararing and resolving
   resolveFunc : scope * string -> list((path * (string * TYPE)))
   resolveFunc(s, name) = occs :-
     query func
-      filter P*
+      filter P*|INHERIT*
          and { name' :- name' == name }
-         min $ < P
-         and false
+         min $ < P, $ < INHERIT
+         and true // todo: set to false to implement overloading between classes
           in s |-> occs.
 
   /**

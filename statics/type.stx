@@ -168,3 +168,10 @@ rules
   typeOfDataTy(s, DataTy(modules, name)) = DataType(s_data) :- {s_mod}
     resolveModuleList(s, modules) == s_mod,
     resolveUniqueData(s_mod, name) == s_data.
+
+  /**
+   * getScopeFromType(s, ty)
+   * Returns the scope with methods associated with type [ty]
+   */
+  getScopeFromType : scope * TYPE -> scope
+  getScopeFromType(s, DataType(s_data)) = s_data.

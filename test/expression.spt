@@ -5,8 +5,13 @@ language statixpie
 fixture [[
   module test:expression
   
-  data Foo = foreign java org.example.test.expression.Foo {}
-  data Bar : Foo = foreign java org.example.test.expression.Bar {}
+  data Foo = foreign java org.example.test.expression.Foo {
+    func get() -> Foo
+    func set(Foo) -> unit
+  }
+  data Bar : Foo = foreign java org.example.test.expression.Bar {
+    func finagle(bool, Foo) -> int
+  }
   data Bak : Foo = foreign java org.example.test.expression.Bak {}
   data Bok = foreign java org.example.test.expression.Bok {}
   
@@ -212,7 +217,16 @@ test simple call provide subtype as argument [[ [[takesFoo]](bak) ]] analysis su
 test simple call incorrect arg count [[ double(3, 4) ]] error like "Unexpected number of arguments"
 test simple call incorrect arg type [[ double([[ [3, 4] ]]) ]] >= 1 error at #1 // error like "Type mismatch"
 
-// todo: QCall, ImportCall; create & get suppliers
+test method call no args [[ foo.[[get]]() ]] analysis succeeds  resolve #1
+test method call 1 arg [[ foo.[[set]](bar) ]] analysis succeeds  resolve #1
+test method call 2 args [[ bar.[[finagle]](true, foo) ]] analysis succeeds  resolve #1
+test method call subtype argument [[ bar.[[finagle]](true, bak) ]] analysis succeeds  resolve #1
+test method call overriden method [[ bar.[[get]]() ]] analysis succeeds  resolve #1
+test method call undefined func [[ bar.[[nope]]() ]] >= 1 error at #1
+test method call incorrect arg count [[ foo.set(foo, 8) ]] >= 1 error
+test method call incorrect arg type [[ foo.set([[bok]]) ]] >= 1 error at #1
+
+// todo: ImportCall, create & get suppliers
 
 test list without filter [[ [[ list ./example/ ]] ]] analysis succeeds run pie-ast-type on #1 to ListType(PathType())
 test list with filter regex      [[ list /tmp/test/ with regex "file[0-9]+" ]] analysis succeeds
