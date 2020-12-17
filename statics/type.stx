@@ -49,7 +49,7 @@ rules // operations on types
   subtype(T, NullableType(T)).
   subtype(NullableType(T1), NullableType(T2)) :- subtype(T1, T2).
   subtype(EmptyListType(), ListType(_)).
-  subtype(T1@DataType(_), T2@DataType(_)) :- isSubtype(T1, T2) == TRUE().
+  subtype(DataType(s_sub), DataType(s_super)) :- inherits(s_sub, s_super) == TRUE().
   subtype(T1, T2) :- T1 == T2.
 
   /**
@@ -70,8 +70,7 @@ rules // operations on types
   isSubtype(T, NullableType(T)) = TRUE().
   isSubtype(NullableType(T1), NullableType(T2)) = isSubtype(T1, T2).
   isSubtype(EmptyListType(), ListType(_)) = TRUE().
-  isSubtype(DataType(s_sub), DataType(s_super)) = notB(isEmpty(paths)) :-
-    query () filter INHERIT* and { s_data :- s_data == s_super } in s_sub |-> paths.
+  isSubtype(DataType(s_sub), DataType(s_super)) = inherits(s_sub, s_super).
   isSubtype(T1, T2) = isSubtypeHelper(T1, T2).
 
   // this rule is here to prevent "overlapping rules" error
@@ -106,7 +105,6 @@ rules // operations on types
   dataTypeFromPathOrDefault : list((path * scope)) * TYPE -> TYPE
   dataTypeFromPathOrDefault([], default) = default.
   dataTypeFromPathOrDefault([(_, s)], _) = DataType(s).
-
 
   /**
    * lub(T1, T2)
