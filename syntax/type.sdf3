@@ -12,6 +12,7 @@ template options
 context-free sorts
 
   BaseType
+  DataTy
   TypeMod
   Type
 
@@ -22,10 +23,12 @@ context-free syntax
   BaseType.IntTy      = <int>
   BaseType.StrTy      = <string>
   BaseType.PathTy     = <path>
-  BaseType.DataTy     = <<ModuleList><TYPEID>>
   BaseType.TupleTy    = <(<{Type ", "}+>)>
   BaseType.ListTy     = <<Type>*>
   BaseType.SupplierTy = <supplier\<<Type>\>>
+
+  DataTy.DataTy = <<ModuleList><TYPEID>>
+  BaseType = DataTy
 
   TypeMod.NullableTy = <<BaseType>?>
 

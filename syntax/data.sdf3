@@ -4,6 +4,7 @@ imports
   
   lex/literal
   func_def
+  type
   
 template options
 
@@ -26,7 +27,7 @@ context-free syntax // Data definition
   DataDefMods.DataDefMods = <<{DataDefMod " "}*>>
   
   SuperType.NoSuperType =
-  SuperType.SuperType = < : <TYPEID>>
+  SuperType.SuperType = < : <DataTy>>
 
 context-free syntax // Java foreign data definition
 

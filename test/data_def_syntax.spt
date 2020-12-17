@@ -110,7 +110,8 @@ test name contains close square bracket [[ data Foo]Bar = foreign java org.examp
 test name contains pipe [[ data Foo|Bar = foreign java org.example.test.Foo {} ]] parse fails
 test name contains single quote [[ data Foo'Bar = foreign java org.example.test.Foo {} ]] parse fails
 test name contains double quote [[ data Foo"Bar = foreign java org.example.test.Foo {} ]] parse fails
-test name contains colon [[ data Foo:Bar = foreign java org.example.test.Foo {} ]] parse to DataDef(DataDefMods([]), "Foo", SuperType("Bar"), JavaDataImpl("org.example.test.Foo", []))
+test name contains colon [[ data Foo:Bar = foreign java org.example.test.Foo {} ]] 
+  parse to DataDef(DataDefMods([]), "Foo", SuperType(DataTy(NoModuleList(), "Bar")), JavaDataImpl("org.example.test.Foo", []))
 test name contains semicolon [[ data Foo;Bar = foreign java org.example.test.Foo {} ]] parse fails
 test name contains comma [[ data Foo,Bar = foreign java org.example.test.Foo {} ]] parse fails
 test name contains period [[ data Foo.Bar = foreign java org.example.test.Foo {} ]] parse fails
@@ -130,7 +131,9 @@ test with supertype [[ data Foo : Bar = foreign java org.example.test.Foo {} ]] 
 test with imported supertype [[ data Foo : example:otherMod:Bar = foreign java org.example.test.Foo {} ]] parse succeeds
 test supertype missing name [[ data Foo : = foreign java org.example.test.Foo {} ]] parse fails
 test supertype missing colon [[ data Foo Bar = foreign java org.example.test.Foo {} ]] parse fails
-test double supertype colon-separated [[ data Foo : Bar : Baz = foreign java org.example.test.Foo {} ]] parse succeeds // todo: parse to <datatype with imported name>
+test double supertype colon-separated [[ 
+  data Foo : Bar : Baz = foreign java org.example.test.Foo {} 
+]] parse to DataDef(DataDefMods([]), "Foo", SuperType(DataTy(ModuleList(["Bar"]), "Baz")), JavaDataImpl("org.example.test.Foo", []))
 test double supertype list [[ data Foo : [Bar, Baz] = foreign java org.example.test.Foo {} ]] parse fails
 test supertype no layout before colon [[ data Foo: Bar = foreign java org.example.test.Foo {} ]] parse succeeds
 test supertype no layout after colon [[ data Foo :Bar = foreign java org.example.test.Foo {} ]] parse succeeds
