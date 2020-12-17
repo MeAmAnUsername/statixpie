@@ -17,6 +17,7 @@ test path [[ path ]] analysis succeeds
 test tuple [[ (path, string?) ]] analysis succeeds
 test list [[ path* ]] analysis succeeds
 test supplier [[ supplier<string> ]] analysis fails // todo: implement suppliers
-test data type [[ Foo ]] analysis succeeds
+test data type local [[ Foo ]] analysis succeeds
+test data type imported [[ test:type_signature:Foo ]] analysis fails // todo: implement modules
 test data type undefined [[ Bar ]] analysis fails
 test nullable [[ int? ]] analysis succeeds
