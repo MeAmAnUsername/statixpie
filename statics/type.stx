@@ -47,6 +47,7 @@ rules // operations on types
   subtypes maps subtype(list(*), list(*))
   subtype(NullType(), NullableType(_)).
   subtype(T, NullableType(T)).
+  subtype(NullableType(T1), NullableType(T2)) :- subtype(T1, T2).
   subtype(EmptyListType(), ListType(_)).
   subtype(T1@DataType(_), T2@DataType(_)) :- isSubtype(T1, T2) == TRUE().
   subtype(T1, T2) :- T1 == T2.
@@ -67,6 +68,7 @@ rules // operations on types
   isSubtype : TYPE * TYPE -> BOOLEAN
   isSubtype(NullType(), NullableType(_)) = TRUE().
   isSubtype(T, NullableType(T)) = TRUE().
+  isSubtype(NullableType(T1), NullableType(T2)) = isSubtype(T1, T2).
   isSubtype(EmptyListType(), ListType(_)) = TRUE().
   isSubtype(DataType(s_sub), DataType(s_super)) = notB(isEmpty(paths)) :-
     query () filter INHERIT* and { s_data :- s_data == s_super } in s_sub |-> paths.
@@ -113,6 +115,7 @@ rules // operations on types
   lub : TYPE * TYPE -> TYPE
   lub(NullType(), T) = makeNullable(T).
   lub(T, NullType()) = makeNullable(T).
+  lub(NullableType(T1), NullableType(T2)) = NullableType(lub(T1, T2)).
   lub(EmptyListType(), ListType(T)) = ListType(T).
   lub(ListType(T), EmptyListType()) = ListType(T).
   lub(DataType(s1), DataType(s2)) = dataTypeFromPathOrDefault(paths, TopType()) :-
@@ -130,7 +133,7 @@ rules // operations on types
    * Returns the least upper bound of a list of types.
    */
   listLub : list(TYPE) -> TYPE
-  listLub([]) = TopType().
+  listLub([]) = TopType() :- false | error "listLub is not well-defined for an empty list".
   listLub([T]) = T.
   listLub([T1|[T2|[]]]) = lub(T1, T2).
   listLub([T1|[T2|rest]]) = listLub([lub(T1, T2) | rest]).
