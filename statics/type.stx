@@ -38,7 +38,16 @@ rules // operations on types
   subtype(NullType(), NullableType(_)).
   subtype(T, NullableType(T)).
   subtype(EmptyListType(), ListType(_)).
+  subtype(T1@DataType(_), T2@DataType(_)) :- isSubtype(T1, T2) == TRUE().
   subtype(T1, T2) :- T1 == T2.
+
+  /**
+   * isEmpty(paths)
+   * Returns TRUE if the list [paths] is empty, FALSE() otherwise.
+   */
+  isEmpty : list((path * scope)) -> BOOLEAN
+  isEmpty([]) = TRUE().
+  isEmpty([_|_]) = FALSE().
 
   /**
    * isSubtype(T1, T2)
@@ -49,6 +58,8 @@ rules // operations on types
   isSubtype(NullType(), NullableType(_)) = TRUE().
   isSubtype(T, NullableType(T)) = TRUE().
   isSubtype(EmptyListType(), ListType(_)) = TRUE().
+  isSubtype(DataType(s_sub), DataType(s_super)) = notB(isEmpty(paths)) :-
+    query () filter INHERIT* and { s_data :- s_data == s_super } in s_sub |-> paths.
   isSubtype(T1, T2) = isSubtypeHelper(T1, T2).
 
   // this rule is here to prevent "overlapping rules" error
