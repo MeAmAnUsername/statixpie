@@ -23,7 +23,7 @@ signature
     SupplierType : TYPE -> TYPE
     
     FuncType : list(TYPE) * TYPE -> TYPE
-    DataType : string * scope -> TYPE
+    DataType : scope -> TYPE
 
 rules // operations on types
 
@@ -115,6 +115,6 @@ rules
   typeOf(s, TypeMod2Type(NullableTy(ty))) = NullableType(typeOf(s, BaseType2Type(ty))).
 
   typeOfDataTy : scope * DataTy -> TYPE
-  typeOfDataTy(s, DataTy(modules, name)) = ty :- {s_mod}
+  typeOfDataTy(s, DataTy(modules, name)) = DataType(s_data) :- {s_mod}
     resolveModuleList(s, modules) == s_mod,
-    resolveUniqueDatatype(s_mod, name) == ty.
+    resolveUniqueData(s_mod, name) == s_data.

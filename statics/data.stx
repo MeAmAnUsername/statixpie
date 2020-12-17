@@ -12,7 +12,7 @@ rules
   dataDefOk : scope * DataDef
   dataDefOk(s, DataDef(DataDefMods(mods), name, super, impl)) :- {s_data}
     new s_data,
-    declareDatatype(s, name, s_data),
+    declareData(s, name, s_data),
     @name.mods := mods,
     superOk(s, s_data, super),
     dataImplOk(s, s_data, impl).
@@ -20,7 +20,7 @@ rules
   superOk : scope * scope * SuperType
   superOk(s, s_data, NoSuperType()).
   superOk(s, s_data, SuperType(data_ty)) :- {s_super}
-    typeOfDataTy(s, data_ty) == DataType(_, s_super),
+    typeOfDataTy(s, data_ty) == DataType(s_super),
     s_data -INHERIT-> s_super.
     // todo: check that all functions in s_data are subtypes of functions in s_super
   

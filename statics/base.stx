@@ -137,20 +137,20 @@ rules // Declararing and resolving
   /**
    * Declare a datatype [name] with scope [s_data] in scope [s]
    */
-  declareDatatype : scope * string * scope
-  declareDatatype(s, name, s_data) :-
+  declareData : scope * string * scope
+  declareData(s, name, s_data) :-
     {occs} // todo: remove
 //    try { false } | note $[Declare func [name] in [s]: occs=[occs]], // todo: remove
     !data[name, s_data] in s,
-    occs@resolveDatatype(s, name) == [_]
+    occs@resolveData(s, name) == [_]
       | error $[Duplicate definition of Datatype [name]],
-    @name.type := DataType(name, s_data).
+    @name.type := DataType(s_data).
 
   /**
-   * Resolve a datatype [name] in scope [s]
+   * Resolve data [name] in scope [s] to a list of data scopes
    */
-  resolveDatatype : scope * string -> list((path * (string * scope)))
-  resolveDatatype(s, name) = occs :-
+  resolveData : scope * string -> list((path * (string * scope)))
+  resolveData(s, name) = occs :-
     query data
       filter P*
          and { name' :- name' == name }
@@ -159,16 +159,16 @@ rules // Declararing and resolving
           in s |-> occs.
 
   /**
-   * resolve a datatype [name] to a unique declaration in scope [s]
+   * resolve data [name] to a unique data scope [s_data] in scope [s]
    */
-  resolveUniqueDatatype : scope * string -> scope
-  resolveUniqueDatatype(s, name) = s_data :- {occs name'}
-    resolveDatatype(s, name) == occs,
+  resolveUniqueData : scope * string -> scope
+  resolveUniqueData(s, name) = s_data :- {occs name'}
+    resolveData(s, name) == occs,
     occs == [(_, (name', s_data))],
     @name.ref := name',
-    @name.type := DataType(name', s_data),
+    @name.type := DataType(s_data),
     // If there are multiple, the declaration will give an error.
-    try { occs != [] } | error $[Could not resolve function [name]] @name.
+    try { occs != [] } | error $[Could not resolve data [name]] @name.
 
 
   setContextType : scope * string * TYPE
