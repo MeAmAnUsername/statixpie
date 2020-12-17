@@ -115,4 +115,6 @@ rules
   typeOf(s, TypeMod2Type(NullableTy(ty))) = NullableType(typeOf(s, BaseType2Type(ty))).
 
   typeOfDataTy : scope * DataTy -> TYPE
-  // todo
+  typeOfDataTy(s, DataTy(modules, name)) = ty :- {s_mod}
+    resolveModuleList(s, modules) == s_mod,
+    resolveUniqueDatatype(s_mod, name) == ty.

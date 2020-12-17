@@ -58,6 +58,9 @@ rules // Logic functions
 
 rules // Declararing and resolving
 
+  resolveModuleList : scope * ModuleList -> scope
+  resolveModuleList(s, NoModuleList()) = s.
+
   /**
    * Declare a value [name] with type [TYPE] and ValKind [kind] in scope [s]
    */
