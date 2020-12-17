@@ -1,0 +1,22 @@
+module type_signature
+language statixpie
+
+fixture [[
+  module test:type_signature
+  
+  data Foo = foreign java org.example.test.type.Foo {
+    func bar() -> [[...]]
+  }
+]]
+
+test unit [[ unit ]] analysis succeeds
+test bool [[ bool ]] analysis succeeds
+test int [[ int ]] analysis succeeds
+test string [[ string ]] analysis succeeds
+test path [[ path ]] analysis succeeds
+test tuple [[ (path, string?) ]] analysis succeeds
+test list [[ path* ]] analysis succeeds
+test supplier [[ supplier<string> ]] analysis fails // todo: implement suppliers
+test data type [[ Foo ]] analysis succeeds
+test data type undefined [[ Bar ]] analysis fails
+test nullable [[ int? ]] analysis succeeds
