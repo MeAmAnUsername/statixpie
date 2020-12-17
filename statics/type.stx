@@ -28,6 +28,16 @@ signature
 rules // operations on types
 
   /**
+   * inherits(s_sub, s_super) -> res
+   * Returns TRUE() if s_sub inherits from (can be reached by only
+   * following INHERIT edges from) s_super or is equal to s_super,
+   * FALSE() otherwise.
+   */
+  inherits : scope * scope -> BOOLEAN
+  inherits(s_sub, s_super) = notB(isEmpty(paths)) :-
+    query () filter INHERIT* and { s_data :- s_data == s_super } in s_sub |-> paths.
+
+  /**
    * subtype(T1, T2)
    * Holds if type T1 is a non-strict subtype of type T2.
    * Fails with error if T1 is not a subtype of T2.
@@ -76,22 +86,46 @@ rules // operations on types
   firstTrueT([(FALSE(), _)|rest], T) = firstTrueT(rest, T).
   firstTrueT([(TRUE(), T)|_], _) = T.
 
+  /**
+   * makeNullable(ty)
+   * Make Type [ty] nullable if it is not already.
+   * This returns either NullType() or NullableType(_)
+   */
   makeNullable : TYPE -> TYPE
   makeNullable(NullType()) = NullType().
   makeNullable(T@NullableType(_)) = T.
   makeNullable(T) = NullableType(T).  
 
+  /**
+   * dataTypeFromPathOrDefault(list, default)
+   * Returns the scope from the single pair in the list wrapped in a DataType
+   * or the default type if the list is empty.
+   */
+  dataTypeFromPathOrDefault : list((path * scope)) * TYPE -> TYPE
+  dataTypeFromPathOrDefault([], default) = default.
+  dataTypeFromPathOrDefault([(_, s)], _) = DataType(s).
+
+
+  /**
+   * lub(T1, T2)
+   * Returns the least upper bound of types [T1] and [T2].
+   */
   lub : TYPE * TYPE -> TYPE
-  listLub : list(TYPE) -> TYPE
   lub(NullType(), T) = makeNullable(T).
   lub(T, NullType()) = makeNullable(T).
   lub(EmptyListType(), ListType(T)) = ListType(T).
   lub(ListType(T), EmptyListType()) = ListType(T).
+  lub(DataType(s1), DataType(s2)) = dataTypeFromPathOrDefault(paths, TopType()) :-
+    // find all scopes from s1 that s2 inherits from, take the shortest one.
+    query ()
+      filter INHERIT* and { s_super :- inherits(s2, s_super) == TRUE() }
+      min $ < INHERIT in s1 |-> paths.
   lub(T1, T2) = firstTrueT([
     (isSubtype(T1, T2), T2),
     (isSubtype(T2, T1), T1)],
     TopType()).
   
+  listLub : list(TYPE) -> TYPE
   listLub([]) = TopType().
   listLub([T]) = T.
   listLub([T1|[T2|[]]]) = lub(T1, T2).
