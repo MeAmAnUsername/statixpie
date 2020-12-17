@@ -107,7 +107,8 @@ rules
     typeOfExp(s_if, exp_true) == (_, ty_true),
     typeOfExp(s_if, exp_false) == (_, ty_false),
     lub(ty_true, ty_false) == ty,
-    try { ty != TopType() } | error $[Type mismatch: true branch ([ty_true]) and false branch ([ty_false]) combine to the top type].
+    try { ty != TopType()               } | error $[Type mismatch: true branch ([ty_true]) and false branch ([ty_false]) combine to the top type],
+    try { ty != NullableType(TopType()) } | error $[Type mismatch: true branch ([ty_true]) and false branch ([ty_false]) combine to the top type].
 
  typeOfExpImpl(s1, ListComprehension(exp_map, binder, exp_list)) = (s1, ListType(ty_map)) :- {s2 s3 ty_list expected_ty ty_arg}
    typeOfExp(s1, exp_list) == (s2, ty_list),
