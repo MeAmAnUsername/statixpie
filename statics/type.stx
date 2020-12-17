@@ -124,7 +124,11 @@ rules // operations on types
     (isSubtype(T1, T2), T2),
     (isSubtype(T2, T1), T1)],
     TopType()).
-  
+
+  /**
+   * listLub(list)
+   * Returns the least upper bound of a list of types.
+   */
   listLub : list(TYPE) -> TYPE
   listLub([]) = TopType().
   listLub([T]) = T.
