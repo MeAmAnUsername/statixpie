@@ -112,13 +112,14 @@ test concatenate with empty list [[ [[ ["hello", "world"] + [] ]] ]]
   warning like "concatenating an empty list" at #1
   run pie-ast-type on #1 to ListType(StrType())
 test add element to list [[ [[ [1, 2, 3] + 4 ]] ]] analysis succeeds run pie-ast-type on #1 to ListType(IntType())
-test add element to list type mimatch [[ [1, 2, 3] + [[true]] ]] 1 error // todo: create specific error on wrong element type. error like "Type mismatch" at #1
+test add element to list type mismatch [[ [1, 2, 3] + [[true]] ]] 1 error at #1  error like "Type mismatch"  error like "element"
 test add null to list [[ [[ [1, 2, 3] + null ]] ]] analysis succeeds run pie-ast-type on #1 to ListType(NullableType(IntType()))
 test add element to nullable list [[ [[ [1, null, 3] + 4 ]] ]] analysis succeeds run pie-ast-type on #1 to ListType(NullableType(IntType()))
 test add null to nullable list [[ [[ [1, null, 3] + null ]] ]] analysis succeeds run pie-ast-type on #1 to ListType(NullableType(IntType()))
 test add subtype to list [[ [[ [foo] + bar ]] ]] analysis succeeds run pie-ast-type on #1 to ListType(DataType(_))
 test concatenate list to empty list [[ [[ [] + [1, 2] ]] ]] analysis succeeds run pie-ast-type on #1 to ListType(IntType())
 test concatenate list to subtype list [[ [[ [foo] + [bar] ]] ]] analysis succeeds run pie-ast-type on #1 to ListType(DataType(_))
+test concatenate list incorrect type [[ [1, 2, 3] + [[ [bar] ]] ]] 1 error at #1  // error like "Type mismatch"  error like "concatenate"
 test add two empty lists [[ [[ [] + [] ]] ]]
   analysis succeeds
   1 warning
