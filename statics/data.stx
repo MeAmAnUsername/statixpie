@@ -14,14 +14,15 @@ rules
     new s_data,
     declareData(s, name, s_data),
     @name.mods := mods,
-    superOk(s, s_data, super),
+    superOk(s, s_data, super, name),
     dataImplOk(s, s_data, impl).
 
-  superOk : scope * scope * SuperType
-  superOk(s, s_data, NoSuperType()).
-  superOk(s, s_data, SuperType(data_ty)) :- {s_super}
+  superOk : scope * scope * SuperType * string
+  superOk(s, s_data, NoSuperType(), name).
+  superOk(s, s_data, SuperType(data_ty@DataTy(_, super_name)), name) :- {s_super}
     typeOfDataTy(s, data_ty) == DataType(s_super),
-    s_data -INHERIT-> s_super.
+    s_data -INHERIT-> s_super,
+    inherits(s_super, s_data) == FALSE() | error $[Cannot (indirectly) inherit from self. [super_name] is already an (indirect) subtype of [name]] @super_name.
     // todo: check that all functions in s_data are subtypes of functions in s_super
   
   dataImplOk : scope * scope * DataImpl
