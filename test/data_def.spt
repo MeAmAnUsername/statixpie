@@ -1,0 +1,14 @@
+module data_def
+
+language statixpie
+
+fixture [[
+  module test:data_def
+  
+  [[...]]
+]]
+
+test no datadef [[ ]] analysis succeeds
+
+test datadef foreign java [[ data Foo = foreign java org.example.test.Foo {} ]] analysis succeeds
+// todo: more tests

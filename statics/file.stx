@@ -6,11 +6,11 @@ imports
   signatures/lex/literal-sig
   signatures/type-sig
   statics/func_def
+  statics/data
 
 rules
 
   programOk : Start
-
   programOk(Program(Module(mods), imports, defs)) :- {s_file}
     // todo module, imports
     new s_file,
@@ -18,9 +18,7 @@ rules
 
   defOk : scope * Def
   defsOk maps defOk(*, list(*))
-
   defOk(s_mod, FuncDef2Def(funcDef)) :-
     funcDefOk(s_mod, funcDef).
-// todo: implement dataDefOk, enable this rule.
-//  defOk(s_mod, DataDef2Def(dataDef)) :-
-//    dataDefOk(s_mod, dataDef).
+  defOk(s_mod, DataDef2Def(dataDef)) :-
+    dataDefOk(s_mod, dataDef).

@@ -3,6 +3,7 @@ module statics/base
 imports
 
   signatures/lex/literal-sig
+  statics/type
 
 signature
   sorts
@@ -13,6 +14,7 @@ signature
   relations
     val : VALID -> TYPE
     func : FUNCID -> TYPE
+    data : TYPEID -> scope
     context : string -> TYPE
 
   constructors
@@ -23,7 +25,7 @@ signature
 
 signature
   name-resolution
-    labels P
+    labels P INHERIT
 
 rules // Logic functions
 
@@ -93,7 +95,7 @@ rules // Declararing and resolving
 
 
   /**
-   * Declare a value [name] with type [TYPE] and ValKind [kind] in scope [s]
+   * Declare a function [name] with type [TYPE] in scope [s]
    */
   declareFunc : scope * string * TYPE
   declareFunc(s, name, type) :-
@@ -125,6 +127,43 @@ rules // Declararing and resolving
     occs == [(_, (name', ty))],
     @name.ref := name',
     @name.type := ty,
+    // If there are multiple, the declaration will give an error.
+    try { occs != [] } | error $[Could not resolve function [name]] @name.
+
+
+  /**
+   * Declare a datatype [name] with scope [s_data] in scope [s]
+   */
+  declareDatatype : scope * string * scope
+  declareDatatype(s, name, s_data) :-
+    {occs} // todo: remove
+//    try { false } | note $[Declare func [name] in [s]: occs=[occs]], // todo: remove
+    !data[name, s_data] in s,
+    occs@resolveDatatype(s, name) == [_]
+      | error $[Duplicate definition of Datatype [name]],
+    @name.type := DataType(name, s_data).
+
+  /**
+   * Resolve a datatype [name] in scope [s]
+   */
+  resolveDatatype : scope * string -> list((path * (string * scope)))
+  resolveDatatype(s, name) = occs :-
+    query data
+      filter P*
+         and { name' :- name' == name }
+         min $ < P
+         and false
+          in s |-> occs.
+
+  /**
+   * resolve a datatype [name] to a unique declaration in scope [s]
+   */
+  resolveUniqueDatatype : scope * string -> scope
+  resolveUniqueDatatype(s, name) = s_data :- {occs name'}
+    resolveDatatype(s, name) == occs,
+    occs == [(_, (name', s_data))],
+    @name.ref := name',
+    @name.type := DataType(name', s_data),
     // If there are multiple, the declaration will give an error.
     try { occs != [] } | error $[Could not resolve function [name]] @name.
 

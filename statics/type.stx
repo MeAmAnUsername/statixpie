@@ -2,6 +2,7 @@ module statics/type
 
 imports
 
+  signatures/data-sig
   signatures/type-sig
   statics/base
 
@@ -20,7 +21,9 @@ signature
     EmptyListType : TYPE
     TupleType : list(TYPE) -> TYPE
     SupplierType : TYPE -> TYPE
+    
     FuncType : list(TYPE) * TYPE -> TYPE
+    DataType : string * scope -> TYPE
 
 rules // operations on types
 
@@ -105,9 +108,11 @@ rules
   typeOf(_, BaseType2Type(IntTy()))  = IntType().
   typeOf(_, BaseType2Type(StrTy()))  = StrType().
   typeOf(_, BaseType2Type(PathTy())) = PathType().
-  // todo: DataTy
-  // todo: ImportTy
+  typeOf(s, BaseType2Type(DataTy2BaseType(data_ty))) = typeOfDataTy(s, data_ty).
   typeOf(s, BaseType2Type(TupleTy(tys))) = TupleType(typesOf(s, tys)).
   typeOf(s, BaseType2Type(ListTy(ty))) = ListType(typeOf(s, ty)).
   // todo: SupplierTy
   typeOf(s, TypeMod2Type(NullableTy(ty))) = NullableType(typeOf(s, BaseType2Type(ty))).
+
+  typeOfDataTy : scope * DataTy -> TYPE
+  // todo
