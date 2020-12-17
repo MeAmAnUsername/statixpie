@@ -3,6 +3,7 @@ module type
 imports
 
   lex/literal
+  common
 
 template options
 
@@ -21,8 +22,7 @@ context-free syntax
   BaseType.IntTy      = <int>
   BaseType.StrTy      = <string>
   BaseType.PathTy     = <path>
-  BaseType.DataTy     = <<TYPEID>> {avoid}
-  BaseType.ImportTy   = <<{MODID ":"}+>:<TYPEID>>
+  BaseType.DataTy     = <<ModuleList><TYPEID>>
   BaseType.TupleTy    = <(<{Type ", "}+>)>
   BaseType.ListTy     = <<Type>*>
   BaseType.SupplierTy = <supplier\<<Type>\>>
