@@ -180,6 +180,7 @@ test val declaration single bind [[ val [[x]] = 9+7 ]] analysis succeeds run pie
 test val declaration single bind with type [[val [[x]]: bool = true ]] analysis succeeds run pie-ast-type on #1 to BoolType()
 test val declaration single bind assign subtype [[val [[x]]: Foo = bar ]] analysis succeeds run pie-ast-type on #1 to DataType(_)
 test val declaration single bind assign nullable subtype [[val [[x]]: Foo? = bar? ]] analysis succeeds run pie-ast-type on #1 to NullableType(DataType(_))
+test val declaration single bind assign non-nullable subtype to nullable [[val [[x]]: Foo? = bak ]] analysis succeeds run pie-ast-type on #1 to NullableType(DataType(_))
 test val declaration single bind type mismatch [[ val x: [[string]] = null ]] 1 error error like "Type mismatch" at #1
 test val declaration assign tuple to single bind [[ val [[tup]] = ("left", "right") ]] analysis succeeds run pie-ast-type on #1 to TupleType([StrType(), StrType()])
 test val declaration tuple bind [[

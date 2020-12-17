@@ -46,7 +46,7 @@ rules // operations on types
   subtype : TYPE * TYPE
   subtypes maps subtype(list(*), list(*))
   subtype(NullType(), NullableType(_)).
-  subtype(T, NullableType(T)).
+  subtype(T1, NullableType(T2)) :- subtype(T1, T2).
   subtype(NullableType(T1), NullableType(T2)) :- subtype(T1, T2).
   subtype(EmptyListType(), ListType(_)).
   subtype(DataType(s_sub), DataType(s_super)) :- inherits(s_sub, s_super) == TRUE().
@@ -67,7 +67,7 @@ rules // operations on types
    */
   isSubtype : TYPE * TYPE -> BOOLEAN
   isSubtype(NullType(), NullableType(_)) = TRUE().
-  isSubtype(T, NullableType(T)) = TRUE().
+  isSubtype(T1, NullableType(T2)) = isSubtype(T1, T2).
   isSubtype(NullableType(T1), NullableType(T2)) = isSubtype(T1, T2).
   isSubtype(EmptyListType(), ListType(_)) = TRUE().
   isSubtype(DataType(s_sub), DataType(s_super)) = inherits(s_sub, s_super).
