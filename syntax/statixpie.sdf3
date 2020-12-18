@@ -7,6 +7,7 @@ imports
   lex/comment
   type
   data
+  common
   func_def
   func_body
 
@@ -40,9 +41,9 @@ context-free syntax
 
   <{Def "\n"}*>>
 
-  Module.Module = <module <{MODID ":"}+>>
+  Module.Module = <module <ModuleList><MODID>>
 
-  Import.Import = <import <{MODID ":"}+>>
+  Import.Import = <import <ModuleList><MODID>>
 
   Def = DataDef
   Def = FuncDef

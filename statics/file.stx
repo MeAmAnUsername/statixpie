@@ -15,7 +15,7 @@ rules
   projectOk(s). // todo: create scopes for built-in types
 
   programOk : scope * Start
-  programOk(s_project, Program(Module(mods), imports, defs)) :- {s_file}
+  programOk(s_project, Program(Module(module_list, name), imports, defs)) :- {s_file}
     // todo module, imports
     new s_file,
     s_file -ROOT-> s_project,
