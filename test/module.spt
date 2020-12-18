@@ -2,6 +2,7 @@ module module
 
 language statixpie
 
+// syntax
 test missing module statement [[ ]] parse fails
 test module statement missing layout [[ moduletest ]] parse fails
 test module statement layout in keyword [[ mod ule test ]] parse fails
@@ -48,3 +49,37 @@ test duplicate module statement  [[
   module test
 ]] parse fails
 test module statement closing ; [[module example;]] parse fails
+
+// semantics
+test not nested [[ module example ]] analysis succeeds
+test nested [[ module example:modules:module ]] analysis succeeds
+test not nested referenced by data supertype [[
+  module [[example]]
+  data [[Foo]] = foreign java org.example.Foo {}
+  data Bar : [[example]]:[[Foo]] = foreign java org.example.Foo {}
+]] analysis succeeds
+   resolve #3 to #1
+   resolve #4 to #2
+test nested referenced by data supertype [[
+  module example:modules:[[module]]
+  data [[Foo]] = foreign java org.example.Foo {}
+  data Bar : example:modules:[[module]]:[[Foo]] = foreign java org.example.Foo {}
+]] analysis succeeds
+   resolve #3 to #1
+   resolve #4 to #2
+test not nested referenced by return type [[
+  module [[example]]
+  data [[Foo]] = foreign java org.example.Foo {}
+  func main(foo: [[Foo]]) -> [[example]]:[[Foo]] = foo
+]] analysis succeeds
+   resolve #3 to #2
+   resolve #4 to #1
+   resolve #5 to #2
+test nested referenced by return type [[
+  module example:modules:[[module]]
+  data [[Foo]] = foreign java org.example.Foo {}
+  func main(foo: [[Foo]]) -> example:modules:[[module]]:[[Foo]] = foo
+]] analysis succeeds
+   resolve #3 to #2
+   resolve #4 to #1
+   resolve #5 to #2
