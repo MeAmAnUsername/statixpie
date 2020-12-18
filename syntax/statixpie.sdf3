@@ -29,6 +29,7 @@ context-free start-symbols
   Exp
   DataDef
   Type
+  Import
 
 context-free syntax
 
