@@ -11,11 +11,11 @@ imports
 rules // Analysis
 
   // single-file analysis
-//  editor-analyze = stx-editor-analyze(pre-analyze, post-analyze|"statics/file", "programOk")
+//  editor-analyze = stx-editor-analyze(pre-analyze, post-analyze|"statics/project", "programOk")
   
   // see README.md for details on how to switch to multi-file analysis
   // multi-file analysis
-  editor-analyze = stx-editor-analyze(pre-analyze, post-analyze|"statics/file", "projectOk", "programOk")
+  editor-analyze = stx-editor-analyze(pre-analyze, post-analyze|"statics/project", "projectOk", "programOk")
 
   pre-analyze  = explicate-injections-statixpie-Start
   post-analyze = implicate-injections-statixpie-Start
