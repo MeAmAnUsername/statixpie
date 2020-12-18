@@ -225,6 +225,7 @@ test method call overriden method [[ bar.[[get]]() ]] analysis succeeds  resolve
 test method call undefined func [[ bar.[[nope]]() ]] >= 1 error at #1
 test method call incorrect arg count [[ foo.set(foo, 8) ]] >= 1 error
 test method call incorrect arg type [[ foo.set([[bok]]) ]] >= 1 error at #1
+// todo: method calls on built-in types
 
 // todo: ImportCall, create & get suppliers
 

@@ -2,18 +2,23 @@ module statics/file
 
 imports
 
-  signatures/statixpie-sig
   signatures/lex/literal-sig
   signatures/type-sig
-  statics/func_def
+  signatures/statixpie-sig
+  statics/base
   statics/data
+  statics/func_def
 
 rules
 
-  programOk : Start
-  programOk(Program(Module(mods), imports, defs)) :- {s_file}
+  projectOk : scope
+  projectOk(s). // todo: create scopes for built-in types
+
+  programOk : scope * Start
+  programOk(s_project, Program(Module(mods), imports, defs)) :- {s_file}
     // todo module, imports
     new s_file,
+    s_file -ROOT-> s_project,
     defsOk(s_file, defs).
 
   defOk : scope * Def
