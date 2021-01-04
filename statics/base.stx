@@ -25,7 +25,10 @@ signature
 
 signature
   name-resolution
-    labels P INHERIT ROOT
+    labels
+      P // Scopes within functions; function scope to file scope.
+      INHERIT // Between data scopes
+      ROOT // file scope to root scope. Root scope is the project scope.
 
 rules // Logic functions
 
