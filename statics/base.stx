@@ -3,6 +3,7 @@ module statics/base
 imports
 
   signatures/lex/literal-sig
+  signatures/statixpie-sig
   statics/type
 
 signature
@@ -12,6 +13,7 @@ signature
     BOOLEAN // For logic in this statix spec.
 
   relations
+    mod_wip : MODID -> scope
     val : VALID -> TYPE
     func : FUNCID -> TYPE
     data : TYPEID -> scope
@@ -60,6 +62,34 @@ rules // Logic functions
   notB(FALSE()) = TRUE().
 
 rules // Declararing and resolving
+
+  /**
+   * declareWipModule(s_project, s_mod, Module(moduleList, name))
+   * Declare a work in progress module [s_mod] named [name] in the relation
+   * mod_wip. [name] is declared recursively nested in the modules of
+   * [moduleList] starting in the root scope [s_project].
+   * The module is work in progress because there can be multiple such
+   * recursively nested modules, possibly with duplicate names.
+   * The modules are deduplicated in statics/project.stx!projectOk.
+   */
+  declareWipModule : scope * scope * Module
+  declareWipModule(s_project, s_mod, Module(NoModuleList(), name)) :- {s_start s_end}
+    declareWipModule_1(s_project, [], name, s_mod).
+  declareWipModule(s_project, s_mod, Module(ModuleList(mods), name)) :-
+    declareWipModule_1(s_project, mods, name, s_mod).
+
+    declareWipModule_1 : scope * list(MODID) * MODID * scope
+    declareWipModule_1(s, [], name, s_mod) :-
+      !mod_wip[name, s_mod] in s.
+    declareWipModule_1(s, [mod|mods], name, s_mod) :- {s_mod_middle}
+      new s_mod_middle,
+      !mod_wip[mod, s_mod_middle] in s,
+      declareWipModule_1(s_mod_middle, mods, name, s_mod).
+
+  declareDeduplicatedModules : scope
+  declareDeduplicatedModules(s) :-
+    true. // TODO
+
 
   resolveModuleList : scope * ModuleList -> scope
   resolveModuleList(s, NoModuleList()) = s.

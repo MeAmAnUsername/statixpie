@@ -12,13 +12,16 @@ imports
 rules
 
   projectOk : scope
-  projectOk(s). // todo: create scopes for built-in types
+  projectOk(s) :- 
+    declareDeduplicatedModules(s).
+    // todo: create scopes for built-in types
 
   programOk : scope * Start
-  programOk(s_project, Program(Module(module_list, name), imports, defs)) :- {s_mod}
-    // todo module, imports
+  programOk(s_project, Program(module, imports, defs)) :- {s_mod}
+    // todo imports
     new s_mod,
     s_mod -ROOT-> s_project,
+    declareWipModule(s_project, s_mod, module),
     defsOk(s_mod, defs).
 
   defOk : scope * Def
