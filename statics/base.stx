@@ -113,23 +113,22 @@ rules // Declararing and resolving
 
   declareModulesFromTree : scope * ModuleTree
   declareModulesFromTrees maps declareModulesFromTree(*, list(*))
-  declareModulesFromTree(s, ModuleTreeNode(name, [], sub_modules)) :- {s_mod}
-    new s_mod,
-    declareModule(s, name, s_mod),
-    declareModulesFromTrees(s_mod, sub_modules).
-  declareModulesFromTree(s, ModuleTreeNode(name, [s_mod], sub_modules)) :-
-    declareModule(s, name, s_mod),
-    declareModulesFromTrees(s_mod, sub_modules).
-  declareModulesFromTree(s, ModuleTreeNode(name, s_mods@[s_mod|[_|_]], sub_modules)) :-
-    declareModules(s, name, s_mods),
-    declareModulesFromTrees(s_mod, sub_modules),
-    false | error $[Duplicate module] @name.
+  declareModulesFromTree(s, ModuleTreeNode(name, scopes, sub_modules)) :- {s_mod_tree}
+    new s_mod_tree,
+    declareModule(s, name, s_mod_tree),
+    instantiateModules(s_mod_tree, scopes),
+    declareModulesFromTrees(s_mod_tree, sub_modules),
+    try { scopes != [_|[_|_]] } | error $[Duplicate module] @name. // todo: error on all names.
 
   declareModule : scope * MODID * scope
-  declareModules maps declareModule(*, *, list(*))
   declareModule(s, name, s_mod) :-
-    !mod[name, s_mod] in s.
-  
+    !mod[name, s_mod] in s. // todo: resolve to check for duplicates -> error: BUG
+
+  instantiateModule : scope * scope
+  instantiateModules maps instantiateModule(*, list(*))
+  instantiateModule(s_mod_tree, s_mod_file) :-
+    s_mod_tree -MOD_INSTANCE-> s_mod_file.
+
 
   resolveModuleList : scope * ModuleList -> scope
   resolveModuleList(s, NoModuleList()) = s.
