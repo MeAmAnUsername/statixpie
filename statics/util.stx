@@ -2,6 +2,7 @@ module statics/util
 
 imports
 
+  signatures/common-sig
   signatures/func_body-sig
   statics/base
   statics/type
@@ -30,3 +31,20 @@ rules
     expectSubtypesPassScopes(s2, exps, tys, err) == s3.
   expectSubtypesPassScopes(s, [], types@[_|_], err) = s :- false | error $[[err]; remaining types: [types]].
   expectSubtypesPassScopes(s, exps@[_|_],  [], err) = s :- false | error $[[err]; remaining expressions: [exps]].
+
+  /**
+   * moduleToList(mod@Module(moduleList, name))
+   * Convert a Module [mod] to a list of the modules
+   * Append [name] to the [moduleList].
+   */
+  moduleToList : Module -> list(MODID)
+  moduleToList(Module(NoModuleList(), name)) = [name].
+  moduleToList(Module(ModuleList(mods), name)) = appendString(mods, name).
+
+  /**
+   * appendString(strs, newStr)
+   * append string [newStr] to list of strings [strs].
+   */
+  appendString : list(string) * string -> list(string)
+  appendString([], newStr) = [newStr].
+  appendString([str|strs], newStr) = [str|appendString(strs, newStr)].

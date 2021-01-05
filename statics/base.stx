@@ -4,6 +4,7 @@ imports
 
   signatures/lex/literal-sig
   signatures/statixpie-sig
+  statics/util
   statics/type
 
 signature
@@ -11,9 +12,11 @@ signature
     TYPE // A semantic type (as opposed to the lexical, non-all caps Type)
     ValKind // The kind of a value. Used by code generation.
     BOOLEAN // For logic in this statix spec.
+    ModuleTree // For constructing the tree of modules
 
   relations
-    mod_wip : MODID -> scope
+    mod_wip : MODID -> (scope * Module)
+    mod : MODID -> scope
     val : VALID -> TYPE
     func : FUNCID -> TYPE
     data : TYPEID -> scope
@@ -24,6 +27,7 @@ signature
     LocalValKind : ValKind
     TRUE : BOOLEAN
     FALSE : BOOLEAN
+    ModuleTreeNode : MODID * list(scope) * list(ModuleTree) -> ModuleTree
 
 signature
   name-resolution
@@ -73,23 +77,59 @@ rules // Declararing and resolving
    * The modules are deduplicated in statics/project.stx!projectOk.
    */
   declareWipModule : scope * scope * Module
-  declareWipModule(s_project, s_mod, Module(NoModuleList(), name)) :- {s_start s_end}
-    declareWipModule_1(s_project, [], name, s_mod).
-  declareWipModule(s_project, s_mod, Module(ModuleList(mods), name)) :-
-    declareWipModule_1(s_project, mods, name, s_mod).
-
-    declareWipModule_1 : scope * list(MODID) * MODID * scope
-    declareWipModule_1(s, [], name, s_mod) :-
-      !mod_wip[name, s_mod] in s.
-    declareWipModule_1(s, [mod|mods], name, s_mod) :- {s_mod_middle}
-      new s_mod_middle,
-      !mod_wip[mod, s_mod_middle] in s,
-      declareWipModule_1(s_mod_middle, mods, name, s_mod).
+  declareWipModule(s_project, s_mod, module@Module(_, name)) :-
+    !mod_wip[name, (s_mod, module)] in s_project.
 
   declareDeduplicatedModules : scope
-  declareDeduplicatedModules(s) :-
-    true. // TODO
+  declareDeduplicatedModules(s) :- {occs modules}
+    query mod_wip filter e in s |-> occs,
+    addAllToModuleTree([], occs) == modules,
+    declareModulesFromTrees(s, modules).
 
+  addAllToModuleTree : list(ModuleTree) * list((path * (string * (scope * Module)))) -> list(ModuleTree)
+  addAllToModuleTree(modules, []) = modules.
+  addAllToModuleTree(modules_1, [occ|occs]) = modules_3 :- {modules_2}
+    addToModuleTree(modules_1, occ) == modules_2,
+    addAllToModuleTree(modules_2, occs) == modules_3.
+
+  addToModuleTree : list(ModuleTree) * (path * (string * (scope * Module))) -> list(ModuleTree)
+  addToModuleTree(modules, (_, (_, (s_mod, module)))) =
+    addToModuleTree_1(modules, moduleToList(module), s_mod).
+
+    addToModuleTree_1 : list(ModuleTree) * list(MODID) * scope -> list(ModuleTree)
+    addToModuleTree_1(_, [], s_mod) = [] :- false | error "BUG: called addToModuleTree_1 with empty module name list".
+    addToModuleTree_1([], [name], s_mod) =
+      [ModuleTreeNode(name, [s_mod], [])].
+    addToModuleTree_1([ModuleTreeNode(name, scopes, sub_modules)|modules], [name], s_mod) =
+      [ModuleTreeNode(name, [s_mod|scopes], sub_modules)|modules].
+    addToModuleTree_1([module@ModuleTreeNode(name', _, _)|modules], [name], s_mod) =
+      [module|addToModuleTree_1(modules, [name], s_mod)] :- name' != name.
+    addToModuleTree_1([], [name|names], s_mod) =
+      [ModuleTreeNode(name, [], addToModuleTree_1([], names, s_mod))].
+    addToModuleTree_1([ModuleTreeNode(name , scopes, sub_modules)|modules], [name|names], s_mod) =
+      [ModuleTreeNode(name, scopes, addToModuleTree_1(sub_modules, names, s_mod))|modules].
+    addToModuleTree_1([module@ModuleTreeNode(name', _, _)|modules], names@[name|_], s_mod) =
+      [module|addToModuleTree_1(modules, names, s_mod)] :- name' != name.
+
+  declareModulesFromTree : scope * ModuleTree
+  declareModulesFromTrees maps declareModulesFromTree(*, list(*))
+  declareModulesFromTree(s, ModuleTreeNode(name, [], sub_modules)) :- {s_mod}
+    new s_mod,
+    declareModule(s, name, s_mod),
+    declareModulesFromTrees(s_mod, sub_modules).
+  declareModulesFromTree(s, ModuleTreeNode(name, [s_mod], sub_modules)) :-
+    declareModule(s, name, s_mod),
+    declareModulesFromTrees(s_mod, sub_modules).
+  declareModulesFromTree(s, ModuleTreeNode(name, s_mods@[s_mod|[_|_]], sub_modules)) :-
+    declareModules(s, name, s_mods),
+    declareModulesFromTrees(s_mod, sub_modules),
+    false | error $[Duplicate module] @name.
+
+  declareModule : scope * MODID * scope
+  declareModules maps declareModule(*, *, list(*))
+  declareModule(s, name, s_mod) :-
+    !mod[name, s_mod] in s.
+  
 
   resolveModuleList : scope * ModuleList -> scope
   resolveModuleList(s, NoModuleList()) = s.
