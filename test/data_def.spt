@@ -35,9 +35,8 @@ test supertype use before declaration [[
 test supertype imported [[
   data [[Bar]] = foreign java org.example.test.Bar {}
   data Foo : test:data_def:[[Bar]] = foreign java org.example.test.Foo {}
-]] // analysis succeeds
-   // resolve #2 to #1
-   analysis fails // todo: implement modules
+]] analysis succeeds
+   resolve #2 to #1
 test supertype is self [[ data [[Foo]] : [[Foo]] = foreign java org.example.test.Foo {} ]]
   resolve #2 to #1
   1 error at #2
