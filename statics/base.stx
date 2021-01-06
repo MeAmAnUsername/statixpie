@@ -150,6 +150,11 @@ rules // Declararing and resolving
     addToModuleTree_1([module@ModuleTreeNode(name', _, _)|modules], names@[name|_], s_mod) =
       [module|addToModuleTree_1(modules, names, s_mod)] :- name' != name.
 
+  /**
+   * declareModulesFromTree(s, tree)
+   * Declares all modules in the tree with a new scope and adds a pointer to
+   * the file scopes where applicible (see statics/base!instantiateModule).
+   */
   declareModulesFromTree : scope * ModuleTree
   declareModulesFromTrees maps declareModulesFromTree(*, list(*))
   declareModulesFromTree(s, ModuleTreeRoot(sub_modules)) :-
@@ -162,17 +167,35 @@ rules // Declararing and resolving
     declareModulesFromTrees(s_mod_tree, sub_modules),
     try { scopes != [_|[_|_]] } | error $[Duplicate module] @name. // todo: error on all names.
 
+  /**
+   * declareModule(s, name, s_mod)
+   * Declare a module [s_mod] named [name] in scope [s].
+   */
   declareModule : scope * MODID * scope
   declareModule(s, name, s_mod) :-
     !mod[name, s_mod] in s,
     query mod filter e in s |-> [_] | error $[BUG: duplicate definitions for module [name] in [s]].
 
+  /**
+   * instantiateModule(s_mod_tree, s_mod_file)
+   * Instantiate module [s_mod_file] by adding a MOD_INSTANCE edge to
+   * [s_mod_tree].
+   */
   instantiateModule : scope * scope
   instantiateModules maps instantiateModule(*, list(*))
   instantiateModule(s_mod_tree, s_mod_file) :-
     s_mod_tree -MOD_INSTANCE-> s_mod_file.
 
 
+  /**
+   * resolveModuleList(s, moduleList) = s_mod
+   * Resolve the modules from the ModuleList [moduleList] and return the scope
+   * [s_mod] of the last module in the list.
+   * Also sets references on the names in the moduleList to files, if
+   * such files exist. (example: given foo:bar:baz, it points foo to a file foo
+   * if it exists, bar to a file bar if it exists, baz to a file baz if it
+   * exists)
+   */
   resolveModuleList : scope * ModuleList -> scope
   resolveModuleList(s, NoModuleList()) = s.
   resolveModuleList(s, ModuleList(mods)) = s_mod :- {s_root}
