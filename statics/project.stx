@@ -18,10 +18,11 @@ rules
     // todo: create scopes for built-in types
 
   programOk : scope * Start
-  programOk(s_project, Program(module, imports, defs)) :- {s_mod}
+  programOk(s_project, Program(module@Module(_, name), imports, defs)) :- {s_mod}
     // todo imports
     new s_mod,
     s_mod -ROOT-> s_project,
+    setContext(s_mod, "module_name", ContextName(name)),
     declareWipModule(s_project, s_mod, module),
     defsOk(s_mod, defs).
 

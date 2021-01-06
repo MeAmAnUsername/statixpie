@@ -216,7 +216,7 @@ rules
 // Early return and failure
 
   typeOfExpImpl(s1, Return(exp)) = (s2, UnitType()) :- {expected_ty}
-    getContextType(s1, "func_return_ty") == expected_ty,
+    getContext(s1, "func_return_type") == ContextType(expected_ty),
     expectSubtype(s1, exp, expected_ty) == s2.
     
   typeOfExpImpl(s1, Fail(exp)) = (s2, UnitType()) :-

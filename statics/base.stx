@@ -13,6 +13,7 @@ signature
     ValKind // The kind of a value. Used by code generation.
     BOOLEAN // For logic in this statix spec.
     ModuleTree // For constructing the tree of modules
+    CONTEXT // context values that are saved in the scope graph
 
   relations
     mod_wip : MODID -> (scope * Module)
@@ -20,7 +21,7 @@ signature
     val : VALID -> TYPE
     func : FUNCID -> TYPE
     data : TYPEID -> scope
-    context : string -> TYPE
+    context : string -> CONTEXT
 
   constructors
     InputValKind : ValKind
@@ -28,6 +29,8 @@ signature
     TRUE : BOOLEAN
     FALSE : BOOLEAN
     ModuleTreeNode : MODID * list(scope) * list(ModuleTree) -> ModuleTree
+    ContextType : TYPE -> CONTEXT
+    ContextName : string -> CONTEXT
 
 signature
   name-resolution
@@ -155,7 +158,16 @@ rules // Declararing and resolving
     resolveModuleList_1(s, [name|names]) = resolveModuleList_1(s_next, names) :- {occs instance_occs}
       query mod filter e and {name' :- name' == name} in s |-> occs,
       occs == [(_, (_, s_next))] | error $[Cannot resolve [name]] @name,
-      try { occs != [_|[_|_]] } | error $[BUG: submodule [name] resolves to multiple modules, occs: [occs]] @name.
+      try { occs != [_|[_|_]] } | error $[BUG: submodule [name] resolves to multiple modules, occs: [occs]] @name,
+      query () filter MOD_INSTANCE in s_next |-> instance_occs,
+      resolveModuleList_2s(instance_occs, name).
+
+    // adds references to files if applicable
+    resolveModuleList_2 : (path * scope) * MODID
+    resolveModuleList_2s maps resolveModuleList_2(list(*), *)
+    resolveModuleList_2((_, s), ref_name) :- {orig_name}
+      getContext(s, "module_name") == ContextName(orig_name),
+      @ref_name.ref := orig_name.
 
 
   /**
@@ -267,21 +279,26 @@ rules // Declararing and resolving
     // If there are multiple, the declaration will give an error.
     try { occs != [] } | error $[Could not resolve data [name]] @name.
 
+  /**
+   * setContext(s, name, context)
+   * Set a context value [context] named [name] in scope [s].
+   */
+  setContext : scope * string * CONTEXT
+  setContext(s, name, context) :-
+    !context[name, context] in s,
+    getContext(s, name) == context | error $[Context value [name] is already set in [s]].
 
-  setContextType : scope * string * TYPE
-  setContextType(s, name, ty) :-
-    !context[name, ty] in s,
-    true. // todo
-//    getContextType(s, name) == _
-//      | error $[Context value [name] is already set in [s]].
-
-  getContextType : scope * string -> TYPE
-  getContextType(s, name) = ty :- {occs}
+  /**
+   * getContext(s, name) -> context
+   * Get a context value [context] named [name] from scope [s].
+   */
+  getContext : scope * string -> CONTEXT
+  getContext(s, name) = context :- {occs}
     query context
       filter P*
          and { name' :- name' == name }
          min $ < P
          and true
           in s |-> occs,
-    occs == [(_, (_, ty))],
+    occs == [(_, (_, context))],
     try { occs != [] } | error $[cannot get context value [name] in [s]].
