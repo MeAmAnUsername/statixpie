@@ -12,8 +12,9 @@ imports
 rules
 
   projectOk : scope
-  projectOk(s) :- 
-    declareDeduplicatedModules(s).
+  projectOk(s_root) :- 
+    s_root -ROOT-> s_root,
+    declareDeduplicatedModules(s_root).
     // todo: create scopes for built-in types
 
   programOk : scope * Start

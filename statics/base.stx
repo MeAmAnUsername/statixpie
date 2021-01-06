@@ -35,6 +35,7 @@ signature
       P // Scopes within functions; function scope to file scope.
       INHERIT // Between data scopes
       ROOT // file scope to root scope. Root scope is the project scope.
+      MOD_INSTANCE // from a module tree scope to a file scope
 
 rules // Logic functions
 
@@ -66,6 +67,18 @@ rules // Logic functions
   notB(FALSE()) = TRUE().
 
 rules // Declararing and resolving
+
+  /**
+   * getRoot(s)
+   * Get the root scope. The root scope is the scope passed to
+   * statics/project!projectOk.
+   * All scopes have a path to the root scope and all paths to the root scope
+   * end with a ROOT edge.
+   */
+  getRoot : scope -> scope
+  getRoot(s) = s_root :- {occs}
+    query () filter P* ROOT in s |-> occs,
+    occs == [(_, s_root)] | error $[BUG: cannot resolve root scope from [s]. occs: [occs]].
 
   /**
    * declareWipModule(s_project, s_mod, Module(moduleList, name))
@@ -115,6 +128,7 @@ rules // Declararing and resolving
   declareModulesFromTrees maps declareModulesFromTree(*, list(*))
   declareModulesFromTree(s, ModuleTreeNode(name, scopes, sub_modules)) :- {s_mod_tree}
     new s_mod_tree,
+    s_mod_tree -ROOT-> getRoot(s),
     declareModule(s, name, s_mod_tree),
     instantiateModules(s_mod_tree, scopes),
     declareModulesFromTrees(s_mod_tree, sub_modules),
@@ -132,6 +146,17 @@ rules // Declararing and resolving
 
   resolveModuleList : scope * ModuleList -> scope
   resolveModuleList(s, NoModuleList()) = s.
+  resolveModuleList(s, ModuleList(mods)) = s_mod :- {s_root}
+    getRoot(s) == s_root,
+    resolveModuleList_1(s_root, mods) == s_mod.
+    
+    resolveModuleList_1 : scope * list(MODID) -> scope
+    resolveModuleList_1(s, []) = s.
+    resolveModuleList_1(s, [name|names]) = resolveModuleList_1(s_next, names) :- {occs instance_occs}
+      query mod filter e and {name' :- name' == name} in s |-> occs,
+      occs == [(_, (_, s_next))] | error $[Cannot resolve [name]] @name,
+      try { occs != [_|[_|_]] } | error $[BUG: submodule [name] resolves to multiple modules, occs: [occs]] @name.
+
 
   /**
    * Declare a value [name] with type [TYPE] and ValKind [kind] in scope [s]
@@ -224,7 +249,7 @@ rules // Declararing and resolving
   resolveData : scope * string -> list((path * (string * scope)))
   resolveData(s, name) = occs :-
     query data
-      filter P*
+      filter MOD_INSTANCE? P* // todo: also add `MOD_INSTANCE?` to other queries
          and { name' :- name' == name }
          min $ < P
          and false
