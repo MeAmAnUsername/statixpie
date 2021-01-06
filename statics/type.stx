@@ -34,8 +34,13 @@ rules // operations on types
    * FALSE() otherwise.
    */
   inherits : scope * scope -> BOOLEAN
-  inherits(s_sub, s_super) = notB(isEmpty(paths)) :-
+  inherits(s_sub, s_super) = inherits_1(paths) :-
     query () filter INHERIT* and { s_data :- s_data == s_super } in s_sub |-> paths.
+
+    // Returns FALSE if the list is empty, TRUE otherwise.
+    inherits_1 : list((path * scope)) -> BOOLEAN
+    inherits_1([]) = FALSE().
+    inherits_1([_|_]) = TRUE().
 
   /**
    * subtype(T1, T2)
@@ -51,14 +56,6 @@ rules // operations on types
   subtype(EmptyListType(), ListType(_)).
   subtype(DataType(s_sub), DataType(s_super)) :- inherits(s_sub, s_super) == TRUE().
   subtype(T1, T2) :- T1 == T2.
-
-  /**
-   * isEmpty(paths)
-   * Returns TRUE if the list [paths] is empty, FALSE() otherwise.
-   */
-  isEmpty : list((path * scope)) -> BOOLEAN
-  isEmpty([]) = TRUE().
-  isEmpty([_|_]) = FALSE().
 
   /**
    * isSubtype(T1, T2)
