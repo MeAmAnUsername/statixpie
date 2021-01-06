@@ -28,6 +28,7 @@ signature
     LocalValKind : ValKind
     TRUE : BOOLEAN
     FALSE : BOOLEAN
+    ModuleTreeRoot : list(ModuleTree) -> ModuleTree
     ModuleTreeNode : MODID * list(scope) * list(ModuleTree) -> ModuleTree
     ContextType : TYPE -> CONTEXT
     ContextName : string -> CONTEXT
@@ -96,21 +97,43 @@ rules // Declararing and resolving
   declareWipModule(s_project, s_mod, module@Module(_, name)) :-
     !mod_wip[name, (s_mod, module)] in s_project.
 
+  /**
+   * declareDeduplicatedModules(s_root)
+   * Gets all declared work in progress modules (see
+   * statics/base!declareWipModule), converts them to a module tree (without
+   * duplicates) and then declares all the modules.
+   */
   declareDeduplicatedModules : scope
-  declareDeduplicatedModules(s) :- {occs modules}
+  declareDeduplicatedModules(s) :- {occs tree}
     query mod_wip filter e in s |-> occs,
-    addAllToModuleTree([], occs) == modules,
-    declareModulesFromTrees(s, modules).
+    addAllToModuleTree(ModuleTreeRoot([]), occs) == tree,
+    declareModulesFromTree(s, tree).
 
-  addAllToModuleTree : list(ModuleTree) * list((path * (string * (scope * Module)))) -> list(ModuleTree)
-  addAllToModuleTree(modules, []) = modules.
-  addAllToModuleTree(modules_1, [occ|occs]) = modules_3 :- {modules_2}
-    addToModuleTree(modules_1, occ) == modules_2,
-    addAllToModuleTree(modules_2, occs) == modules_3.
+  /**
+   * addAllToModuleTree(root_in, wip_modules) -> root_out
+   * Add all wip modules [wip_modules] to module tree [root_in].
+   * root_in is required to be a ModuleTreeRoot
+   * All modules are deduplicated and added recursively.
+   */
+  addAllToModuleTree : ModuleTree * list((path * (string * (scope * Module)))) -> ModuleTree
+  addAllToModuleTree(node@ModuleTreeNode(_, _, _), []) = node :-
+    false | error $[BUG: called addAllToModuleTree with a non-root node].
+  addAllToModuleTree(root@ModuleTreeRoot(_), []) = root.
+  addAllToModuleTree(root_1@ModuleTreeRoot(_), [occ|occs]) = root_3 :- {root_2}
+    addToModuleTree(root_1, occ) == root_2,
+    addAllToModuleTree(root_2, occs) == root_3.
 
-  addToModuleTree : list(ModuleTree) * (path * (string * (scope * Module))) -> list(ModuleTree)
-  addToModuleTree(modules, (_, (_, (s_mod, module)))) =
-    addToModuleTree_1(modules, moduleToList(module), s_mod).
+  /**
+   * addToModuleTree(root_in, wip_module_occurrence) -> root_out
+   * Add module from [wip_module_occurrence] to module tree [root_in].
+   * root_in is required to be a ModuleTreeRoot
+   * The module is added recursively and deduplicated as necessary.
+   */
+  addToModuleTree : ModuleTree * (path * (string * (scope * Module))) -> ModuleTree
+  addToModuleTree(node@ModuleTreeNode(_, _, _), _) = node :-
+    false | error $[BUG: called addToModuleTree with a non-root node].
+  addToModuleTree(ModuleTreeRoot(modules), (_, (_, (s_mod, module)))) =
+    ModuleTreeRoot(addToModuleTree_1(modules, moduleToList(module), s_mod)).
 
     addToModuleTree_1 : list(ModuleTree) * list(MODID) * scope -> list(ModuleTree)
     addToModuleTree_1(_, [], s_mod) = [] :- false | error "BUG: called addToModuleTree_1 with empty module name list".
@@ -129,6 +152,8 @@ rules // Declararing and resolving
 
   declareModulesFromTree : scope * ModuleTree
   declareModulesFromTrees maps declareModulesFromTree(*, list(*))
+  declareModulesFromTree(s, ModuleTreeRoot(sub_modules)) :-
+    declareModulesFromTrees(s, sub_modules).
   declareModulesFromTree(s, ModuleTreeNode(name, scopes, sub_modules)) :- {s_mod_tree}
     new s_mod_tree,
     s_mod_tree -ROOT-> getRoot(s),
