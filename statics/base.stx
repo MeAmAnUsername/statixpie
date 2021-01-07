@@ -140,6 +140,7 @@ rules // Declararing and resolving
   resolveUniqueFunc(s, name) = ty :- {occs name'}
     resolveFunc(s, name) == occs,
     occs == [(_, (name', ty))],
+    // todo: allow overloading (multiple occurences, find best match by input types)
     @name.ref := name',
     @name.type := ty,
     // If there are multiple, the declaration will give an error.

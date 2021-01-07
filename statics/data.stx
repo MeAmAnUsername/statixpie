@@ -38,12 +38,30 @@ rules
 
   superOk : scope * scope * SuperType * string
   superOk(s, s_data, NoSuperType(), name).
-  superOk(s, s_data, SuperType(data_ty@DataTy(_, super_name)), name) :- {s_super}
+  superOk(s, s_data, SuperType(data_ty@DataTy(_, super_name)), name) :- {s_super occs}
     typeOfDataTy(s, data_ty) == DataType(s_super),
     s_data -INHERIT-> s_super,
-    inherits(s_super, s_data) == FALSE() | error $[Cannot (indirectly) inherit from self. [super_name] is already an (indirect) subtype of [name]] @super_name.
-    // todo: check that all functions in s_data are subtypes of functions in s_super
-  
+    inherits(s_super, s_data) == FALSE() | error $[Cannot (indirectly) inherit from self. [super_name] is already an (indirect) subtype of [name]] @super_name,
+    query func filter e in s_data |-> occs,
+    superOk_1s(s_super, occs).
+
+    // check that all functions of current are valid overrides of super.
+    superOk_1 : scope * (path * (FUNCID * TYPE))
+    superOk_1s maps superOk_1(*, list(*))
+    superOk_1(s_super, (_, (name, func_ty))) :- {occs}
+      resolveFunc(s_super, name) == occs,
+      superOk_2s(func_ty, occs, name).
+
+    // Check that function is either a valid override or not an override
+    superOk_2 : TYPE * (path * (FUNCID * TYPE)) * FUNCID
+    superOk_2s maps superOk_2(*, list(*), *)
+    superOk_2(FuncType(param_tys, ty_out), (path, (_, FuncType(param_tys_super, ty_out_super))), name_node) :-
+      orB(
+        notB(isAllSubTypes(param_tys_super, param_tys)),
+        isSubtype(ty_out_super, ty_out)
+      ) == TRUE() | error $[Type mismatch: incompatable return type for override] @name_node.
+      // todo: figure out how to set reference to overridden function (how to do?)
+
   dataImplOk : scope * scope * DataImpl
   dataImplOk(s, s_data, JavaDataImpl(java_name, members)) :-
     javaDataMembersOk(s, s_data, members).

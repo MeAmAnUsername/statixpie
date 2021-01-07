@@ -78,6 +78,19 @@ rules // operations on types
   isSubtypeHelper(_, _) = FALSE().
 
   /**
+   * isAllSubTypes(T1s, T2s)
+   * Returns TRUE if the types in [T1s] are pairwise subtypes of [T2s], FALSE
+   * otherwise. Also returns FALSE if the lists don't have the same length.
+   * This is useful for comparing parameter lists of functions.
+   * Delegates to isSubtype.
+   */
+  isAllSubTypes : list(TYPE) * list(TYPE) -> BOOLEAN
+  isAllSubTypes([], []) = TRUE().
+  isAllSubTypes(Ts@[_|_], []) = FALSE().
+  isAllSubTypes([], Ts@[_|_]) = FALSE().
+  isAllSubTypes([T1|T1s], [T2|T2s]) = andB(isSubtype(T1, T2), isAllSubTypes(T1s, T2s)).
+
+  /**
    * Returns the first element in the list that is TRUE(), or the default otherwise.
    */
   firstTrueT : list((BOOLEAN * TYPE)) * TYPE -> TYPE
