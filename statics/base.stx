@@ -207,7 +207,8 @@ rules // Declararing and resolving
   declareModule : scope * MODID * scope
   declareModule(s, name, s_mod) :-
     !mod[name, s_mod] in s,
-    query mod filter e in s |-> [_] | error $[BUG: duplicate definitions for module [name] in [s]].
+    query mod filter e and {name' :- name' == name} in s |-> [_]
+      | error $[BUG: duplicate definitions for module [name] in [s]].
 
   /**
    * instantiateModule(s_mod_tree, s_mod_file)
