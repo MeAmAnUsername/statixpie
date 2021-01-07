@@ -155,7 +155,7 @@ rules
     expectSubtypesPassScopes(s1, arg_exps, param_tys, "Unexpected number of arguments") == s2.
 
   typeOfExpImpl(s, Call(moduleList, name, arg_exps)) =
-    typeOfCall(s, resolveModuleList(s, moduleList), name, arg_exps).
+    typeOfCall(s, resolveModuleListToFile(s, moduleList), name, arg_exps).
 
   typeOfExpImpl(s1, QCall(exp, name, arg_exps)) = (s3, ty) :- {s2 exp_ty s_data}
     typeOfExp(s1, exp) == (s2, exp_ty),

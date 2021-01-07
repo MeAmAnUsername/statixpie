@@ -163,7 +163,7 @@ rules
 
   typeOfDataTy : scope * DataTy -> TYPE
   typeOfDataTy(s, DataTy(modules, name)) = DataType(s_data) :- {s_mod}
-    resolveModuleList(s, modules) == s_mod,
+    resolveModuleListToFile(s, modules) == s_mod,
     resolveUniqueData(s_mod, name) == s_data.
 
   /**
