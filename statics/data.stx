@@ -12,12 +12,29 @@ rules
 
   dataDefOk : scope * DataDef
   dataDefOk(s, DataDef(DataDefMods(mods), name, super, impl)) :- {s_data}
+    dataDefModsOk(mods),
     new s_data,
     s_data -ROOT-> getRoot(s),
     declareData(s, name, s_data),
     @name.mods := mods,
     superOk(s, s_data, super, name),
     dataImplOk(s, s_data, impl).
+
+  dataDefModsOk : list(DataDefMod)
+  dataDefModsOk([]).
+  dataDefModsOk([mod|mods1]) :- {mods2}
+    dataDefModsOk_1(mods1, mod) == mods2,
+    dataDefModsOk(mods2).
+    
+    // checks that mods list does not contain a duplicate modifier
+    // returns list with duplicates removed
+    dataDefModsOk_1 : list(DataDefMod) * DataDefMod -> list(DataDefMod)
+    dataDefModsOk_1([], _) = [].
+    dataDefModsOk_1([mod|mods], mod) = mods_out :-
+      dataDefModsOk_1(mods, mod) == mods_out,
+      false | error $[Duplicate modifier [mod]] @mod.
+    dataDefModsOk_1([mod1|mods], mod2) = [mod1|mods_out] :-
+      dataDefModsOk_1(mods, mod2) == mods_out.
 
   superOk : scope * scope * SuperType * string
   superOk(s, s_data, NoSuperType(), name).
