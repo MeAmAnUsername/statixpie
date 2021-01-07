@@ -247,7 +247,7 @@ rules // Declararing and resolving
     resolveModuleList_2 : (path * scope) * MODID
     resolveModuleList_2s maps resolveModuleList_2(list(*), *)
     resolveModuleList_2((_, s), ref_name) :- {orig_name}
-      getContext(s, "module_name") == ContextName(orig_name),
+      getContext(s, "module_name_simple") == ContextName(orig_name),
       @ref_name.ref := orig_name.
 
 
