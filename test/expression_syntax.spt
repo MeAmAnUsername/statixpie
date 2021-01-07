@@ -18,8 +18,8 @@ test null literal [[ null ]] parse succeeds
 test or [[ var == null || someCall(var) ]] parse succeeds
 test or no layout around [[ true||true ]] parse succeeds
 test or layout between [[ true | | false ]] parse fails
-test or missing lhs [[ && true ]] parse fails
-test or missing rhs [[ false && ]] parse fails
+test or missing lhs [[ || true ]] parse fails
+test or missing rhs [[ false || ]] parse fails
 
 test and [[ var != null && someCall(var) ]] parse succeeds
 test and layout between [[ true & & false ]] parse fails
