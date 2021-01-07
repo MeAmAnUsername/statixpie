@@ -178,10 +178,11 @@ rules // Declararing and resolving
     // give an error on name of s_mod and set references to all other names from scopes in list
     declareModulesFromTree_2 : scope * list(scope)
     declareModulesFromTree_2s maps declareModulesFromTree_2(list(*), *)
-    declareModulesFromTree_2(s_mod, scopes) :- {name module}
-      getContext(s_mod, "module_name_simple") == ContextName(name) | error $[BUG: cannot get simple module name from [s_mod]],
+    declareModulesFromTree_2(s_mod, scopes) :- {module module_pp name}
       getContext(s_mod, "module_name_qualified") == ContextModule(module) | error $[BUG: cannot get qualified module name from [s_mod]],
-      false | error $[Duplicate module [module]. Ctrl/Cmd + click to go to duplicate definition.] @name,
+      moduleToList(module) == module_pp,
+      false | error $[Duplicate module [module_pp]. Ctrl/Cmd + click on [name] to go to duplicate definition.] @module,
+      getContext(s_mod, "module_name_simple") == ContextName(name) | error $[BUG: cannot get simple module name from [s_mod]],
       declareModulesFromTree_3s(declareModulesFromTree_4(scopes, s_mod), name).
 
     // set a reference from name to s_cur
