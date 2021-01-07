@@ -243,7 +243,7 @@ rules // Declararing and resolving
       query () filter MOD_INSTANCE in s_next |-> instance_occs,
       resolveModuleList_2s(instance_occs, name).
 
-    // adds references to files if applicable
+    // adds references to files if file exists
     resolveModuleList_2 : (path * scope) * MODID
     resolveModuleList_2s maps resolveModuleList_2(list(*), *)
     resolveModuleList_2((_, s), ref_name) :- {orig_name}
