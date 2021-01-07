@@ -146,7 +146,7 @@ test call missing open bracket [[ double 4) ]] parse fails
 test call missing close bracket [[ double (6 ]] parse fails
 test call missing commas [[ argsFunc(1 3 "no") ]] parse fails
 test simple call with layout [[ anotherFunc  (  ) ]] parse succeeds
-test fully qualified call [[ foo:bar:baz() ]] parse to ImportCall(["foo", "bar"], "baz", [])
+test fully qualified call [[ foo:bar:baz() ]] parse to Call(ModuleList(["foo", "bar"]), "baz", [])
 test fully qualified call with layout between [[ foo : bar : baz ( ) ]] parse succeeds
 test fully qualified call missing module name start [[ :bar:baz:fun() ]] parse fails
 test fully qualified call missing module name middle [[ foo::baz:fun() ]] parse fails
@@ -221,7 +221,7 @@ test return no layout between followed by open bracket in tuple [[ return(5, 9) 
 test return no layout between followed by open square bracket in list literal [[ return[1, 2] ]] parse fails
 test return no layout between followed by open square bracket in list comprehension [[ return[double(x) | x <- [1, 2, 3] ] ]] parse fails
 test return no layout between followed by letter in variable [[ returnfile ]] parse to Ref("returnfile")
-test return no layout between followed by letter in function [[ returnsomeFunc() ]] parse to Call("returnsomeFunc", [])
+test return no layout between followed by letter in function [[ returnsomeFunc() ]] parse to Call(NoModuleList(), "returnsomeFunc", [])
 test return no layout between followed by digit [[ return5 ]] parse to Ref("return5")
 test return no layout between followed by underscore [[ return_foo ]] parse to Ref("return_foo")
 test return no layout between followed by dash [[ return-5 ]] parse to Ref("return-5")
@@ -238,7 +238,7 @@ test fail no layout between followed by open bracket in tuple [[ fail(5, 9) ]] /
 test fail no layout between followed by open square bracket in list literal [[ fail[1, 2] ]] parse fails
 test fail no layout between followed by open square bracket in list comprehension [[ fail[double(x) | x <- [1, 2, 3] ] ]] parse fails
 test fail no layout between followed by letter in variable [[ failfile ]] parse to Ref("failfile")
-test fail no layout between followed by letter in function [[ failsomeFunc() ]] parse to Call("failsomeFunc", [])
+test fail no layout between followed by letter in function [[ failsomeFunc() ]] parse to Call(NoModuleList(), "failsomeFunc", [])
 test fail no layout between followed by digit [[ fail5 ]] parse to Ref("fail5")
 test fail no layout between followed by underscore [[ fail_foo ]] parse to Ref("fail_foo")
 test fail no layout between followed by dash [[ fail-5 ]] parse to Ref("fail-5")

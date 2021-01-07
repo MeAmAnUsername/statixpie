@@ -3,6 +3,7 @@ module func_body
 imports
 
   lex/literal
+  common
   type
 
 template options
@@ -72,9 +73,8 @@ context-free syntax // References
   Ref.Ref = <<VALID>> {avoid}
   Exp     = Ref
 
-  Exp.Call  = <<FUNCID>(<{Exp ", "}*>)>       {left}
-  Exp.QCall = <<Exp>.<FUNCID>(<{Exp ", "}*>)> {left}
-  Exp.ImportCall = <<{MODID ":"}+>:<FUNCID>(<{Exp ", "}*>)> {left}
+  Exp.Call  = <<ModuleList><FUNCID>(<{Exp ", "}*>)> {left}
+  Exp.QCall = <<Exp>.<FUNCID>(<{Exp ", "}*>)>       {left}
 
   Exp.CreateSupplier = <supplier (<Exp>)>
   Exp.TaskSupplier   = <<FUNCID>.supplier(<{Exp ", "}*>)>

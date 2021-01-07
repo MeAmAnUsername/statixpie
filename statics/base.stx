@@ -307,7 +307,7 @@ rules // Declararing and resolving
   resolveFunc : scope * string -> list((path * (string * TYPE)))
   resolveFunc(s, name) = occs :-
     query func
-      filter P*|INHERIT*
+      filter (MOD_INSTANCE? P*)|INHERIT*
          and { name' :- name' == name }
          min $ < P, $ < INHERIT
          and true // todo: set to false to implement overloading between classes
@@ -344,7 +344,7 @@ rules // Declararing and resolving
   resolveData : scope * string -> list((path * (string * scope)))
   resolveData(s, name) = occs :-
     query data
-      filter MOD_INSTANCE? P* // todo: also add `MOD_INSTANCE?` to other queries
+      filter MOD_INSTANCE? P*
          and { name' :- name' == name }
          min $ < P
          and false

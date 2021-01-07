@@ -154,17 +154,13 @@ rules
     resolveUniqueFunc(s_data, name) == FuncType(param_tys, out_ty),
     expectSubtypesPassScopes(s1, arg_exps, param_tys, "Unexpected number of arguments") == s2.
 
-  typeOfExpImpl(s, Call(name, arg_exps)) = typeOfCall(s, s, name, arg_exps).
+  typeOfExpImpl(s, Call(moduleList, name, arg_exps)) =
+    typeOfCall(s, resolveModuleList(s, moduleList), name, arg_exps).
 
   typeOfExpImpl(s1, QCall(exp, name, arg_exps)) = (s3, ty) :- {s2 exp_ty s_data}
     typeOfExp(s1, exp) == (s2, exp_ty),
     getScopeFromType(s2, exp_ty) == s_data,
     typeOfCall(s2, s_data, name, arg_exps) == (s3, ty).
-
-  typeOfExpImpl(s, ImportCall(moduleList, name, arg_exps)) = ty :- {s_data}
-    // todo: resolve module list to s_data
-    false | error "todo: ImportCall statics",
-    typeOfCall(s, s_data, name, arg_exps) == ty.
 
   // todo: CreateSupplier, TaskSupplier, SupplierGet
   

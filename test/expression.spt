@@ -217,11 +217,11 @@ test simple call provide subtype as argument [[ [[takesFoo]](bak) ]] analysis su
 test simple call incorrect arg count [[ double(3, 4) ]] error like "Unexpected number of arguments"
 test simple call incorrect arg type [[ double([[ [3, 4] ]]) ]] >= 1 error at #1 // error like "Type mismatch"
 
-test fully qualified call no args [[ test:expression:[[anotherFunc]]() ]] analysis fails // todo: implement imported functions analysis succeeds resolve #1
-test fully qualified call 1 arg [[ test:expression:[[double]](4) ]] analysis fails // todo: implement imported functions analysis succeeds resolve #1
-test fully qualified call 3 args [[ test:expression:[[argsFunc]](2, value, "yes") ]] analysis fails // todo: implement imported functions analysis succeeds resolve #1
+test fully qualified call no args [[ test:expression:[[anotherFunc]]() ]] analysis succeeds resolve #1
+test fully qualified call 1 arg [[ test:expression:[[double]](4) ]] analysis succeeds resolve #1
+test fully qualified call 3 args [[ test:expression:[[argsFunc]](2, value, "yes") ]] analysis succeeds resolve #1
 test fully qualified call undefined func [[ test:expression:[[unknown]](true) ]] >= 1 error at #1 // error like "undefined function"
-test fully qualified call provide subtype as argument [[ test:expression:[[takesFoo]](bak) ]] analysis fails // todo: implement imported functions analysis succeeds resolve #1
+test fully qualified call provide subtype as argument [[ test:expression:[[takesFoo]](bak) ]] analysis succeeds resolve #1
 test fully qualified call incorrect arg count [[ test:expression:double(3, 4) ]] error like "Unexpected number of arguments"
 test fully qualified call incorrect arg type [[ test:expression:double([[ [3, 4] ]]) ]] >= 1 error at #1 // error like "Type mismatch"
 
