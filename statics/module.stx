@@ -31,7 +31,7 @@ rules
   /**
    * declareDeduplicatedModules(s_root)
    * Gets all declared work in progress modules (see
-   * statics/base!declareWipModule), converts them to a module tree (without
+   * statics/module!declareWipModule), converts them to a module tree (without
    * duplicates) and then declares all the modules.
    */
   declareDeduplicatedModules : scope
@@ -84,7 +84,7 @@ rules
   /**
    * declareModulesFromTree(s, tree)
    * Declares all modules in the tree with a new scope and adds a pointer to
-   * the file scopes where applicible (see statics/base!instantiateModule).
+   * the file scopes where applicible (see statics/module!instantiateModule).
    */
   declareModulesFromTree : scope * ModuleTree
   declareModulesFromTrees maps declareModulesFromTree(*, list(*))
