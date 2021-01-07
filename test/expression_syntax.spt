@@ -146,6 +146,14 @@ test call missing open bracket [[ double 4) ]] parse fails
 test call missing close bracket [[ double (6 ]] parse fails
 test call missing commas [[ argsFunc(1 3 "no") ]] parse fails
 test simple call with layout [[ anotherFunc  (  ) ]] parse succeeds
+test fully qualified call [[ foo:bar:baz() ]] parse to ImportCall(["foo", "bar"], "baz", [])
+test fully qualified call with layout between [[ foo : bar : baz ( ) ]] parse succeeds
+test fully qualified call missing module name start [[ :bar:baz:fun() ]] parse fails
+test fully qualified call missing module name middle [[ foo::baz:fun() ]] parse fails
+test fully qualified call missing module name end [[ foo:bar::fun() ]] parse fails
+test fully qualified call missing function name [[ foo:bar:baz:() ]] parse fails
+test fully qualified call missing open bracket [[ foo:bar:baz) ]] parse fails
+test fully qualified call missing open bracket [[ foo:bar:baz( ]] parse fails
 
 test list absolute path literal [[ list /foo ]] parse succeeds
 test list relative path literal [[ list ./foo ]] parse succeeds
