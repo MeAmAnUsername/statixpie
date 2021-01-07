@@ -32,6 +32,7 @@ signature
     ModuleTreeNode : MODID * list(scope) * list(ModuleTree) -> ModuleTree
     ContextType : TYPE -> CONTEXT
     ContextName : string -> CONTEXT
+    ContextModule : Module -> CONTEXT
 
 signature
   name-resolution
@@ -177,18 +178,21 @@ rules // Declararing and resolving
     // give an error on name of s_mod and set references to all other names from scopes in list
     declareModulesFromTree_2 : scope * list(scope)
     declareModulesFromTree_2s maps declareModulesFromTree_2(list(*), *)
-    declareModulesFromTree_2(s_mod, scopes) :- {name}
-      getContext(s_mod, "module_name") == ContextName(name) | error $[BUG: cannot get module name from [s_mod]],
-      false | error $[Duplicate module [name]. Ctrl/Cmd + click to go to duplicate definition.] @name,
-      declareModulesFromTree_3s(declareModulesFromTree_4(scopes, s_mod), name).
+    declareModulesFromTree_2(s_mod, scopes) :- {name module}
+      getContext(s_mod, "module_name_simple") == ContextName(name) | error $[BUG: cannot get simple module name from [s_mod]],
+      getContext(s_mod, "module_name_qualified") == ContextModule(module) | error $[BUG: cannot get qualified module name from [s_mod]],
+      false | error $[Duplicate module [module]. Ctrl/Cmd + click to go to duplicate definition.] @name,
+      {other_scopes} declareModulesFromTree_3s(other_scopes@declareModulesFromTree_4(scopes, s_mod), name),
+      try { false } | note $[in [s_mod] with [scopes], setting references to [other_scopes]] @name.
 
     // set a reference from name to s_cur
     declareModulesFromTree_3 : scope * string
     declareModulesFromTree_3s maps declareModulesFromTree_3(list(*), *)
     declareModulesFromTree_3(s_cur, ref_name) :- {cur_name}
-      getContext(s_cur, "module_name") == ContextName(cur_name) | error $[BUG: cannot get module name from [s_cur]],
-      @ref_name.ref := cur_name.
-    
+      getContext(s_cur, "module_name_simple") == ContextName(cur_name) | error $[BUG: cannot get module name from [s_cur]],
+      @ref_name.ref := cur_name,
+      try{false}|note$[Setting reference to [s_cur]] @ref_name.
+
     // filter scope from list of scopes
     // assumes that scope only occurs once.
     declareModulesFromTree_4 : list(scope) * scope -> list(scope)

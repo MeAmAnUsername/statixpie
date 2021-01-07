@@ -22,7 +22,8 @@ rules
     // todo imports
     new s_mod,
     s_mod -ROOT-> s_project,
-    setContext(s_mod, "module_name", ContextName(name)),
+    setContext(s_mod, "module_name_simple", ContextName(name)),
+    setContext(s_mod, "module_name_qualified", ContextModule(module)),
     declareWipModule(s_project, s_mod, module),
     defsOk(s_mod, defs).
 
