@@ -6,6 +6,7 @@ imports
   statics/base
   statics/type
   statics/util
+  statics/module
   statics/binder
 
 rules

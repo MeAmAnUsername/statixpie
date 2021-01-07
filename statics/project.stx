@@ -6,6 +6,7 @@ imports
   signatures/type-sig
   signatures/statixpie-sig
   statics/base
+  statics/module
   statics/data
   statics/func_def
 

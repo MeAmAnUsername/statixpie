@@ -5,6 +5,7 @@ imports
   signatures/data-sig
   statics/base
   statics/type
+  statics/util
   statics/func_def
 
 rules

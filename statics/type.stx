@@ -5,6 +5,7 @@ imports
   signatures/data-sig
   signatures/type-sig
   statics/base
+  statics/module
 
 signature
   constructors
