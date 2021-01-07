@@ -165,7 +165,37 @@ rules // Declararing and resolving
     declareModule(s, name, s_mod_tree),
     instantiateModules(s_mod_tree, scopes),
     declareModulesFromTrees(s_mod_tree, sub_modules),
-    try { scopes != [_|[_|_]] } | error $[Duplicate module] @name. // todo: error on all names.
+    declareModulesFromTree_1(scopes).
+
+    // give duplicate name error if list has more than one element
+    declareModulesFromTree_1 : list(scope)
+    declareModulesFromTree_1([]).
+    declareModulesFromTree_1([_]).
+    declareModulesFromTree_1(scopes@[_, _|_]) :-
+      declareModulesFromTree_2s(scopes, scopes).
+
+    // give an error on name of s_mod and set references to all other names from scopes in list
+    declareModulesFromTree_2 : scope * list(scope)
+    declareModulesFromTree_2s maps declareModulesFromTree_2(list(*), *)
+    declareModulesFromTree_2(s_mod, scopes) :- {name}
+      getContext(s_mod, "module_name") == ContextName(name) | error $[BUG: cannot get module name from [s_mod]],
+      false | error $[Duplicate module [name]. Ctrl/Cmd + click to go to duplicate definition.] @name,
+      declareModulesFromTree_3s(declareModulesFromTree_4(scopes, s_mod), name).
+
+    // set a reference from name to s_cur
+    declareModulesFromTree_3 : scope * string
+    declareModulesFromTree_3s maps declareModulesFromTree_3(list(*), *)
+    declareModulesFromTree_3(s_cur, ref_name) :- {cur_name}
+      getContext(s_cur, "module_name") == ContextName(cur_name) | error $[BUG: cannot get module name from [s_cur]],
+      @ref_name.ref := cur_name.
+    
+    // filter scope from list of scopes
+    // assumes that scope only occurs once.
+    declareModulesFromTree_4 : list(scope) * scope -> list(scope)
+    declareModulesFromTree_4([], _) = [].
+    declareModulesFromTree_4([s_mod|rest], s_mod) = rest.
+    declareModulesFromTree_4([s    |rest], s_mod) = [s|declareModulesFromTree_4(rest, s_mod)] :-
+      s != s_mod.
 
   /**
    * declareModule(s, name, s_mod)
