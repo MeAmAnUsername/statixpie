@@ -20,7 +20,13 @@ context-free sorts
   Start
   ModuleStmt
   Module
-  Import
+  ImportStmt
+  ImportListElement
+  ImportSubModule
+  SubModule
+  ImportFinalElement
+  ImportFinalSubModule
+  FinalSubModule
   Def
 
 context-free start-symbols
@@ -31,21 +37,43 @@ context-free start-symbols
   Exp
   DataDef
   Type
-  Import
+  ImportStmt
 
 context-free syntax
 
   Start.Program =
   <<ModuleStmt>
 
-  <{Import "\n"}*>
+  <{ImportStmt "\n"}*>
 
   <{Def "\n"}*>>
 
+  // Module statement
   ModuleStmt.ModuleStmt = <module <Module>>
   Module.Module = <<ModuleList><MODID>> // split up to give error on name only
 
-  Import.Import = <import <ModuleList><MODID>>
+  // Imports
+  ImportStmt.ImportStmt = <import <{ImportListElement ":"}+>:<ImportFinalElement>>
 
+  ImportListElement.SingleElement = <<MODID>>
+  ImportListElement.MultiElement = <{<{ImportSubModule ", "}+>}>
+
+  ImportSubModule.NoRename = <<SubModule>>
+  ImportSubModule.Rename = <<SubModule> as <SubModule>>
+
+  SubModule.SubModule = <<{MODID ":"}+>>
+
+
+  ImportFinalElement.SingleFinalElement = <<ANYID>>
+  ImportFinalElement.SingleFinalRename = <<ANYID> as <FinalSubModule>>
+  ImportFinalElement.MultiFinalElement = <{<{ImportFinalSubModule ", "}+>}>
+
+  ImportFinalSubModule.FinalNoRename = <<FinalSubModule>>
+  ImportFinalSubModule.FinalRename = <<FinalSubModule> as <FinalSubModule>>
+
+  FinalSubModule.SingleName = <<ANYID>>
+  FinalSubModule.FinalSubModule = <<SubModule>:<ANYID>>
+
+  // Definitions
   Def = DataDef
   Def = FuncDef

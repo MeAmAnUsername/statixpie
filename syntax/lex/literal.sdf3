@@ -7,6 +7,7 @@ lexical sorts
   VALID
   MODID
   FUNCID
+  ANYID
   JAVAFUNCID
   INT
 
@@ -24,6 +25,7 @@ lexical syntax // Identifier
   MODID      = ID
   FUNCID     = VALID
   JAVAFUNCID = VALID
+  ANYID      = ID // any ID, used for imports because they can import anything
 
 lexical restrictions
 

@@ -1,51 +1,80 @@
 module import_syntax
 language statixpie
-start symbol Import
+start symbol ImportStmt
 
 test missing import statement [[ ]] parse fails
 test import statement missing layout [[ importtest ]] parse fails
 test import statement layout in keyword [[ imp ort test ]] parse fails
 test import statement missing name [[ import ]] parse fails
-test import statement no nesting [[import example]]
+test import statement no nesting [[import example]] parse fails
 test import statement nested 1 [[import example:sub]]
 test import statement nested 2 [[import example:sub:subb]]
 test import statement nested many [[import example:sub:subb:foo:bar:very:deeply:nested:import]]
 test import statement nesting duplicate name [[import example:example]]
 
-test import statement number in name [[import example1]]
-test import statement underscore in name [[import example_test]]
-test import statement dash in name [[import example-test]]
-test import statement capital in name [[import exampleTest]]
-test import statement start with capital [[import Example]]
-test import statement ALL_CAPS [[import EXAMPLE]]
-test import statement snake_Camel case [[import example_Test]]
-test import statement ` in name [[import example`test]] parse fails
-test import statement ~ in name [[import example~test]] parse fails
-test import statement ! in name [[import example!test]] parse fails
-test import statement @ in name [[import example@test]] parse fails
-test import statement # in name [[import example#test]] parse fails
-test import statement $ in name [[import example$test]] parse fails
-test import statement % in name [[import example%test]] parse fails
-test import statement ^ in name [[import example^test]] parse fails
-test import statement & in name [[import example&test]] parse fails
-test import statement * in name [[import example*test]] parse fails
-test import statement ( in name [[import example(test]] parse fails
-test import statement ) in name [[import example)test]] parse fails
-test import statement + in name [[import example+test]] parse fails
-test import statement = in name [[import example=test]] parse fails
-test import statement open square bracket in name [[import example[test]] parse fails
-test import statement closing square bracket in name [[import example]test]] parse fails
-test import statement { in name [[import example{test]] parse fails
-test import statement } in name [[import example}test]] parse fails
-test import statement ; in name [[import example;test]] parse fails
+test import statement number in name [[import example:example1]]
+test import statement underscore in name [[import example:example_test]]
+test import statement dash in name [[import example:example-test]]
+test import statement capital in name [[import example:exampleTest]]
+test import statement start with capital [[import example:Example]]
+test import statement ALL_CAPS [[import example:EXAMPLE]]
+test import statement snake_Camel case [[import example:example_Test]]
+test import statement ` in name [[import example:example`test]] parse fails
+test import statement ~ in name [[import example:example~test]] parse fails
+test import statement ! in name [[import example:example!test]] parse fails
+test import statement @ in name [[import example:example@test]] parse fails
+test import statement # in name [[import example:example#test]] parse fails
+test import statement $ in name [[import example:example$test]] parse fails
+test import statement % in name [[import example:example%test]] parse fails
+test import statement ^ in name [[import example:example^test]] parse fails
+test import statement & in name [[import example:example&test]] parse fails
+test import statement * in name [[import example:example*test]] parse fails
+test import statement ( in name [[import example:example(test]] parse fails
+test import statement ) in name [[import example:example)test]] parse fails
+test import statement + in name [[import example:example+test]] parse fails
+test import statement = in name [[import example:example=test]] parse fails
+test import statement open square bracket in name [[import example:example[test]] parse fails
+test import statement closing square bracket in name [[import example:example]test]] parse fails
+test import statement { in name [[import example:example{test]] parse fails
+test import statement } in name [[import example:example}test]] parse fails
+test import statement ; in name [[import example:example;test]] parse fails
 test import statement empty name [[import example:sub1::sub3]] parse fails
-test import statement name equals "import" [[import import]]
-test import statement name equals "module" [[import module]]
-test allow non-layout after non-keyword import [[import importtest]]
-test import statement name equals "int" [[import int]]
-test import statement start with number [[import 123test]] parse fails
+test import statement name equals "import" [[import example:import]]
+test import statement name equals "module" [[import example:module]]
+test allow non-layout after non-keyword import [[import example:importtest]]
+test import statement name equals "int" [[import example:int]]
+test import statement start with number [[import example:123test]] parse fails
 test duplicate import statement  [[
-  import example
-  import test
+  import example:example
+  import example:test
 ]] parse fails
 test import statement closing ; [[import example;]] parse fails
+
+test renaming [[import foo as bar]] parse fails
+test renaming no layout before keyword as [[import fooas bar]] parse fails
+test renaming no layout after keyword as [[import foo asbar]] parse fails
+test renaming layout within keyword as [[import foo a s bar]] parse fails
+test renaming with modulelist [[ import example:foo as bar ]]
+test renaming with modulelist [[ import example:foo as example:bar ]]
+test renaming to modulelist [[ import example as test:foo ]] parse fails
+
+test multi import missing list single element [[import {foo}]] parse fails
+test multi import missing list single element rename [[import {foo as bar}]] parse fails
+test multi import missing list [[import {foo, bar}]] parse fails
+test multi import missing list rename first element [[import {foo as fuz, bar}]] parse fails
+test multi import missing list rename second element [[import {foo, bar as baz}]] parse fails
+test multi import missing list rename all [[import {foo as fuz, bar as baz}]] parse fails
+test multi import [[ import example:{foo, bar} ]]
+test multi import rename first [[ import example:{foo as fuz, bar} ]]
+test multi import rename second [[ import example:{foo, bar as baz} ]]
+test multi import rename both [[ import example:{foo as fuz, bar as baz} ]]
+test multi import renaming with modulelist to nested module [[ import example:{foo as example:foo, bar as example:bar} ]]
+
+// todo: test QualifiedImport
+
+/* todo (in analaysis spt):
+   - test renaming to same name.
+   - `import example:foo as example:foo` warning: no-op
+   - `import example:{foo as example:foo}` warning: no-op
+   - `import example:{foo}` warning: multi-import with single element
+*/
