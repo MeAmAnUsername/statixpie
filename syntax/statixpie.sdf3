@@ -72,7 +72,7 @@ context-free syntax
   ImportFinalSubModule.FinalRename = <<FinalSubModule> as <FinalSubModule>>
 
   FinalSubModule.SingleName = <<ANYID>>
-  FinalSubModule.FinalSubModule = <<SubModule>:<ANYID>>
+  FinalSubModule.FinalSubModule = <<{MODID ":"}+>:<ANYID>>
 
   // Definitions
   Def = DataDef
