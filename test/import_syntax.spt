@@ -70,10 +70,20 @@ test multi import rename second [[ import example:{foo, bar as baz} ]]
 test multi import rename both [[ import example:{foo as fuz, bar as baz} ]]
 test multi import renaming with modulelist to nested module [[ import example:{foo as example:foo, bar as example:bar} ]]
 
-// todo: test QualifiedImport
+test multi import in modulelist [[ import {foo, bar}:compile ]]
+test multi import in modulelist [[ import example:{foo, bar}:compile ]]
+test double multi import [[ import example:{foo, bar}:{fuz, baz}:compile ]]
+test double multi import with end [[ import example:{foo, bar}:{parse, compile} ]]
+test multi import in modulelist rename first [[ import example:{foo as fuz, bar}:prettprint ]]
+test multi import in modulelist rename second [[ import example:{foo, bar as buz}:prettprint ]]
+test multi import in modulelist rename both [[ import example:{foo as fuz, bar as buz}:prettprint ]]
+test multi import in modulelist rename multi list [[ import example:{foo, bar} as wrong:prettprint ]] parse fails
+test nested multi import [[ import example:{foo:{glub, glab}, bar}:prettprint ]] parse fails
+test nested multi import at end [[ import example:{foo:{parse, compile}, prettyprint} ]] parse fails
 
 /* todo (in analaysis spt):
    - test renaming to same name.
+   - `import {foo, bar}:func` warning: no-op
    - `import example:foo as example:foo` warning: no-op
    - `import example:{foo as example:foo}` warning: no-op
    - `import example:{foo}` warning: multi-import with single element
