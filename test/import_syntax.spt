@@ -50,13 +50,13 @@ test duplicate import statement  [[
 ]] parse fails
 test import statement closing ; [[import example;]] parse fails
 
-test renaming [[import foo as bar]] parse fails
+test renaming missing modulelist [[import foo as bar]] parse fails
 test renaming no layout before keyword as [[import fooas bar]] parse fails
 test renaming no layout after keyword as [[import foo asbar]] parse fails
 test renaming layout within keyword as [[import foo a s bar]] parse fails
-test renaming with modulelist [[ import example:foo as bar ]]
-test renaming with modulelist [[ import example:foo as example:bar ]]
-test renaming to modulelist [[ import example as test:foo ]] parse fails
+test renaming [[ import example:foo as bar ]]
+test renaming to modulelist [[ import example:foo as example:bar ]]
+test renaming to modulelist missing modulelist [[ import example as test:foo ]] parse fails
 
 test multi import missing list single element [[import {foo}]] parse fails
 test multi import missing list single element rename [[import {foo as bar}]] parse fails
@@ -65,12 +65,14 @@ test multi import missing list rename first element [[import {foo as fuz, bar}]]
 test multi import missing list rename second element [[import {foo, bar as baz}]] parse fails
 test multi import missing list rename all [[import {foo as fuz, bar as baz}]] parse fails
 test multi import [[ import example:{foo, bar} ]]
+test empty multi import [[ import example:{} ]] parse fails
+test multi import single element [[ import example:{foo} ]]
 test multi import rename first [[ import example:{foo as fuz, bar} ]]
 test multi import rename second [[ import example:{foo, bar as baz} ]]
 test multi import rename both [[ import example:{foo as fuz, bar as baz} ]]
 test multi import renaming with modulelist to nested module [[ import example:{foo as example:foo, bar as example:bar} ]]
 
-test multi import in modulelist [[ import {foo, bar}:compile ]]
+test multi import in modulelist first element [[ import {foo, bar}:compile ]]
 test multi import in modulelist [[ import example:{foo, bar}:compile ]]
 test double multi import [[ import example:{foo, bar}:{fuz, baz}:compile ]]
 test double multi import with end [[ import example:{foo, bar}:{parse, compile} ]]
