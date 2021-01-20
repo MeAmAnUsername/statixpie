@@ -150,7 +150,7 @@ rules // Declararing and resolving
       filter (P* FILE)|INHERIT*
          and { name' :- name' == name }
          min $ < P, $ < FILE, $ < INHERIT
-         and true // todo: set to false to implement overloading between classes
+         and true
           in s |-> occs.
 
   /**
@@ -194,10 +194,10 @@ rules // Declararing and resolving
   resolveData : scope * string -> list((path * (string * scope)))
   resolveData(s, name) = occs :-
     query data
-      filter P* FILE
+      filter P* FILE?
          and { name' :- name' == name }
          min $ < P, $ < FILE
-         and false
+         and true
           in s |-> occs.
 
   /**

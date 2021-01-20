@@ -11,5 +11,6 @@ fixture [[
 ]]
 
 test simple function import [[ import test:[[import]]:[[main]] ]] analysis succeeds  resolve #1  resolve #2
+test simple data import [[ import test:[[import]]:[[Foo]] ]] analysis succeeds  resolve #1  resolve #2
 test simple import undefined submodule [[ import example:main ]] analysis fails
 test simple import undefined final element [[ import test:import:[[nope]] ]] 1 error at #1
