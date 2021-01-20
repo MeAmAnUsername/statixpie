@@ -183,7 +183,7 @@ rules // Declararing and resolving
   declareDataWithoutSettingType : scope * TYPEID * scope
   declareDataWithoutSettingType(s, name, s_data) :-
     {occs} // todo: remove
-//    try { false } | note $[Declare func [name] in [s]: occs=[occs]], // todo: remove
+//    try { false } | note $[Declare data type [name] in [s]: occs=[occs]], // todo: remove
     !data[name, s_data] in s,
     occs@resolveData(s, name) == [_]
       | error $[Duplicate definition of Datatype [name]].
