@@ -241,12 +241,16 @@ rules
 
     // gets the roots of all module trees reachable from s (should be root and file module tree)
     getModuleTreeRoots : scope * BOOLEAN -> list(scope)
-    getModuleTreeRoots(s, TRUE()) = result@getScopes(occs) :-
-      try {false} | note $[DEBUG: getModuleTreeRoots - s: [s]; follow_imports: TRUE(); occs: [occs]; result: [result]], // todo: remove
-      query () filter P* FILE? ROOT? MODULE_TREE_ROOT in s |-> occs.
-    getModuleTreeRoots(s, FALSE()) = result@getScopes(occs) :-
-      {root} try {false} | note $[DEBUG: getModuleTreeRoots - s: [s]; follow_imports: FALSE(); root: [root]; occs: [occs]; result: [result]], // todo: remove
-      query () filter MODULE_TREE_ROOT in root@getRoot(s) |-> occs.
+    getModuleTreeRoots(s, TRUE()) = result@getModuleTreeRoots_1s([root@getRoot(s)|file@getFileIfExists(s)]).
+//      try {false} | note $[DEBUG: getModuleTreeRoots - s: [s]; follow_imports: TRUE(); root: [root]; file: [file]; result: [result]]. // todo: remove
+    getModuleTreeRoots(s, FALSE()) = result@[getModuleTreeRoots_1(root@getRoot(s))].
+//      try {false} | note $[DEBUG: getModuleTreeRoots - s: [s]; follow_imports: FALSE(); root: [root]; result: [result]]. // todo: remove
+
+      // resolve module tree root scope from root / file scope
+      getModuleTreeRoots_1 : scope -> scope
+      getModuleTreeRoots_1s maps getModuleTreeRoots_1(list(*)) = list(*)
+      getModuleTreeRoots_1(s) = s_module_tree_root :-
+        query () filter MODULE_TREE_ROOT in s |-> [(_, s_module_tree_root)].
 
     resolveModuleList_1 : list(scope) * list(MODID) * MODID * ModuleList -> scope
     resolveModuleList_1([], _, last_name, module) = none :- false | error $[Undefined submodule [last_name] in [module]].
@@ -286,6 +290,7 @@ rules
     addRef : (path * scope) * MODID
     addRefs maps addRef(list(*), *)
     addRef((_, s), ref_name) :- {orig_name}
+//      try {false} | note $[DEBUG: addRef - s: [s]; ref_name: [ref_name]; orig_name: [orig_name]] @ref_name, // todo: remove
       getContext(s, "module_name_simple") == ContextName(orig_name),
       @ref_name.ref := orig_name.
 
