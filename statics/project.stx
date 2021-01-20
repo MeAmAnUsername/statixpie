@@ -158,14 +158,22 @@ rules
     // todo: documentation
     declareFuncPair : scope * FUNCID * (FUNCID * TYPE)
     declareFuncPairs maps declareFuncPair(*, *, list(*))
-    declareFuncPair(s, name, (name_node@name, func_ty)) :- declareFuncWithoutSettingType(s, name_node, func_ty).
-    declareFuncPair(s, name, (name', func_ty)) :- declareFunc(s, name, func_ty).
+    declareFuncPair(s, import_name@name, (decl_name@name, func_ty)) :-
+      declareFuncWithoutSettingType(s, decl_name, func_ty),
+      @import_name.ref := decl_name.
+    declareFuncPair(s, name, (name', func_ty)) :-
+      declareFunc(s, name, func_ty),
+      @name.ref := name'.
 
     // todo: documentation
     declareDataPair : scope * TYPEID * (TYPEID * scope)
     declareDataPairs maps declareDataPair(*, *, list(*))
-    declareDataPair(s, name, (name_node@name, s_mod)) :- declareDataWithoutSettingType(s, name_node, s_mod).
-    declareDataPair(s, name, (name', s_mod)) :- declareData(s, name, s_mod).
+    declareDataPair(s, import_name@name, (decl_name@name, s_mod)) :-
+      declareDataWithoutSettingType(s, decl_name, s_mod),
+      @import_name.ref := decl_name.
+    declareDataPair(s, name, (name', s_mod)) :-
+      declareData(s, name, s_mod),
+      @name.ref := name'.
 
     // todo: documentation
     createModuleForScope : list(MODID) * scope -> MODULE
