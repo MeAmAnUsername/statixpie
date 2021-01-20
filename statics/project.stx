@@ -143,12 +143,12 @@ rules
 
   normalizedImportOk : scope * NormalizedImport -> list(MODULE)
   normalizedImportsOk_1 maps normalizedImportOk(*, list(*)) = list(*)
-  normalizedImportOk(s, import@NormalizedImport(Renaming(_, renaming))) =
+  normalizedImportOk(s, import@NormalizedImport(Renaming(imported, renaming))) =
     [MODULE(s_pseudo, submodule)|modules] :- {funcs data mods name}
-    try {false} | note $[DEBUG: normalizedImportOk - s: [s]; import: [import]; renaming: [renaming]; funcs: [funcs]; data: [data]; mods: [mods]; submodule: [submodule]; name: [name]; s_pseudo: [s_pseudo]],
+    try {false} | note $[DEBUG: normalizedImportOk - s: [s]; import: [import]; imported: [imported]; renaming: [renaming]; funcs: [funcs]; data: [data]; mods: [mods]; submodule: [submodule]; name: [name]; s_pseudo: [s_pseudo]],
     resolveImport(s, import) == (funcs, data, mods),
-    reportErrors(funcs, data, mods),
     removeLast(renaming) == (submodule, name),
+    reportErrors(funcs, data, mods, name, imported),
     new s_pseudo,
     s_pseudo -ROOT-> getRoot(s),
     declareFuncPairs(s_pseudo, name, funcs),
@@ -203,5 +203,25 @@ rules
     getData((_, data)) = data.
 
   // todo: documentation
-  reportErrors : list((FUNCID * TYPE)) * list((TYPEID * scope)) * list(scope)
-  reportErrors(_, _, _). // todo
+  // reportErrors(funcs, data, mods, import_name, module)
+  reportErrors : list((FUNCID * TYPE)) * list((TYPEID * scope)) * list(scope) * ANYID * list(MODID)
+  reportErrors([], [], [], name, module) :- false | error $[[name] does not resolve to anything in [module]] @name.
+  reportErrors(funcs, data, mods, name, module) :-
+    checkTooManyFuncs(funcs, name, module),
+    checkTooManyData(data, name, module),
+    checkTooManyMods(mods, name, module).
+
+    checkTooManyFuncs : list((FUNCID * TYPE)) * ANYID * list(MODID)
+    checkTooManyFuncs([], _, _).
+    checkTooManyFuncs([_], _, _).
+    checkTooManyFuncs([_|_], name, module) :- false | error $[Duplicate definition for function [name] in [module]].
+
+    checkTooManyData : list((TYPEID * scope)) * ANYID * list(MODID)
+    checkTooManyData([], _, _).
+    checkTooManyData([_], _, _).
+    checkTooManyData([_|_], name, module) :- false | error $[Duplicate definition for data type [name] in [module]].
+
+    checkTooManyMods : list(scope) * ANYID * list(MODID)
+    checkTooManyMods([], _, _).
+    checkTooManyMods([_], _, _).
+    checkTooManyMods([_|_], name, module) :- false | error $[BUG: multiple definitions for submodule [name] in [module]].
