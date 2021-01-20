@@ -1,0 +1,15 @@
+module import
+language statixpie
+
+fixture [[
+  module test:import
+  
+  [[...]]
+  
+  data Foo = foreign java Foo {}
+  func main() -> int = 0
+]]
+
+test simple import [[ import test:import:main ]] analysis succeeds
+test simple import undefined submodule [[ import example:main ]] analysis fails
+test simple import undefined final element [[ import test:import:nope ]] analysis succeeds // todo: implement errors - analysis fails

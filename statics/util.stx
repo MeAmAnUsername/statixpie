@@ -19,8 +19,43 @@ rules
    */
   getRoot : scope -> scope
   getRoot(s) = s_root :- {occs}
-    query () filter P* ROOT in s |-> occs,
-    occs == [(_, s_root)] | error $[BUG: cannot resolve root scope from [s]. occs: [occs]].
+    query () filter (P|FILE)* ROOT in s |-> occs,
+    occs == [(_, s_root)|_] | error $[BUG: cannot resolve root scope from [s]. occs: [occs]].
+
+  /**
+   * getFile(s)
+   * Get the file scope. The file scope is the scope created by
+   * statics/project!programOk.
+   * Function bodies have a path back to the file scope.
+   */
+  getFile : scope -> scope
+  getFile(s) = s_file :- {file_scopes}
+    file_scopes@getFileIfExists(s) == [s_file]
+      | error $[BUG: cannot resolve file scope from [s]. file_scopes: [file_scopes]].
+
+  // todo: documentation
+  getFileIfExists : scope -> list(scope)
+  getFileIfExists(s) = getScopes(occs) :-
+    query () filter P* FILE in s |-> occs.
+
+  // adds a File edge if a file can be resolved
+  addFileEdgeIfExists : scope * scope
+  addFileEdgeIfExists(s, s_new) :- addFileEdgeIfExists_1(getFileIfExists(s), s_new).
+  
+    addFileEdgeIfExists_1 : list(scope) * scope
+    addFileEdgeIfExists_1([], s_new).
+    addFileEdgeIfExists_1([s_file], s_new) :- s_new -FILE-> s_file.
+    addFileEdgeIfExists_1([s_file|rest@[_|_]], s_new) :- {module}
+      s_new -FILE-> s_file,
+      addFileEdgeIfExists_1(rest, s_new),
+      getContext(s_file, "module_name_qualified") == ContextModule(module) | error $[BUG: cannot get qualified module name from [s_file]],
+      false | error $[resolved multiple file scopes for module [module]].
+
+  // todo: documentation
+  // get the scope from an occurence
+  getScope : (path * scope) -> scope
+  getScopes maps getScope(list(*)) = list(*)
+  getScope((_, s)) = s.
 
   /**
    * expect Exp [exp] to be a subtype of type [expected_ty] in scope [s]
@@ -60,3 +95,16 @@ rules
   appendString : list(string) * string -> list(string)
   appendString([], newStr) = [newStr].
   appendString([str|strs], newStr) = [str|appendString(strs, newStr)].
+
+  // todo: documentation
+  // Returns the last name in the ModuleList.
+  getLast : list(MODID) -> MODID
+  getLast([]) = "<<ERROR>>" :- false | error "BUG: called getLast with empty list".
+  getLast([name]) = name.
+  getLast([_|mods]) = getLast(mods).
+
+  // todo: documentation
+  removeLast : list(string) -> (list(string) * string)
+  removeLast([]) = res :- false | error "BUG: called removeLast with empty list.".
+  removeLast([str]) = ([], str).
+  removeLast([str|strs]) = ([str|rest], last) :- removeLast(strs) == (rest, last).

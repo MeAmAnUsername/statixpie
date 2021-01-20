@@ -15,7 +15,7 @@ signature
     CONTEXT // context values that are saved in the scope graph
 
   relations
-    mod_wip : MODID -> (scope * Module)
+    mod_wip : MODID -> (scope * Module) // todo: remove name (MODID)
     mod : MODID -> scope
     val : VALID -> TYPE
     func : FUNCID -> TYPE
@@ -34,10 +34,12 @@ signature
 signature
   name-resolution
     labels
-      P // Scopes within functions; function scope to file scope.
       INHERIT // Between data scopes
+      P // Scopes within functions
+      FILE // function scope to file scope; from a module tree scope to a file scope
       ROOT // file scope to root scope. Root scope is the project scope.
-      MOD_INSTANCE // from a module tree scope to a file scope
+      MODULE_TREE_ROOT // points to a module tree root. Starts in root scope for
+                       // module structure or file scope for pseudo modules from imports
 
 rules // Logic functions
 
@@ -74,17 +76,26 @@ rules // Declararing and resolving
   // statics/module!declareModule and statics/module!resolveModuleList
 
   /**
-   * Declare a value [name] with type [TYPE] and ValKind [kind] in scope [s]
+   * Declare a value [name] with type [TYPE] and ValKind [kind] in scope [s],
+   * set the type on the value name.
    */
   declareVal : scope * string * TYPE * ValKind
   declareVal(s, name, type, kind) :-
+    declareValWithoutSettingType(s, name, type, kind),
+    @name.type := type.
+
+  /**
+   * Declare a value [name] with type [TYPE] and ValKind [kind] in scope [s],
+   * do not set the type on the value name.
+   */
+  declareValWithoutSettingType : scope * string * TYPE * ValKind
+  declareValWithoutSettingType(s, name, type, kind) :-
     {occs} // todo: remove
 //    try { false } | note $[Declare val [name] in [s]: occs=[occs]], // todo: remove
     !val[name, type] in s,
     @name.kind := kind,
     occs@resolveVal(s, name) == [_]
-      | error $[Duplicate definition of value [name]],
-    @name.type := type.
+      | error $[Duplicate definition of value [name]].
 
   /**
    * Resolve a value [name] in scope [s]
@@ -110,16 +121,25 @@ rules // Declararing and resolving
 
 
   /**
-   * Declare a function [name] with type [TYPE] in scope [s]
+   * Declare a function [name] with type [TYPE] in scope [s], set the type on
+   * the function name.
    */
   declareFunc : scope * string * TYPE
   declareFunc(s, name, type) :-
+    declareFuncWithoutSettingType(s, name, type),
+    @name.type := type.
+
+  /**
+   * Declare a function [name] with type [TYPE] in scope [s], do not set a type
+   * on the function name.
+   */
+  declareFuncWithoutSettingType : scope * string * TYPE
+  declareFuncWithoutSettingType(s, name, type) :-
     {occs} // todo: remove
 //    try { false } | note $[Declare func [name] in [s]: occs=[occs]], // todo: remove
     !func[name, type] in s,
-    occs@resolveFunc(s, name) == [_]
-      | error $[Duplicate definition of function [name]],
-    @name.type := type.
+    occs@resolveFunc(s, name) == [_] | error $[Duplicate definition of function [name]].
+  
 
   /**
    * Resolve a function [name] in scope [s]
@@ -127,9 +147,9 @@ rules // Declararing and resolving
   resolveFunc : scope * string -> list((path * (string * TYPE)))
   resolveFunc(s, name) = occs :-
     query func
-      filter P*|INHERIT*
+      filter (P* FILE)|INHERIT*
          and { name' :- name' == name }
-         min $ < P, $ < INHERIT
+         min $ < P, $ < FILE, $ < INHERIT
          and true // todo: set to false to implement overloading between classes
           in s |-> occs.
 
@@ -148,16 +168,25 @@ rules // Declararing and resolving
 
 
   /**
-   * Declare a datatype [name] with scope [s_data] in scope [s]
+   * Declare a datatype [name] with scope [s_data] in scope [s], set the type
+   * on the data name.
    */
-  declareData : scope * string * scope
+  declareData : scope * TYPEID * scope
   declareData(s, name, s_data) :-
+    declareDataWithoutSettingType(s, name, s_data),
+    @name.type := DataType(s_data).
+
+  /**
+   * Declare a datatype [name] with scope [s_data] in scope [s], do not set the
+   * type on the data name.
+   */
+  declareDataWithoutSettingType : scope * TYPEID * scope
+  declareDataWithoutSettingType(s, name, s_data) :-
     {occs} // todo: remove
 //    try { false } | note $[Declare func [name] in [s]: occs=[occs]], // todo: remove
     !data[name, s_data] in s,
     occs@resolveData(s, name) == [_]
-      | error $[Duplicate definition of Datatype [name]],
-    @name.type := DataType(s_data).
+      | error $[Duplicate definition of Datatype [name]].
 
   /**
    * Resolve data [name] in scope [s] to a list of data scopes
@@ -165,9 +194,9 @@ rules // Declararing and resolving
   resolveData : scope * string -> list((path * (string * scope)))
   resolveData(s, name) = occs :-
     query data
-      filter P*
+      filter P* FILE
          and { name' :- name' == name }
-         min $ < P
+         min $ < P, $ < FILE
          and false
           in s |-> occs.
 
@@ -199,9 +228,9 @@ rules // Declararing and resolving
   getContext : scope * string -> CONTEXT
   getContext(s, name) = context :- {occs}
     query context
-      filter P*
+      filter P* FILE?
          and { name' :- name' == name }
-         min $ < P
+         min $ < P, $ < FILE
          and true
           in s |-> occs,
     occs == [(_, (_, context))],

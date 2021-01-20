@@ -29,7 +29,7 @@ rules
   typeOfFuncHead : scope * FuncHead -> (scope * string * TYPE)
   typeOfFuncHead(s, FuncHead(name, Params(params), out_ty_exp)) = (s_func, name, FuncType(param_tys, out_ty)) :-
     new s_func,
-    s_func -P-> s,
+    s_func -FILE-> s,
     typeOfParams(s, s_func, params) == param_tys,
     typeOf(s, out_ty_exp) == out_ty.
   

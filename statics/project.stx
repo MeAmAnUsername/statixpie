@@ -6,9 +6,19 @@ imports
   signatures/type-sig
   signatures/statixpie-sig
   statics/base
+  statics/util
   statics/module
   statics/data
   statics/func_def
+
+signature
+  sorts
+    Renaming
+    NormalizedImport
+  
+  constructors
+    Renaming : list(string) * list(string) -> Renaming
+    NormalizedImport : Renaming -> NormalizedImport
 
 rules
 
@@ -20,12 +30,13 @@ rules
 
   programOk : scope * Start
   programOk(s_project, Program(ModuleStmt(module@Module(_, name)), imports, defs)) :- {s_mod}
-    // todo imports
     new s_mod,
     s_mod -ROOT-> s_project,
+    s_mod -FILE-> s_mod,
     setContext(s_mod, "module_name_simple", ContextName(name)),
     setContext(s_mod, "module_name_qualified", ContextModule(module)),
     declareWipModule(s_project, s_mod, module),
+    importsOk(s_mod, imports),
     defsOk(s_mod, defs).
 
   defOk : scope * Def
@@ -34,3 +45,163 @@ rules
     funcDefOk(s_mod, funcDef).
   defOk(s_mod, DataDef2Def(dataDef)) :-
     dataDefOk(s_mod, dataDef).
+
+  importsOk : scope * list(ImportStmt)
+  importsOk(s, imports) :- {pseudo_modules flattened}
+//    try { false } | note $[importsOk | imports: [imports]; pseudo_modules: [pseudo_modules]; flattened: [flattened]], // todo remove
+    importsOkSeparate(s, imports) == pseudo_modules,
+    declareModules(s, flattened@flattenModuleList(pseudo_modules)).
+
+    // flattens/concatenates all lists into a single list
+    flattenModuleList : list(list(MODULE)) -> list(MODULE)
+    flattenModuleList([]) = [].
+    flattenModuleList([list|lists]) = concatModuleLists(list, flattenModuleList(lists)).
+
+    // concatenates the two lists
+    concatModuleLists : list(MODULE) * list(MODULE) -> list(MODULE)
+    concatModuleLists([], modules) = modules.
+    concatModuleLists([mod|mods], modules) = [mod|concatModuleLists(mods, modules)].
+
+  importOk : scope * ImportStmt -> list(MODULE)
+  importsOkSeparate maps importOk(*, list(*)) = list(*)
+  importOk(s, import) = pseudo_modules :- {normalized}
+//    try { false } | note $[importOk | import: [import]; normalized: [normalized]; pseudo_modules: [pseudo_modules]], // todo remove
+    normalizeImport(import) == normalized,
+    normalizedImportsOk(s, normalized) == pseudo_modules.
+
+  normalizeImport : ImportStmt -> list(NormalizedImport)
+  normalizeImport(ImportStmt(elements, final)) = normalizedImports :-
+    {renamings final_renamings}
+    {carthesianProduct submodule_carthesianProducts} // todo: remove
+//    try { false } | note $[DEBUG: normalizeImport | elements: [elements]; final: [final]; renamings: [renamings]; final_renamings: [final_renamings]; carthesianProduct: [carthesianProduct]; submodule_carthesianProducts: [submodule_carthesianProducts]; normalizedImports: [normalizedImports]], // todo remove
+    normalizeElements(elements) == renamings,
+    normalizeFinal(final) == final_renamings,
+    renamingingsToNormalizedImports(carthesianProduct@carthesianProduct(submodule_carthesianProducts@carthesianProducts(renamings), final_renamings)) == normalizedImports.
+
+    renamingingToNormalizedImport : Renaming -> NormalizedImport
+    renamingingsToNormalizedImports maps renamingingToNormalizedImport(list(*)) = list(*)
+    renamingingToNormalizedImport(renaming) = NormalizedImport(renaming).
+
+    carthesianProducts : list(list(Renaming)) -> list(Renaming)
+    carthesianProducts([]) = [] :- try {false} | note "BUG?: carthesianProducts called with empty list".
+    carthesianProducts([list|[]]) = list.
+    carthesianProducts([list|lists]) = carthesianProduct(list, carthesianProducts(lists)).
+
+    carthesianProduct : list(Renaming) * list(Renaming) -> list(Renaming)
+    carthesianProduct(renamings_1, renamings_2) =
+      flattenRenamingsLists(concatRenamingsBoth(renamings_1, renamings_2)).
+
+    flattenRenamingsLists : list(list(Renaming)) -> list(Renaming)
+    flattenRenamingsLists([]) = [].
+    flattenRenamingsLists([list|lists]) = concatRenamingsLists(list, flattenRenamingsLists(lists)).
+
+    concatRenamingsLists : list(Renaming) * list(Renaming) -> list(Renaming)
+    concatRenamingsLists([], last) = last.
+    concatRenamingsLists([renaming|renamings], last) = [renaming|concatRenamingsLists(renamings, last)].
+
+    concatRenaming : Renaming * Renaming -> Renaming
+    concatRenamingsSecond maps concatRenaming(*, list(*)) = list(*) // single * list -> list
+    concatRenamingsBoth maps concatRenamingsSecond(list(*), *) = list(*) // list * list -> list(list)
+    concatRenaming(Renaming(name_1, rename_1), Renaming(name_2, rename_2)) =
+      Renaming(concatStringList(name_1, name_2), concatStringList(rename_1, rename_2)).
+
+    concatStringList : list(string) * list(string) -> list(string)
+    concatStringList([], last) = last.
+    concatStringList([str|strs], last) = [str|concatStringList(strs, last)].
+
+  normalizeElement : ImportListElement -> list(Renaming)
+  normalizeElements maps normalizeElement(list(*)) = list(*)
+  normalizeElement(SingleElement(name)) = [Renaming([name], [])].
+  normalizeElement(MultiElement(submodules)) = normalizeSubModules(submodules).
+
+  normalizeSubModule : ImportSubModule -> Renaming
+  normalizeSubModules maps normalizeSubModule(list(*)) = list(*)
+  normalizeSubModule(NoRename(SubModule(mods))) = Renaming(mods, []).
+  normalizeSubModule(Rename(SubModule(mods), SubModule(renames))) = Renaming(mods, renames).
+
+  normalizeFinal : ImportFinalElement -> list(Renaming)
+  normalizeFinal(SingleFinalElement(name)) = [Renaming([name], [name])].
+  normalizeFinal(SingleFinalRename(name, renaming)) = [Renaming([name], finalSubModuleToList(renaming))].
+  normalizeFinal(MultiFinalElement(submodules)) = normalizeFinalSubmodules(submodules).
+
+
+  normalizeFinalSubmodule : ImportFinalSubModule -> Renaming
+  normalizeFinalSubmodules maps normalizeFinalSubmodule(list(*)) = list(*)
+  normalizeFinalSubmodule(FinalNoRename(submodule)) = Renaming(finalSubModuleToList(submodule), [lastNameOf(submodule)]).
+  normalizeFinalSubmodule(FinalRename(submodule, rename)) = Renaming(finalSubModuleToList(submodule), finalSubModuleToList(rename)).
+
+  lastNameOf : FinalSubModule -> ANYID
+  lastNameOf(SingleName(name)) = name.
+  lastNameOf(FinalSubModule(_, name)) = name.
+
+  finalSubModuleToList : FinalSubModule -> list(string)
+  finalSubModuleToList(SingleName(name)) = [name].
+  finalSubModuleToList(FinalSubModule(submodule_names, name)) = appendString(submodule_names, name).
+
+  normalizedImportsOk : scope * list(NormalizedImport) -> list(MODULE)
+  normalizedImportsOk(s, normalized_imports) = flattenModuleList(normalizedImportsOk_1(s, normalized_imports)).
+
+  normalizedImportOk : scope * NormalizedImport -> list(MODULE)
+  normalizedImportsOk_1 maps normalizedImportOk(*, list(*)) = list(*)
+  normalizedImportOk(s, import@NormalizedImport(Renaming(_, renaming))) =
+    [MODULE(s_pseudo, submodule)|modules] :- {funcs data mods name}
+    try {false} | note $[DEBUG: normalizedImportOk - s: [s]; import: [import]; renaming: [renaming]; funcs: [funcs]; data: [data]; mods: [mods]; submodule: [submodule]; name: [name]; s_pseudo: [s_pseudo]],
+    resolveImport(s, import) == (funcs, data, mods),
+    reportErrors(funcs, data, mods),
+    removeLast(renaming) == (submodule, name),
+    new s_pseudo,
+    s_pseudo -ROOT-> getRoot(s),
+    declareFuncPairs(s_pseudo, name, funcs),
+    declareDataPairs(s_pseudo, name, data),
+    createModulesForScopes(renaming, mods) == modules.
+
+    // todo: documentation
+    declareFuncPair : scope * FUNCID * (FUNCID * TYPE)
+    declareFuncPairs maps declareFuncPair(*, *, list(*))
+    declareFuncPair(s, name, (name_node@name, func_ty)) :- declareFuncWithoutSettingType(s, name_node, func_ty).
+    declareFuncPair(s, name, (name', func_ty)) :- declareFunc(s, name, func_ty).
+
+    // todo: documentation
+    declareDataPair : scope * TYPEID * (TYPEID * scope)
+    declareDataPairs maps declareDataPair(*, *, list(*))
+    declareDataPair(s, name, (name_node@name, s_mod)) :- declareDataWithoutSettingType(s, name_node, s_mod).
+    declareDataPair(s, name, (name', s_mod)) :- declareData(s, name, s_mod).
+
+    // todo: documentation
+    createModuleForScope : list(MODID) * scope -> MODULE
+    createModulesForScopes maps createModuleForScope(*, list(*)) = list(*)
+    createModuleForScope(name, s) = MODULE(s, name).
+
+  resolveImport : scope * NormalizedImport -> (
+      list((FUNCID * TYPE))
+      * list((TYPEID * scope))
+      * list(scope)
+    )
+  resolveImport(s, NormalizedImport(Renaming(import, renaming))) = (funcs, data, mods) :-
+    {submodule name s_mod_tree s_mod_files}
+    try {false} | note $[DEBUG: resolveImport - import: [import]; s: [s]; renaming: [renaming]; submodule: [submodule]; name: [name]; s_mod_tree: [s_mod_tree]; s_mod_files: [s_mod_files]; funcs: [funcs]; data: [data]; mods: [mods]], // todo remove
+    removeLast(import) == (submodule, name),
+    resolveModuleList(s, ModuleList(submodule), FALSE()) == s_mod_tree,
+    resolveImportInFile(s_mod_files@moduleTreeScopeToFiles(s_mod_tree, name), name) == (funcs, data),
+    resolveModuleOpt(s_mod_tree, name) == mods.
+
+    resolveImportInFile : list(scope) * ANYID -> (list((FUNCID * TYPE)) * list((TYPEID * scope)))
+    resolveImportInFile([], _) = ([], []).
+    resolveImportInFile([s_mod_file], name) = (funcs, data) :-
+      getFuncs(resolveFunc(s_mod_file, name)) == funcs,
+      getDatas(resolveData(s_mod_file, name)) == data.
+    resolveImportInFile([s_mod_file,_|_], node) = ([], []) :- {name}
+      getModuleName(s_mod_file) == name,
+      false | error $[Cannot resolve import: multiple files declared for [name]] @node.
+      
+    getFunc : (path * (FUNCID * TYPE)) -> (FUNCID * TYPE)
+    getFuncs maps getFunc(list(*)) = list(*)
+    getFunc((_, func)) = func.
+
+    getData : (path * (TYPEID * scope)) -> (TYPEID * scope)
+    getDatas maps getData(list(*)) = list(*)
+    getData((_, data)) = data.
+
+  // todo: documentation
+  reportErrors : list((FUNCID * TYPE)) * list((TYPEID * scope)) * list(scope)
+  reportErrors(_, _, _). // todo
