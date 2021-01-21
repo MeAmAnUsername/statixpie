@@ -14,7 +14,7 @@ rules
   dataDefOk(s, DataDef(DataDefMods(mods), name, super, impl)) :- {s_data}
     dataDefModsOk(mods),
     new s_data,
-    s_data -ROOT-> getRoot(s),
+    !root[getRoot(s)] in s_data,
     declareData(s, name, s_data),
     @name.mods := mods,
     superOk(s, s_data, super, name),

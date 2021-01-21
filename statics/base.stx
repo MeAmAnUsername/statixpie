@@ -24,6 +24,8 @@ signature
     ContextModule : Module -> CONTEXT
 
   relations
+    root : scope
+    file : scope
     mod_wip : MODID -> (scope * Module) // todo: remove name (MODID)
     mod : MODID -> scope
     val : VALID -> TYPE
@@ -35,9 +37,8 @@ signature
   name-resolution
     labels
       INHERIT // Between data scopes
-      P // Scopes within functions
-      FILE // function scope to file scope; from a module tree scope to a file scope
-      ROOT // file scope to root scope. Root scope is the project scope.
+      P // Scopes within functions, functions to file, files to root
+      FILE // module tree scope to file scope
       MODULE_TREE_ROOT // points to a module tree root. Starts in root scope for
                        // module structure or file scope for pseudo modules from imports
 
@@ -146,9 +147,9 @@ rules // Declararing and resolving
   resolveFunc : scope * string -> list((path * (string * TYPE)))
   resolveFunc(s, name) = occs :-
     query func
-      filter (P* FILE?)|INHERIT*
+      filter P*|INHERIT*
          and { name' :- name' == name }
-         min $ < FILE, $ < INHERIT
+         min $ < INHERIT
          and true
           in s |-> occs.
 
@@ -193,10 +194,9 @@ rules // Declararing and resolving
   resolveData : scope * string -> list((path * (string * scope)))
   resolveData(s, name) = occs :-
     query data
-      filter P* FILE?
+      filter P*
          and { name' :- name' == name }
-         min $ < FILE
-         and true
+         min and false
           in s |-> occs.
 
   /**
@@ -227,10 +227,9 @@ rules // Declararing and resolving
   getContext : scope * string -> CONTEXT
   getContext(s, name) = context :- {occs}
     query context
-      filter P* FILE?
+      filter P*
          and { name' :- name' == name }
-         min $ < P, $ < FILE
-         and true
+         min and false
           in s |-> occs,
     occs == [(_, (_, context))],
     try { occs != [] } | error $[cannot get context value [name] in [s]].

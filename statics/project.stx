@@ -24,15 +24,15 @@ rules
 
   projectOk : scope
   projectOk(s_root) :- 
-    s_root -ROOT-> s_root,
+    !root[s_root] in s_root,
     declareDeduplicatedModules(s_root).
     // todo: create scopes for built-in types
 
   programOk : scope * Start
   programOk(s_project, Program(ModuleStmt(module@Module(_, name)), imports, defs)) :- {s_mod}
     new s_mod,
-    s_mod -ROOT-> s_project,
-    s_mod -FILE-> s_mod,
+    s_mod -P-> s_project,
+    !file[s_mod] in s_mod,
     setContext(s_mod, "module_name_simple", ContextName(name)),
     setContext(s_mod, "module_name_qualified", ContextModule(module)),
     declareWipModule(s_project, s_mod, module),
@@ -150,7 +150,7 @@ rules
     removeLast(renaming) == (submodule, name),
     reportErrors(funcs, data, mods, name, imported),
     new s_pseudo, // todo: move scope creation to declareFuncsAndData?
-    s_pseudo -ROOT-> getRoot(s),
+    !root[getRoot(s)] in s_pseudo,
     declareFuncsAndData(s, s_pseudo, submodule, name, funcs, data),
     createModulesForScopes(renaming, mods) == modules.
 

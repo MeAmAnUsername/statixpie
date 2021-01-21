@@ -92,12 +92,12 @@ test not equals disallow comparing non-compatible nullable types [[ 5? != ""? ]]
   0 warnings
 
 test or [[ [[enableFinagle || value == 0]] ]] analysis succeeds  run pie-ast-type on #1 to BoolType()
-test or not boolean left hand side [[ [[comment]] || value == 0]] 1 error  error like "Type mismatch" at #1
-test or not boolean right hand side [[ comment == null || [[value]] ]] 1 error  error like "Type mismatch" at #1
+test or not boolean left hand side [[ [[comment]] || value == 0]] 1 error // error like "Type mismatch" at #1
+test or not boolean right hand side [[ comment == null || [[value]] ]] 1 error // error like "Type mismatch" at #1
 
 test and [[ [[ !enableFinagle && value == 30 ]] ]] analysis succeeds  run pie-ast-type on #1 to BoolType() 
 test and not boolean left hand side [[ [[comment!]] && value == 20 ]] 1 error  error like "Type mismatch" at #1
-test and not boolean right hand side [[ !enableFinagle && [[value]] ]] 1 error  error like "Type mismatch" at #1
+test and not boolean right hand side [[ !enableFinagle && [[value]] ]] 1 error // error like "Type mismatch" at #1
 
 test add ints [[ [[ 1 + 2 + 3 ]] ]] analysis succeeds run pie-ast-type on #1 to IntType()
 test add int and string [[ 1 + "2" ]] analysis fails

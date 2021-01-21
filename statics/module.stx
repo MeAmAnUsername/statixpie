@@ -110,13 +110,13 @@ rules
   declareModulesFromTrees maps declareModulesFromTree(*, list(*))
   declareModulesFromTree(s, ModuleTreeRoot(root_scopes, sub_modules)) :- {s_tree_root}
     new s_tree_root,
-    s_tree_root -ROOT-> getRoot(s),
+    !root[getRoot(s)] in s_tree_root,
     s -MODULE_TREE_ROOT-> s_tree_root,
     declareModuleInstances(s_tree_root, root_scopes),
     declareModulesFromTrees(s_tree_root, sub_modules).
   declareModulesFromTree(s, ModuleTreeNode(name, scopes, sub_modules)) :- {s_mod_tree}
     new s_mod_tree,
-    s_mod_tree -ROOT-> getRoot(s),
+    !root[getRoot(s)] in s_mod_tree,
     declareModule(s, name, s_mod_tree),
     setContext(s_mod_tree, "module_name_simple", ContextName(name)),
     declareModuleInstances(s_mod_tree, scopes),
