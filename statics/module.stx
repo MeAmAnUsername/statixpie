@@ -27,8 +27,8 @@ rules
    * The modules are deduplicated in statics/project.stx!projectOk.
    */
   declareWipModule : scope * scope * Module
-  declareWipModule(s_project, s_mod, module@Module(_, name)) :-
-    !mod_wip[name, (s_mod, module)] in s_project.
+  declareWipModule(s_project, s_mod, module) :-
+    !mod_wip[MODULE(s_mod, moduleToList(module))] in s_project.
 
   /**
    * declareDeduplicatedModules(s_root)
@@ -39,12 +39,12 @@ rules
   declareDeduplicatedModules : scope
   declareDeduplicatedModules(s) :- {occs}
     query mod_wip filter e in s |-> occs,
-    declareModules(s, mod_wipToModules(occs)).
+    declareModules(s, getWipModules(occs)).
 
   // todo: documentation
-  mod_wipToModule : (path * (string * (scope * Module))) -> MODULE
-  mod_wipToModules maps mod_wipToModule(list(*)) = list(*)
-  mod_wipToModule((_, (_, (s_mod, mod)))) = MODULE(s_mod, moduleToList(mod)).
+  getWipModule : (path * MODULE) -> MODULE
+  getWipModules maps getWipModule(list(*)) = list(*)
+  getWipModule((_, module)) = module.
 
   // todo: documentation
   declareModules : scope * list(MODULE)
