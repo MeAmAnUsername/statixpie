@@ -149,11 +149,21 @@ rules
     resolveImport(s, import) == (funcs, data, mods),
     removeLast(renaming) == (submodule, name),
     reportErrors(funcs, data, mods, name, imported),
-    new s_pseudo,
+    new s_pseudo, // todo: move scope creation to declareFuncsAndData?
     s_pseudo -ROOT-> getRoot(s),
-    declareFuncPairs(s_pseudo, name, funcs),
-    declareDataPairs(s_pseudo, name, data),
+    declareFuncsAndData(s, s_pseudo, submodule, name, funcs, data),
     createModulesForScopes(renaming, mods) == modules.
+
+    // declareFuncsAndData(s, s_pseudo, submodule, name, funcs, data)
+    // Declare in s or s_pseudo depending on whether submodule is empty
+    declareFuncsAndData : scope * scope * list(MODID) * ANYID * list((FUNCID * TYPE)) * list((TYPEID * scope))
+    declareFuncsAndData(_, s, [], name, funcs, data) :-
+      // todo: replace with declareFuncsAndData(s, _, ...)
+      declareFuncPairs(s, name, funcs),
+      declareDataPairs(s, name, data).
+    declareFuncsAndData(_, s_pseudo, [_|_], name, funcs, data) :-
+      declareFuncPairs(s_pseudo, name, funcs),
+      declareDataPairs(s_pseudo, name, data).
 
     // todo: documentation
     declareFuncPair : scope * FUNCID * (FUNCID * TYPE)

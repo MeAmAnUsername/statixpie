@@ -14,3 +14,6 @@ test simple function import [[ import test:[[import]]:[[main]] ]] analysis succe
 test simple data import [[ import test:[[import]]:[[Foo]] ]] analysis succeeds  resolve #1  resolve #2
 test simple import undefined submodule [[ import example:main ]] analysis fails
 test simple import undefined final element [[ import test:import:[[nope]] ]] 1 error at #1
+
+// todo: test that declared import actual works
+test simple renaming function import [[ import test:[[import]]:[[main]] as func ]] analysis succeeds // todo: fix renaming - analysis succeeds  resolve #1  resolve #2
