@@ -106,8 +106,7 @@ rules // Declararing and resolving
     query val
       filter P*
          and { name' :- name' == name }
-         min $ < P
-         and false 
+         min and false
           in s |-> occs.
 
   resolveUniqueVal : scope * string -> TYPE
@@ -147,9 +146,9 @@ rules // Declararing and resolving
   resolveFunc : scope * string -> list((path * (string * TYPE)))
   resolveFunc(s, name) = occs :-
     query func
-      filter (P* FILE)|INHERIT*
+      filter (P* FILE?)|INHERIT*
          and { name' :- name' == name }
-         min $ < P, $ < FILE, $ < INHERIT
+         min $ < FILE, $ < INHERIT
          and true
           in s |-> occs.
 
@@ -196,7 +195,7 @@ rules // Declararing and resolving
     query data
       filter P* FILE?
          and { name' :- name' == name }
-         min $ < P, $ < FILE
+         min $ < FILE
          and true
           in s |-> occs.
 
