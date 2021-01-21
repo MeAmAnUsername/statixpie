@@ -14,14 +14,6 @@ signature
     BOOLEAN // For logic in this statix spec.
     CONTEXT // context values that are saved in the scope graph
 
-  relations
-    mod_wip : MODID -> (scope * Module) // todo: remove name (MODID)
-    mod : MODID -> scope
-    val : VALID -> TYPE
-    func : FUNCID -> TYPE
-    data : TYPEID -> scope
-    context : string -> CONTEXT
-
   constructors
     InputValKind : ValKind
     LocalValKind : ValKind
@@ -30,6 +22,14 @@ signature
     ContextType : TYPE -> CONTEXT
     ContextName : string -> CONTEXT
     ContextModule : Module -> CONTEXT
+
+  relations
+    mod_wip : MODID -> (scope * Module) // todo: remove name (MODID)
+    mod : MODID -> scope
+    val : VALID -> TYPE
+    func : FUNCID -> TYPE
+    data : TYPEID -> scope
+    context : string -> CONTEXT
 
 signature
   name-resolution
