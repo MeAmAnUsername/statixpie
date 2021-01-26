@@ -39,6 +39,7 @@ test simple import undefined final element [[
    resolve #1
    error like "does not resolve" at #2
 
+// simple imports with renaming
 test simple renaming function import [[
   import test:[[import]]:[[main]] as [[func]]
   func test() -> int = [[func]]()
