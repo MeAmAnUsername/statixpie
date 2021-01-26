@@ -213,17 +213,6 @@ rules // Declararing and resolving
     @import_name.ref := decl_name.
 
   /**
-   * Resolve data [name] in scope [s] to a list of data scopes
-   */
-  resolveData : scope * string -> list((path * (string * scope)))
-  resolveData(s, name) = occs :-
-    query data
-      filter (P* (MODULE_TREE_ROOT FILE)?) | FILE?
-         and { name' :- name' == name }
-         min and false
-          in s |-> occs.
-
-  /**
    * resolveDataInFileOnly(s, name)
    * Resolve data [name] in scope [s] to a list of data scopes.
    * Does not resolve to imported data (used when declaring imports to avoid
@@ -233,6 +222,17 @@ rules // Declararing and resolving
   resolveDataInFileOnly(s, name) = occs :-
     query data
       filter P*
+         and { name' :- name' == name }
+         min and false
+          in s |-> occs.
+
+  /**
+   * Resolve data [name] in scope [s] to a list of data scopes
+   */
+  resolveData : scope * string -> list((path * (string * scope)))
+  resolveData(s, name) = occs :-
+    query data
+      filter (P* (MODULE_TREE_ROOT FILE)?) | FILE?
          and { name' :- name' == name }
          min and false
           in s |-> occs.
