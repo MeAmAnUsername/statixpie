@@ -29,8 +29,15 @@ test simple data import [[
    resolve #2 to #3
    error like "Duplicate definition" at #2
    error like "Duplicate definition" at #3
-test simple import undefined submodule [[ import example:main ]] analysis fails
-test simple import undefined final element [[ import test:import:[[nope]] ]] analysis fails
+test simple import undefined submodule [[
+  import [[example]]:main
+]] analysis fails
+   error like "Undefined submodule" at #1
+test simple import undefined final element [[
+  import test:[[import]]:[[nope]]
+]] analysis fails
+   resolve #1
+   error like "does not resolve" at #2
 
 test simple renaming function import [[
   import test:[[import]]:[[main]] as [[func]]
