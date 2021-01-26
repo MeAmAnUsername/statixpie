@@ -16,7 +16,7 @@ fixture [[
 test simple function import [[
   import test:[[import]]:[[foo]]
   func [[foo]]() -> int = 0
-]] analysis fails
+]] 2 errors at #2, #3
    resolve #1
    resolve #2 to #3
    error like "Duplicate function" at #2
@@ -39,6 +39,10 @@ test simple renaming function import [[
    resolve #1
    resolve #2
    resolve #4 to #3
+test simple renaming function duplicate name [[
+  import test:import:main as [[func]]
+  import test:import:main as [[func]]
+]] 2 errors at #1, #2
 test simple renaming data import [[
   import test:[[import]]:[[Foo]] as [[Bar]]
   func test(foo: [[Bar]]) -> int = 4

@@ -22,6 +22,7 @@ rules
   funcDefOk(s_mod, func@FuncDef(func_head, impl)) :- {name s_func out_ty impl_kind ty}
     typeOfFuncHead(s_mod, func_head) == (s_func, name, ty@FuncType(_, out_ty)),
     declareFunc(s_mod, name, ty),
+    declareLocalFunc(s_mod, name, ty),
     funcImplOk(s_func, impl, out_ty) == impl_kind,
     @func.kind := impl_kind,
     @func.type := ty.

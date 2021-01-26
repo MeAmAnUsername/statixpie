@@ -51,6 +51,7 @@ rules
    * Expect Exps [exps] to have types [tys]. This version passes along scopes from one expression to the next.
    * Also takes a string argument [err], this will be used for the error message in case two lists have different lengths.
    */
+  // todo: remove message
   expectSubtypesPassScopes : scope * list(Exp) * list(TYPE) * string -> scope
   expectSubtypesPassScopes(s, [], [], _) = s.
   expectSubtypesPassScopes(s1, [exp | exps], [ty | tys], err) = s3 :- {s2}

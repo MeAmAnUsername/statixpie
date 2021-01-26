@@ -145,17 +145,25 @@ rules
   normalizedImportsOk_1 maps normalizedImportOk(*, list(*)) = list(*)
   normalizedImportOk(s, import@NormalizedImport(Renaming(imported, renaming))) =
     [MODULE(s_pseudo, submodule)|modules] :- {funcs data mods name import_name}
-    try {false} | note $[DEBUG: normalizedImportOk - s: [s]; import: [import]; imported: [imported]; renaming: [renaming]; funcs: [funcs]; data: [data]; mods: [mods]; submodule: [submodule]; name: [name]; import_name: [import_name]; s_pseudo: [s_pseudo]],
+    try {false} | note $[DEBUG: normalizedImportOk - s: [s]; import: [import]; imported: [imported]; renaming: [renaming]; funcs: [funcs]; data: [data]; mods: [mods]; import_name: [import_name]; submodule: [submodule]; name: [name]; s_pseudo: [s_pseudo]],
     resolveImport(s, import) == (funcs, data, mods),
-    removeLast(renaming) == (submodule, name),
     removeLast(imported) == (_, import_name),
+    removeLast(renaming) == (submodule, name),
     reportErrors(funcs, data, mods, import_name, imported),
-    new s_pseudo, // todo: rename to s_import_tree
+    new s_pseudo, // todo: rename to s_import_tree; move to declareFuncsAndData?
     !root[getRoot(s)] in s_pseudo,
-    s_pseudo -FILE-> s,
-    declareFuncImports(s_pseudo, name, import_name, funcs),
-    declareDataImports(s_pseudo, name, import_name, data),
+    declareFuncsAndData(s, s_pseudo, submodule, import_name, name, funcs, data),
     createModulesForScopes(renaming, mods) == modules.
+
+    // declareFuncsAndData(s, s_pseudo, submodule, import_name, rename, funcs, data)
+    // Declare in s or s_pseudo depending on whether submodule is empty
+    declareFuncsAndData : scope * scope * list(MODID) * ANYID * ANYID * list((FUNCID * TYPE)) * list((TYPEID * scope))
+    declareFuncsAndData(s, _, [], import_name, rename, funcs, data) :-
+      declareFuncImports(s, rename, import_name, funcs),
+      declareDataImports(s, rename, import_name, data).
+    declareFuncsAndData(_, s_pseudo, [_|_], import_name, rename, funcs, data) :-
+      declareFuncImports(s_pseudo, rename, import_name, funcs),
+      declareDataImports(s_pseudo, rename, import_name, data).
 
     // todo: documentation
     createModuleForScope : list(MODID) * scope -> MODULE
@@ -178,8 +186,8 @@ rules
     resolveImportInFile : list(scope) * ANYID -> (list((FUNCID * TYPE)) * list((TYPEID * scope)))
     resolveImportInFile([], _) = ([], []).
     resolveImportInFile([s_mod_file], name) = (funcs, data) :-
-      getFuncs(resolveFuncInFileOnly(s_mod_file, name)) == funcs,
-      getDatas(resolveDataInFileOnly(s_mod_file, name)) == data.
+      getFuncs(resolveLocalFunc(s_mod_file, name)) == funcs,
+      getDatas(resolveLocalData(s_mod_file, name)) == data.
     resolveImportInFile([s_mod_file,_|_], node) = ([], []) :- {name}
       getModuleName(s_mod_file) == name,
       false | error $[Cannot resolve import: multiple files declared for [name]] @node.

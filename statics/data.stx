@@ -16,6 +16,7 @@ rules
     new s_data,
     !root[getRoot(s)] in s_data,
     declareData(s, name, s_data),
+    declareLocalData(s, name, s_data),
     @name.mods := mods,
     superOk(s, s_data, super, name),
     dataImplOk(s, s_data, impl).
