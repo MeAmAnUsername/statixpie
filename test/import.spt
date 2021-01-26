@@ -43,6 +43,8 @@ test simple renaming function duplicate name [[
   import test:import:main as [[func]]
   import test:import:main as [[func]]
 ]] 2 errors at #1, #2
+   error like "Duplicate function" at #1
+   error like "Duplicate function" at #2
 test simple renaming data import [[
   import test:[[import]]:[[Foo]] as [[Bar]]
   func test(foo: [[Bar]]) -> int = 4
@@ -50,9 +52,13 @@ test simple renaming data import [[
    resolve #1
    resolve #2
    resolve #4 to #3
+test simple renaming data duplicate name [[
+  import test:import:Foo as [[Bar]]
+  import test:import:Foo as [[Bar]]
+]] 2 errors at #1, #2
+   error like "Duplicate definition" at #1
+   error like "Duplicate definition" at #2
 
-
-// todo: check duplicate def error on func
 /* todo:
    - test renaming to same name.
    - `import {foo, bar}:func` warning: no-op
