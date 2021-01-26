@@ -82,11 +82,3 @@ test multi import in modulelist rename both [[ import example:{foo as fuz, bar a
 test multi import in modulelist rename multi list [[ import example:{foo, bar} as wrong:prettprint ]] parse fails
 test nested multi import [[ import example:{foo:{glub, glab}, bar}:prettprint ]] parse fails
 test nested multi import at end [[ import example:{foo:{parse, compile}, prettyprint} ]] parse fails
-
-/* todo (in analaysis spt):
-   - test renaming to same name.
-   - `import {foo, bar}:func` warning: no-op
-   - `import example:foo as example:foo` warning: no-op
-   - `import example:{foo as example:foo}` warning: no-op
-   - `import example:{foo}` warning: multi-import with single element
-*/

@@ -168,31 +168,52 @@ rules // Declararing and resolving
 
 
   /**
+   * declareData(s, name, s_data)
    * Declare a datatype [name] with scope [s_data] in scope [s], set the type
    * on the data name.
    */
   declareData : scope * TYPEID * scope
   declareData(s, name, s_data) :-
-    declareDataWithoutSettingType(s, name, s_data),
-    @name.type := DataType(s_data).
-
-  /**
-   * Declare a datatype [name] with scope [s_data] in scope [s], do not set the
-   * type on the data name.
-   */
-  declareDataWithoutSettingType : scope * TYPEID * scope
-  declareDataWithoutSettingType(s, name, s_data) :-
     {occs} // todo: remove
 //    try { false } | note $[Declare data type [name] in [s]: occs=[occs]], // todo: remove
     !data[name, s_data] in s,
     occs@resolveData(s, name) == [_]
-      | error $[Duplicate definition of Datatype [name]].
+      | error $[Duplicate definition of Datatype [name]] @name,
+    @name.type := DataType(s_data).
+
+  /**
+   * declareDataImport(s, decl_name, s_data, import_name)
+   * Declare a datatype [decl_name] with scope [s_data] in scope [s].
+   * Set reference and type on [import_name].
+   */
+  declareDataImport : scope * TYPEID * TYPEID * (TYPEID * scope)
+  declareDataImports maps declareDataImport(*, *, *, list(*))
+  declareDataImport(s, import_as_name, import_name, (decl_name, s_data)) :-
+    !data[import_as_name, s_data] in s,
+    resolveData(s, import_as_name) == [_]
+      | error $[Duplicate definition of Datatype [import_as_name]] @import_as_name,
+    @import_as_name.type := DataType(s_data),
+    @import_name.ref := decl_name.
 
   /**
    * Resolve data [name] in scope [s] to a list of data scopes
    */
   resolveData : scope * string -> list((path * (string * scope)))
   resolveData(s, name) = occs :-
+    query data
+      filter (P* (MODULE_TREE_ROOT FILE)?) | FILE?
+         and { name' :- name' == name }
+         min and false
+          in s |-> occs.
+
+  /**
+   * resolveDataInFileOnly(s, name)
+   * Resolve data [name] in scope [s] to a list of data scopes.
+   * Does not resolve to imported data (used when declaring imports to avoid
+   * circular dependencies).
+   */
+  resolveDataInFileOnly : scope * string -> list((path * (string * scope)))
+  resolveDataInFileOnly(s, name) = occs :-
     query data
       filter P*
          and { name' :- name' == name }
