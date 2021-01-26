@@ -39,6 +39,14 @@ test simple renaming function import [[
    resolve #1
    resolve #2
    resolve #4 to #3
+test simple renaming data import [[
+  import test:[[import]]:[[Foo]] as [[Bar]]
+  func test(foo: [[Bar]]) -> int = 4
+]] analysis succeeds
+   resolve #1
+   resolve #2
+   resolve #4 to #3
+
 
 // todo: check duplicate def error on func
 /* todo:
