@@ -7,7 +7,7 @@ fixture [[
   [[...]]
   
   data Foo = foreign java Foo {}
-//  func main() -> int = 0
+  func main() -> int = 0
 ]]
 
 // simple imports without renaming.
@@ -18,10 +18,10 @@ test simple function import [[
   func [[foo]]() -> int = 0
 ]]
   analysis fails
-//  resolve #1
-//  resolve #2 to #3
-//  error like "Duplicate function" at #2
-//  error like "Duplicate function" at #3
+  resolve #1
+  resolve #2 to #3
+  error like "Duplicate function" at #2
+  error like "Duplicate function" at #3
 test simple data import [[
   import test:[[import]]:[[Bar]]
   data [[Bar]] = foreign java Bar {}
@@ -35,7 +35,7 @@ test simple import undefined submodule [[ import example:main ]] analysis fails
 test simple import undefined final element [[ import test:import:[[nope]] ]] analysis fails
 
 // todo: test that declared import actual works
-test simple renaming function import [[ import test:[[import]]:[[main]] as func ]] analysis succeeds // todo: fix renaming - analysis succeeds  resolve #1  resolve #2
+test simple renaming function import [[ import test:[[import]]:[[main]] as func ]] analysis succeeds  resolve #1  resolve #2
 
 // todo: check duplicate def error on func
 /* todo:

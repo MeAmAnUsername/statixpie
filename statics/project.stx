@@ -145,49 +145,17 @@ rules
   normalizedImportsOk_1 maps normalizedImportOk(*, list(*)) = list(*)
   normalizedImportOk(s, import@NormalizedImport(Renaming(imported, renaming))) =
     [MODULE(s_pseudo, submodule)|modules] :- {funcs data mods name import_name}
-    try {false} | note $[DEBUG: normalizedImportOk - s: [s]; import: [import]; imported: [imported]; renaming: [renaming]; funcs: [funcs]; data: [data]; mods: [mods]; submodule: [submodule]; name: [name]; s_pseudo: [s_pseudo]],
+    try {false} | note $[DEBUG: normalizedImportOk - s: [s]; import: [import]; imported: [imported]; renaming: [renaming]; funcs: [funcs]; data: [data]; mods: [mods]; submodule: [submodule]; name: [name]; import_name: [import_name]; s_pseudo: [s_pseudo]],
     resolveImport(s, import) == (funcs, data, mods),
     removeLast(renaming) == (submodule, name),
-    reportErrors(funcs, data, mods, name, imported),
+    removeLast(imported) == (_, import_name),
+    reportErrors(funcs, data, mods, import_name, imported),
     new s_pseudo, // todo: rename to s_import_tree
     !root[getRoot(s)] in s_pseudo,
     s_pseudo -FILE-> s,
-    removeLast(imported) == (_, import_name),
-    declareFuncPairs(s_pseudo, name, funcs), // todo: update to declareFuncImports
+    declareFuncImports(s_pseudo, name, import_name, funcs),
     declareDataImports(s_pseudo, name, import_name, data),
     createModulesForScopes(renaming, mods) == modules.
-
-    // declareFuncsAndData(s, s_pseudo, submodule, name, funcs, data)
-    // Declare in s or s_pseudo depending on whether submodule is empty
-    // todo: remove
-    declareFuncsAndData : scope * scope * list(MODID) * ANYID * list((FUNCID * TYPE)) * list((TYPEID * scope))
-    declareFuncsAndData(s, _, [], name, funcs, data) :-
-      declareFuncPairs(s, name, funcs),
-      declareDataPairs(s, name, data).
-    declareFuncsAndData(_, s_pseudo, [_|_], name, funcs, data) :-
-      declareFuncPairs(s_pseudo, name, funcs),
-      declareDataPairs(s_pseudo, name, data).
-
-    // todo: documentation
-    declareFuncPair : scope * FUNCID * (FUNCID * TYPE)
-    declareFuncPairs maps declareFuncPair(*, *, list(*))
-    declareFuncPair(s, import_name@name, (decl_name@name, func_ty)) :-
-      declareFuncWithoutSettingType(s, decl_name, func_ty),
-      @import_name.ref := decl_name.
-    declareFuncPair(s, name, (name', func_ty)) :-
-      declareFunc(s, name, func_ty),
-      @name.ref := name'.
-
-    // todo: documentation
-    // todo: remove
-    declareDataPair : scope * TYPEID * (TYPEID * scope)
-    declareDataPairs maps declareDataPair(*, *, list(*))
-    declareDataPair(s, import_name@name, (decl_name@name, s_mod)) :-
-//      declareDataWithoutSettingType(s, decl_name, s_mod, import_name),
-      @import_name.ref := decl_name.
-    declareDataPair(s, name, (name', s_mod)) :-
-      declareData(s, name, s_mod),
-      @name.ref := name'.
 
     // todo: documentation
     createModuleForScope : list(MODID) * scope -> MODULE
@@ -210,7 +178,7 @@ rules
     resolveImportInFile : list(scope) * ANYID -> (list((FUNCID * TYPE)) * list((TYPEID * scope)))
     resolveImportInFile([], _) = ([], []).
     resolveImportInFile([s_mod_file], name) = (funcs, data) :-
-      getFuncs(resolveFunc(s_mod_file, name)) == funcs,
+      getFuncs(resolveFuncInFileOnly(s_mod_file, name)) == funcs,
       getDatas(resolveDataInFileOnly(s_mod_file, name)) == data.
     resolveImportInFile([s_mod_file,_|_], node) = ([], []) :- {name}
       getModuleName(s_mod_file) == name,

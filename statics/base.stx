@@ -126,20 +126,37 @@ rules // Declararing and resolving
    */
   declareFunc : scope * string * TYPE
   declareFunc(s, name, type) :-
-    declareFuncWithoutSettingType(s, name, type),
+    !func[name, type] in s,
+    resolveFunc(s, name) == [_] | error $[Duplicate function [name]] @name,
     @name.type := type.
 
   /**
-   * Declare a function [name] with type [TYPE] in scope [s], do not set a type
-   * on the function name.
+   * declareFuncImport(s, decl_name, s_data, import_name)
+   * Declare a datatype [decl_name] with scope [s_data] in scope [s].
+   * Set reference and type on [import_name].
    */
-  declareFuncWithoutSettingType : scope * string * TYPE
-  declareFuncWithoutSettingType(s, name, type) :-
-    {occs} // todo: remove
-//    try { false } | note $[Declare func [name] in [s]: occs=[occs]], // todo: remove
-    !func[name, type] in s,
-    occs@resolveFunc(s, name) == [_] | error $[Duplicate definition of function [name]].
-  
+  declareFuncImport : scope * FUNCID * FUNCID * (FUNCID * TYPE)
+  declareFuncImports maps declareFuncImport(*, *, *, list(*))
+  declareFuncImport(s, import_as_name, import_name, (decl_name, type)) :-
+    !func[import_as_name, type] in s,
+    resolveFunc(s, import_as_name) == [_]
+      | error $[Duplicate function [import_as_name]] @import_as_name,
+    @import_as_name.type := type,
+    @import_name.ref := decl_name.
+
+  /**
+   * resolveFuncInFileOnly(s, name)
+   * Resolve function [name] in scope [s] to a list of function types.
+   * Does not resolve to imported functions (used when declaring imports to
+   * avoid circular dependencies).
+   */
+  resolveFuncInFileOnly : scope * FUNCID -> list((path * (FUNCID * TYPE)))
+  resolveFuncInFileOnly(s, name) = occs :-
+    query func
+      filter P*
+         and { name' :- name' == name }
+         min and false
+          in s |-> occs.
 
   /**
    * Resolve a function [name] in scope [s]
@@ -147,7 +164,7 @@ rules // Declararing and resolving
   resolveFunc : scope * string -> list((path * (string * TYPE)))
   resolveFunc(s, name) = occs :-
     query func
-      filter P*|INHERIT*
+      filter (P* (MODULE_TREE_ROOT FILE)?)|INHERIT*|FILE?
          and { name' :- name' == name }
          min $ < INHERIT
          and true
