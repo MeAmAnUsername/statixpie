@@ -24,7 +24,7 @@ test simple function import [[
 test simple data import [[
   import test:[[import]]:[[Bar]]
   data [[Bar]] = foreign java Bar {}
-]] 2 errors
+]] 2 errors at #2, #3
    resolve #1
    resolve #2 to #3
    error like "Duplicate definition" at #2
