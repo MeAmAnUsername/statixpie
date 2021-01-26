@@ -199,7 +199,7 @@ rules // Declararing and resolving
     @name.type := DataType(s_data).
 
   /**
-   * declareDataImport(s, decl_name, s_data, import_name)
+   * declareDataImport(s, import_as_name, import_name, (decl_name, s_data))
    * Declare a datatype [decl_name] with scope [s_data] in scope [s].
    * Set reference and type on [import_name].
    */
