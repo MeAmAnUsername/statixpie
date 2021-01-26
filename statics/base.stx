@@ -161,7 +161,7 @@ rules // Declararing and resolving
   /**
    * Resolve a function [name] in scope [s]
    */
-  resolveFunc : scope * string -> list((path * (string * TYPE)))
+  resolveFunc : scope * FUNCID -> list((path * (FUNCID * TYPE)))
   resolveFunc(s, name) = occs :-
     query func
       filter (P* (MODULE_TREE_ROOT FILE)?)|INHERIT*|FILE?
@@ -173,7 +173,7 @@ rules // Declararing and resolving
   /**
    * resolve a function [name] to a unique declaration in scope [s]
    */
-  resolveUniqueFunc : scope * string -> TYPE
+  resolveUniqueFunc : scope * FUNCID -> TYPE
   resolveUniqueFunc(s, name) = ty :- {occs name'}
     resolveFunc(s, name) == occs,
     occs == [(_, (name', ty))],
