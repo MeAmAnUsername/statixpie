@@ -253,7 +253,9 @@ rules
         query () filter MODULE_TREE_ROOT in s |-> [(_, s_module_tree_root)].
 
     resolveModuleList_1 : list(scope) * list(MODID) * MODID * ModuleList -> scope
-    resolveModuleList_1([], _, last_name, module) = none :- false | error $[Undefined submodule [last_name] in [module]].
+    resolveModuleList_1([], _, last_name, module) = none :-
+      new none,
+      false | error $[Undefined submodule [last_name] in [module]] @last_name.
     resolveModuleList_1(scopes, [], _, module) = resolveModuleList_2(scopes, module).
     resolveModuleList_1(scopes, [name|names], last_name, module) =
       result@resolveModuleList_1(next_scopes@flattenScopeList(resolveModulesOpt(scopes, name)), names, last_name, module) :-
