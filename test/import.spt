@@ -62,6 +62,19 @@ test simple renaming data duplicate name [[
    error like "Duplicate definition" at #1
    error like "Duplicate definition" at #2
 
+// multi imports
+test simple multi-import no renaming [[
+  import test:import:{[[Bar]], [[foo]]}
+  func [[foo]]() -> int = 6
+  data [[Bar]] = foreign java Bar {}
+]] 4 errors at #1, #2, #3, #4
+   resolve #1 to #4
+   resolve #2 to #3
+   error like "Duplicate function" at #2
+   error like "Duplicate function" at #3
+   error like "Duplicate definition" at #1
+   error like "Duplicate definition" at #4
+
 /* todo:
    - test renaming to same name.
    - `import {foo, bar}:func` warning: no-op
