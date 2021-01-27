@@ -179,7 +179,7 @@ rules
     {submodule name s_mod_tree s_mod_files}
     try {false} | note $[DEBUG: resolveImport - import: [import]; s: [s]; renaming: [renaming]; submodule: [submodule]; name: [name]; s_mod_tree: [s_mod_tree]; s_mod_files: [s_mod_files]; funcs: [funcs]; data: [data]; mods: [mods]], // todo remove
     removeLast(import) == (submodule, name),
-    resolveModuleList(s, ModuleList(submodule), FALSE()) == s_mod_tree,
+    resolveModuleList(s, ModuleList(submodule), FALSE(), FALSE()) == s_mod_tree,
     resolveImportInFile(s_mod_files@moduleTreeScopeToFiles(s_mod_tree, name), name) == (funcs, data),
     resolveModuleOpt(s_mod_tree, name) == mods.
 

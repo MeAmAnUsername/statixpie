@@ -197,7 +197,7 @@ rules
   resolveModuleListToFile : scope * ModuleList -> scope
   resolveModuleListToFile(s, NoModuleList()) = s.
   resolveModuleListToFile(s, moduleList@ModuleList(mods)) =
-    moduleTreeScopeToFile(resolveModuleList(s, moduleList, TRUE()), getLast(mods)).
+    moduleTreeScopeToFile(resolveModuleList(s, moduleList, TRUE(), TRUE()), getLast(mods)).
 
   /**
    * moduleTreeScopeToFile(
@@ -223,7 +223,7 @@ rules
   moduleTreeScopesToFiles(tree_scopes, name) = flattenScopeList(moduleTreeScopesToFiles_1(tree_scopes, name)).
 
   /**
-   * resolveModuleList(s, moduleList, follow_imports) = s_mod_tree
+   * resolveModuleList(s, moduleList, follow_imports, add_references) = s_mod_tree
    * Resolve the modules from the ModuleList [moduleList] and return the module
    * tree scope [s_mod_tree] of the last module in the list.
    * If follow_imports is TRUE() it will follow pseudomodules declared by
@@ -232,11 +232,11 @@ rules
    * such files exist. (example: given foo:bar:baz, it points foo to a file foo
    * if it exists and bar to a file foo:bar if it exists)
    */
-  resolveModuleList : scope * ModuleList * BOOLEAN -> scope
-  resolveModuleList(s, NoModuleList(), _) = s.
-  resolveModuleList(s, ModuleList([]), _) = s :- try {false} | note "BUG?: called resolveModuleList with empty ModuleList".
-  resolveModuleList(s, module@ModuleList(mods@[name|_]), follow_imports) =
-    result@resolveModuleList_1(tree_roots@getModuleTreeRoots(s, follow_imports), mods, name, module).
+  resolveModuleList : scope * ModuleList * BOOLEAN * BOOLEAN -> scope
+  resolveModuleList(s, NoModuleList(), _, _) = s.
+  resolveModuleList(s, ModuleList([]), _, _) = s :- try {false} | note "BUG?: called resolveModuleList with empty ModuleList".
+  resolveModuleList(s, module@ModuleList(mods@[name|_]), follow_imports, add_references) =
+    result@resolveModuleList_1(tree_roots@getModuleTreeRoots(s, follow_imports), mods, name, module, add_references).
 //    try {false} | note $[DEBUG: resolveModuleList - s: [s]; module: [module]; mods: [mods]; name: [name]; follow_imports: [follow_imports], tree_roots: [tree_roots]; result: [result]]. // todo: remove
 
     // gets the roots of all module trees reachable from s (should be root and file module tree)
@@ -252,12 +252,13 @@ rules
       getModuleTreeRoots_1(s) = s_module_tree_root :-
         query () filter MODULE_TREE_ROOT in s |-> [(_, s_module_tree_root)].
 
-    resolveModuleList_1 : list(scope) * list(MODID) * MODID * ModuleList -> scope
-    resolveModuleList_1([], _, last_name, module) = emptyScope() :- false | error $[Undefined submodule [last_name] in [module]] @last_name.
-    resolveModuleList_1(scopes, [], _, module) = resolveModuleList_2(scopes, module).
-    resolveModuleList_1(scopes, [name|names], last_name, module) =
-      result@resolveModuleList_1(next_scopes@flattenScopeList(resolveModulesOpt(scopes, name)), names, last_name, module) :-
-//      try {false} | note $[DEBUG: resolveModuleList_1 - scopes: [scopes]; name: [name]; names: [names]; last_name: [last_name]; module: [module]; next_scopes: [next_scopes]; result: [result]], // todo: remove
+    resolveModuleList_1 : list(scope) * list(MODID) * MODID * ModuleList * BOOLEAN -> scope
+    resolveModuleList_1([], _, last_name, module, _) = emptyScope() :- false | error $[Undefined submodule [last_name] in [module]] @last_name.
+    resolveModuleList_1(scopes, [], _, module, _) = resolveModuleList_2(scopes, module).
+    resolveModuleList_1(scopes, [name|names], last_name, module, FALSE()) =
+      result@resolveModuleList_1(next_scopes@flattenScopeList(resolveModulesOpt(scopes, name)), names, last_name, module, FALSE()).
+    resolveModuleList_1(scopes, [name|names], last_name, module, TRUE()) =
+      result@resolveModuleList_1(next_scopes@flattenScopeList(resolveModulesOpt(scopes, name)), names, last_name, module, TRUE()) :-
       addFileReferences(next_scopes, name).
 
     resolveModuleList_2 : list(scope) * ModuleList -> scope

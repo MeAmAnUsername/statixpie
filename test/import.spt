@@ -14,39 +14,35 @@ fixture [[
 // Note: simple tests use different names because of 
 // duplicate name errors outside test region
 test simple function import [[
-  import test:[[import]]:[[foo]]
+  import test:import:[[foo]]
   func [[foo]]() -> int = 0
-]] 2 errors at #2, #3
-   resolve #1
-   resolve #2 to #3
+]] 2 errors at #1, #2
+   resolve #1 to #2
+   error like "Duplicate function" at #1
    error like "Duplicate function" at #2
-   error like "Duplicate function" at #3
 test simple data import [[
-  import test:[[import]]:[[Bar]]
+  import test:import:[[Bar]]
   data [[Bar]] = foreign java Bar {}
-]] 2 errors at #2, #3
-   resolve #1
-   resolve #2 to #3
+]] 2 errors at #1, #2
+   resolve #1 to #2
+   error like "Duplicate definition" at #1
    error like "Duplicate definition" at #2
-   error like "Duplicate definition" at #3
 test simple import undefined submodule [[
   import [[example]]:main
 ]] analysis fails
    error like "Undefined submodule" at #1
 test simple import undefined final element [[
-  import test:[[import]]:[[nope]]
+  import test:import:[[nope]]
 ]] analysis fails
-   resolve #1
-   error like "does not resolve" at #2
+   error like "does not resolve" at #1
 
 // simple imports with renaming
 test simple renaming function import [[
-  import test:[[import]]:[[main]] as [[func]]
+  import test:import:[[main]] as [[func]]
   func test() -> int = [[func]]()
 ]] analysis succeeds
    resolve #1
-   resolve #2
-   resolve #4 to #3
+   resolve #3 to #2
 test simple renaming function duplicate name [[
   import test:import:main as [[func]]
   import test:import:main as [[func]]
@@ -54,12 +50,11 @@ test simple renaming function duplicate name [[
    error like "Duplicate function" at #1
    error like "Duplicate function" at #2
 test simple renaming data import [[
-  import test:[[import]]:[[Foo]] as [[Bar]]
+  import test:import:[[Foo]] as [[Bar]]
   func test(foo: [[Bar]]) -> int = 4
 ]] analysis succeeds
    resolve #1
-   resolve #2
-   resolve #4 to #3
+   resolve #3 to #2
 test simple renaming data duplicate name [[
   import test:import:Foo as [[Bar]]
   import test:import:Foo as [[Bar]]
