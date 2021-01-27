@@ -253,9 +253,7 @@ rules
         query () filter MODULE_TREE_ROOT in s |-> [(_, s_module_tree_root)].
 
     resolveModuleList_1 : list(scope) * list(MODID) * MODID * ModuleList -> scope
-    resolveModuleList_1([], _, last_name, module) = none :-
-      new none,
-      false | error $[Undefined submodule [last_name] in [module]] @last_name.
+    resolveModuleList_1([], _, last_name, module) = emptyScope() :- false | error $[Undefined submodule [last_name] in [module]] @last_name.
     resolveModuleList_1(scopes, [], _, module) = resolveModuleList_2(scopes, module).
     resolveModuleList_1(scopes, [name|names], last_name, module) =
       result@resolveModuleList_1(next_scopes@flattenScopeList(resolveModulesOpt(scopes, name)), names, last_name, module) :-
@@ -263,10 +261,10 @@ rules
       addFileReferences(next_scopes, name).
 
     resolveModuleList_2 : list(scope) * ModuleList -> scope
-    resolveModuleList_2([], module) = none :- false | error "BUG: called resolveModuleList_2 with empty list (should have been caught by `resolveModuleList_1([], _, last_name, module)`)" @module.
+    resolveModuleList_2([], module) = emptyScope() :- false | error "BUG: called resolveModuleList_2 with empty list (should have been caught by `resolveModuleList_1([], _, last_name, module)`)" @module.
     resolveModuleList_2([s], _) = s.
     resolveModuleList_2([s|rest@[s|_]], module) = resolveModuleList_2(rest, module).
-    resolveModuleList_2([s,s'|_], module) = none :- false | error $[[module] resolved to different scopes].
+    resolveModuleList_2([s,s'|_], module) = emptyScope() :- false | error $[[module] resolved to different scopes].
 
   // todo: documentation
   // flattens a nested list of scopes. Gives an error if any list contains more than 1 element.
