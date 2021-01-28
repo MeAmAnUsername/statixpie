@@ -113,8 +113,12 @@ rules
   normalizeElements maps normalizeElement(list(*)) = list(*)
   normalizeElement(SingleElement(name)) = [Renaming([name], [])].
   normalizeElement(elems@MultiElement(submodules)) = normalizeSubModules(submodules) :-
-    try { submodules != [] } | warning "Empty multi-import" @elems,
-    {elem} try { submodules != [elem] } | warning "Single element in multi-import" @elem.
+    normalizeElement_1(submodules, elems).
+
+    normalizeElement_1 : list(ImportSubModule) * ImportListElement
+    normalizeElement_1([], elems) :- try {false} | warning "Empty multi-import" @elems.
+    normalizeElement_1([_], elems) :- try {false} | warning "Single element in multi-import" @elems.
+    normalizeElement_1([_, _], elems).
 
   normalizeSubModule : ImportSubModule -> Renaming
   normalizeSubModules maps normalizeSubModule(list(*)) = list(*)
@@ -125,8 +129,12 @@ rules
   normalizeFinal(SingleFinalElement(name)) = [Renaming([name], [name])].
   normalizeFinal(SingleFinalRename(name, renaming)) = [Renaming([name], finalSubModuleToList(renaming))].
   normalizeFinal(elems@MultiFinalElement(submodules)) = normalizeFinalSubmodules(submodules) :-
-    try { submodules != [] } | warning "Empty multi-import" @elems,
-    {elem} try { submodules != [elem] } | warning "Single element in multi-import" @elems.
+    normalizeFinal_1(submodules, elems).
+
+    normalizeFinal_1 : list(ImportFinalSubModule) * ImportFinalElement
+    normalizeFinal_1([], elems) :- try {false} | warning "Empty multi-import" @elems.
+    normalizeFinal_1([_], elems) :- try {false} | warning "Single element in multi-import" @elems.
+    normalizeFinal_1([_, _], elems).
 
 
   normalizeFinalSubmodule : ImportFinalSubModule -> Renaming
