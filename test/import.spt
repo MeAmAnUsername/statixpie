@@ -67,7 +67,8 @@ test empty multi-import [[
   import test:import:[[{}]]
 ]] 1 warning at #1
    warning like "Empty" at #1
-test simple multi-import no renaming single element [[
+
+test simple multi-import function no renaming single element [[
   import test:import:[[{foo}]]
   func [[foo]]() -> int = 6
 ]] 2 errors at #1, #2
@@ -76,6 +77,24 @@ test simple multi-import no renaming single element [[
    error like "Duplicate function" at #1
    error like "Duplicate function" at #2
    warning like "Single element" at #1
+test simple multi-import function renaming single element [[
+  import test:import:[[{main as func}]]
+]] 1 warning at #1
+   warning like "Single element" at #1
+test simple multi-import data no renaming single element [[
+  import test:import:[[{Bar}]]
+  data [[Bar]] = foreign java Bar {}
+]] 2 errors at #1, #2
+   1 warning at #1
+   resolve #1 to #2
+   error like "Duplicate definition" at #1
+   error like "Duplicate definition" at #2
+   warning like "Single element" at #1
+test simple multi-import data renaming single element [[
+  import test:import:[[{Foo as Bar}]]
+]] 1 warning at #1
+   warning like "Single element" at #1
+
 test simple multi-import no renaming [[
   import test:import:{[[Bar]], [[foo]]}
   func [[foo]]() -> int = 6
@@ -87,6 +106,38 @@ test simple multi-import no renaming [[
    error like "Duplicate function" at #3
    error like "Duplicate definition" at #1
    error like "Duplicate definition" at #4
+test simple multi-import rename first [[
+  import test:import:{[[Foo]] as [[Bar]], [[foo]]}
+  func [[foo]](bar: [[Bar]]) -> int = 6
+]] 2 errors at #3, #4
+   resolve #1
+   resolve #3 to #4
+   resolve #5 to #2
+   error like "Duplicate function" at #3
+   error like "Duplicate function" at #4
+test simple multi-import rename second [[
+  import test:import:{[[Bar]], [[main]] as [[fun]]}
+  data [[Bar]] = foreign java Bar {}
+  func test() -> int = [[fun]]()
+]] 2 errors at #1, #4
+   resolve #1 to #4
+   resolve #2
+   resolve #5 to #3
+   error like "Duplicate definition" at #1
+   error like "Duplicate definition" at #4
+test simple multi-import rename both [[
+  import test:import:{[[Foo]] as [[Bar]], [[main]] as [[func]]}
+  func test(bar: [[Bar]]) -> int = [[func]]()
+]] resolve #1
+   resolve #3
+   resolve #5 to #2
+   resolve #6 to #4
+test simple multi-import rename both [[
+  import test:import:{Foo as Bar, main as [[fun]]}
+  func [[fun]]() -> int = 9
+]] 2 errors at #1, #2
+   error like "Duplicate function" at #1
+   error like "Duplicate function" at #2
 
 
 /* todo:
