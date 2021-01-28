@@ -35,6 +35,12 @@ test simple import undefined final element [[
   import test:import:[[nope]]
 ]] analysis fails
    error like "does not resolve" at #1
+test simple import rename to same name [[
+  import test:import:foo as [[foo]]
+  func [[foo]]() -> int = 3
+]] 2 errors at #1, #2
+   1 warning at #1
+   warning like "same name" at #1
 
 // simple imports with renaming
 test simple renaming function import [[

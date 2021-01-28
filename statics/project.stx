@@ -123,11 +123,14 @@ rules
   normalizeSubModule : ImportSubModule -> Renaming
   normalizeSubModules maps normalizeSubModule(list(*)) = list(*)
   normalizeSubModule(NoRename(SubModule(mods))) = Renaming(mods, []).
-  normalizeSubModule(Rename(SubModule(mods), SubModule(renames))) = Renaming(mods, renames).
+  normalizeSubModule(Rename(SubModule(mods), renaming@SubModule(renames))) = Renaming(mods, renames) :-
+    try {mods != renames} | warning "Renaming to the same name" @renaming.
 
   normalizeFinal : ImportFinalElement -> list(Renaming)
   normalizeFinal(SingleFinalElement(name)) = [Renaming([name], [name])].
-  normalizeFinal(SingleFinalRename(name, renaming)) = [Renaming([name], finalSubModuleToList(renaming))].
+  normalizeFinal(SingleFinalRename(name, renaming)) = [Renaming([name], rename@finalSubModuleToList(renaming))] :-
+    try {[name] != rename} | warning "Renaming to the same name" @renaming.
+
   normalizeFinal(elems@MultiFinalElement(submodules)) = normalizeFinalSubmodules(submodules) :-
     normalizeFinal_1(submodules, elems).
 
@@ -140,7 +143,8 @@ rules
   normalizeFinalSubmodule : ImportFinalSubModule -> Renaming
   normalizeFinalSubmodules maps normalizeFinalSubmodule(list(*)) = list(*)
   normalizeFinalSubmodule(FinalNoRename(submodule)) = Renaming(finalSubModuleToList(submodule), [lastNameOf(submodule)]).
-  normalizeFinalSubmodule(FinalRename(submodule, rename)) = Renaming(finalSubModuleToList(submodule), finalSubModuleToList(rename)).
+  normalizeFinalSubmodule(FinalRename(submodule, rename)) = Renaming(finalSubModuleToList(submodule), finalSubModuleToList(rename)) :-
+        try {submodule != rename} | warning "Renaming to the same name" @rename.
 
   lastNameOf : FinalSubModule -> ANYID
   lastNameOf(SingleName(name)) = name.
