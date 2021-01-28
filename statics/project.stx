@@ -154,6 +154,7 @@ rules
   finalSubModuleToList(SingleName(name)) = [name].
   finalSubModuleToList(FinalSubModule(submodule_names, name)) = appendString(submodule_names, name).
 
+
   normalizedImportsOk : scope * list(NormalizedImport) -> list(MODULE)
   normalizedImportsOk(s, normalized_imports) = flattenModuleList(normalizedImportsOk_1(s, normalized_imports)).
 
