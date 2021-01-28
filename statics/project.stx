@@ -149,7 +149,7 @@ rules
   normalizedImportsOk_1 maps normalizedImportOk(*, list(*)) = list(*)
   normalizedImportOk(s, import@NormalizedImport(Renaming(imported, renaming))) =
     [MODULE(s_pseudo, submodule)|modules] :- {funcs data mods name import_name}
-    try {false} | note $[DEBUG: normalizedImportOk - s: [s]; import: [import]; imported: [imported]; renaming: [renaming]; funcs: [funcs]; data: [data]; mods: [mods]; import_name: [import_name]; submodule: [submodule]; name: [name]; s_pseudo: [s_pseudo]],
+//    try {false} | note $[DEBUG: normalizedImportOk - s: [s]; import: [import]; imported: [imported]; renaming: [renaming]; funcs: [funcs]; data: [data]; mods: [mods]; import_name: [import_name]; submodule: [submodule]; name: [name]; s_pseudo: [s_pseudo]],
     resolveImport(s, import) == (funcs, data, mods),
     removeLast(imported) == (_, import_name),
     removeLast(renaming) == (submodule, name),
@@ -181,7 +181,7 @@ rules
     )
   resolveImport(s, NormalizedImport(Renaming(import, renaming))) = (funcs, data, mods) :-
     {submodule name s_mod_tree s_mod_files}
-    try {false} | note $[DEBUG: resolveImport - import: [import]; s: [s]; renaming: [renaming]; submodule: [submodule]; name: [name]; s_mod_tree: [s_mod_tree]; s_mod_files: [s_mod_files]; funcs: [funcs]; data: [data]; mods: [mods]], // todo remove
+//    try {false} | note $[DEBUG: resolveImport - import: [import]; s: [s]; renaming: [renaming]; submodule: [submodule]; name: [name]; s_mod_tree: [s_mod_tree]; s_mod_files: [s_mod_files]; funcs: [funcs]; data: [data]; mods: [mods]], // todo remove
     removeLast(import) == (submodule, name),
     resolveModuleList(s, ModuleList(submodule), FALSE(), FALSE()) == s_mod_tree,
     resolveImportInFile(s_mod_files@moduleTreeScopeToFiles(s_mod_tree, name), name) == (funcs, data),
