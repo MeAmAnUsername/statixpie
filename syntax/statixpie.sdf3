@@ -56,7 +56,7 @@ context-free syntax
   ImportStmt.ImportStmt = <import <{ImportListElement ":"}+>:<ImportFinalElement>>
 
   ImportListElement.SingleElement = <<MODID>>
-  ImportListElement.MultiElement = <{<{ImportSubModule ", "}+>}>
+  ImportListElement.MultiElement = <{<{ImportSubModule ", "}*>}>
 
   ImportSubModule.NoRename = <<SubModule>>
   ImportSubModule.Rename = <<SubModule> as <SubModule>>
@@ -66,7 +66,7 @@ context-free syntax
 
   ImportFinalElement.SingleFinalElement = <<ANYID>>
   ImportFinalElement.SingleFinalRename = <<ANYID> as <FinalSubModule>>
-  ImportFinalElement.MultiFinalElement = <{<{ImportFinalSubModule ", "}+>}>
+  ImportFinalElement.MultiFinalElement = <{<{ImportFinalSubModule ", "}*>}>
 
   ImportFinalSubModule.FinalNoRename = <<FinalSubModule>>
   ImportFinalSubModule.FinalRename = <<FinalSubModule> as <FinalSubModule>>

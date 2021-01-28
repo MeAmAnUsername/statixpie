@@ -74,11 +74,26 @@ test simple multi-import no renaming [[
    error like "Duplicate function" at #3
    error like "Duplicate definition" at #1
    error like "Duplicate definition" at #4
+test simple multi-import no renaming single element [[
+  import test:import:[[{foo}]]
+  func [[foo]]() -> int = 6
+]] 2 errors at #1, #2
+   1 warning at #1
+   resolve #1 to #2
+   error like "Duplicate function" at #1
+   error like "Duplicate function" at #2
+   warning like "Single element" at #1
+test empty multi-import [[
+  import test:import:[[{}]]
+]] 1 warning at #1
+   warning like "Empty" at #1
+
 
 /* todo:
    - test renaming to same name.
    - `import {foo, bar}:func` warning: no-op
    - `import example:foo as example:foo` warning: no-op
    - `import example:{foo as example:foo}` warning: no-op
-   - `import example:{foo}` warning: multi-import with single element
+   - zero element multi-submodule
+   - single element multi-submodule
 */

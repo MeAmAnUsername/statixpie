@@ -65,7 +65,7 @@ test multi import missing list rename first element [[import {foo as fuz, bar}]]
 test multi import missing list rename second element [[import {foo, bar as baz}]] parse fails
 test multi import missing list rename all [[import {foo as fuz, bar as baz}]] parse fails
 test multi import [[ import example:{foo, bar} ]]
-test empty multi import [[ import example:{} ]] parse fails
+test empty multi import [[ import example:{} ]] parse succeeds // warning from static analysis, see import.spt
 test multi import single element [[ import example:{foo} ]]
 test multi import rename first [[ import example:{foo as fuz, bar} ]]
 test multi import rename second [[ import example:{foo, bar as baz} ]]
