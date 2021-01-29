@@ -145,7 +145,7 @@ test simple multi-import rename both [[
    resolve #3
    resolve #5 to #2
    resolve #6 to #4
-test simple multi-import rename both [[
+test simple multi-import rename to existing name [[
   import test:import:{Foo as Bar, main as [[fun]]}
   func [[fun]]() -> int = 9
 ]] 2 errors at #1, #2
