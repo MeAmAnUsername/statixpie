@@ -100,6 +100,13 @@ test simple multi-import data renaming single element [[
   import test:import:[[{Foo as Bar}]]
 ]] 1 warning at #1
    warning like "Single element" at #1
+test simple multi-import data renaming to same name single element [[
+  import test:import:{Bar as [[Bar]]}
+  data [[Bar]] = foreign java Bar {}
+]] 2 errors at #1, #2
+   2 warnings
+   warning like "Single element"
+   warning like "same name" at #1
 
 test simple multi-import no renaming [[
   import test:import:{[[Bar]], [[foo]]}
