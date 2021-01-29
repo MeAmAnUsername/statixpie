@@ -38,13 +38,13 @@ rules
   getScope((_, s)) = s.
 
   /**
-   * emptyScope() -> s
+   * emptyScope() -> s_empty
    * Returns an empty scope. Because it is returned, it cannot be extended.
    * This function is used in error cases where a scope should be returned but
    * none were found, e.g. resolving a non-existent module.
    */
   emptyScope : -> scope
-  emptyScope() = s :- new s.
+  emptyScope() = s_empty :- new s_empty.
 
   /**
    * expect Exp [exp] to be a subtype of type [expected_ty] in scope [s]
