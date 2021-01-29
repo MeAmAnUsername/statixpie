@@ -3,8 +3,8 @@ language statixpie
 start symbol ImportStmt
 
 test missing import statement [[ ]] parse fails
-test import statement missing layout [[ importtest ]] parse fails
-test import statement layout in keyword [[ imp ort test ]] parse fails
+test import statement missing layout [[ importexample:test ]] parse fails
+test import statement layout in keyword [[ imp ort example:test ]] parse fails
 test import statement missing name [[ import ]] parse fails
 test import statement no nesting [[import example]] parse fails
 test import statement nested 1 [[import example:sub]]
