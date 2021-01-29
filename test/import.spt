@@ -67,6 +67,13 @@ test simple renaming data duplicate name [[
 ]] 2 errors at #1, #2
    error like "Duplicate definition" at #1
    error like "Duplicate definition" at #2
+test two simple imports with renaming [[
+  import test:import:Foo as [[Bar]]
+  import test:import:main as [[function]]
+  func test(bar: [[Bar]]) -> int = [[function]]()
+]] 0 errors
+   resolve #3 to #1
+   resolve #4 to #2
 
 // multi imports
 test empty multi-import [[
