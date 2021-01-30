@@ -46,6 +46,7 @@ rules
   defOk(s_mod, DataDef2Def(dataDef)) :-
     dataDefOk(s_mod, dataDef).
 
+  // todo: move to separate file
   importsOk : scope * list(ImportStmt)
   importsOk(s, imports) :- {pseudo_modules flattened}
 //    try { false } | note $[importsOk | imports: [imports]; pseudo_modules: [pseudo_modules]; flattened: [flattened]], // todo remove
@@ -185,7 +186,7 @@ rules
     // todo: documentation
     createModuleForScope : list(MODID) * scope -> MODULE
     createModulesForScopes maps createModuleForScope(*, list(*)) = list(*)
-    createModuleForScope(name, s) = MODULE(s, name).
+    createModuleForScope(name, s) = SUBMODULE(s, name).
 
   resolveImport : scope * NormalizedImport -> (
       list((FUNCID * TYPE))

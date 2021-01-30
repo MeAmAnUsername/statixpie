@@ -159,9 +159,14 @@ test simple multi-import rename to existing name [[
    error like "Duplicate function" at #1
    error like "Duplicate function" at #2
 
+// module imports
+test module import no rename [[
+  import test:import
+  func [[test]]() -> int = import:mod:[[test]]()
+]] analysis succeeds
+   resolve #2 to #1
 
 /* todo:
-   - test renaming to same name.
    - `import {foo, bar}:func` warning: no-op
    - `import example:foo as example:foo` warning: no-op
    - `import example:{foo as example:foo}` warning: no-op
