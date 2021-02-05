@@ -165,6 +165,21 @@ test module import no rename [[
   func [[test]]() -> int = import:mod:[[test]]()
 ]] analysis succeeds
    resolve #2 to #1
+test module import rename [[
+  import test:import as mod
+  func [[test]]() -> int = mod:mod:[[test]]()
+]] analysis succeeds
+   resolve #2 to #1
+test file import no rename [[
+  import test:import:mod
+  func [[test]]() -> int = mod:[[test]]()
+]] analysis succeeds
+   resolve #2 to #1
+test file import rename [[
+  import test:import:mod as file
+  func [[test]]() -> int = file:[[test]]()
+]] analysis succeeds
+   resolve #2 to #1
 
 /* todo:
    - `import {foo, bar}:func` warning: no-op
