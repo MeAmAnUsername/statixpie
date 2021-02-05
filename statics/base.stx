@@ -40,6 +40,7 @@ signature
     labels
       INHERIT // Between data scopes
       P // Scopes within functions, functions to file, files to root
+      I // import module tree to root module tree
       FILE // module tree scope to file scope
       MODULE_TREE_ROOT // points to a module tree root. Starts in root scope for
                        // module structure or file scope for pseudo modules from imports

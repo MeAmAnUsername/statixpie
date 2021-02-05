@@ -25,7 +25,7 @@ signature
      *              module error.
      * tree_scopes: A list of tree scopes that represent the same submodule.
      *              Used to point import module tree to root module tree on
-     *              module imports. Each scope will be pointed to with a P
+     *              module imports. Each scope will be pointed to with a I
      *              edge. This should have 0 or 1 scope, more represents a
      *              bug in this Statix specification.
      * subnodes:    The nodes representing the submodules of this module.
@@ -159,7 +159,7 @@ rules
     declareAlternateTreeScope : scope * scope
     declareAlternateTreeScopes maps declareAlternateTreeScope(*, list(*))
     declareAlternateTreeScope(s_mod_tree, s_mod_tree_alternate) :-
-      s_mod_tree -P-> s_mod_tree_alternate.
+      s_mod_tree -I-> s_mod_tree_alternate.
 
     addDuplicateNameErrors : list(scope)
     addDuplicateNameErrors([]).
@@ -262,7 +262,7 @@ rules
   moduleTreeScopesToFiles_1 maps moduleTreeScopeToFiles(list(*), *) = list(*)
   moduleTreeScopeToFiles(s_mod_tree, name_node) = result@getScopes(occs) :-
 //    try {false} | note $[DEBUG: moduleTreeScopeToFiles - s_mod_tree: [s_mod_tree]; name_node: [name_node]; occs: [occs]; result: [result]], // todo remove
-    query () filter P* FILE in s_mod_tree |-> occs.
+    query () filter I? FILE in s_mod_tree |-> occs.
 
   // todo: documentation  
   moduleTreeScopesToFiles : list(scope) * MODID -> list(scope)
@@ -346,7 +346,7 @@ rules
   resolveModulesOpt maps resolveModuleOpt(list(*), *) = list(*)
   resolveModuleOpt(s, name) = result@getModules(occs) :-
 //    try {false} | note $[DEBUG: resolveModuleOpt - s: [s]; name: [name]; occs: [occs]; result: [result]], // todo: remove
-    query mod filter P* and {name' :- name' == name} in s |-> occs.
+    query mod filter I? and {name' :- name' == name} in s |-> occs.
 
     // get the module from an occurrence
     getModule : (path * (MODID * scope)) -> scope
