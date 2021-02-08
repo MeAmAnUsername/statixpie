@@ -231,8 +231,7 @@ test submodule multi import single element [[
 test submodule empty multi import no rename [[
   import test:{import, [[none]]}:[[mod]]
   func [[test]]() -> int = mod:[[test]]()
-]] analysis fails
-//   2 errors at #1, #2 - todo: fix bug
+]] 2 errors at #1, #2
    resolve #4 to #3
 
 /* todo:

@@ -302,9 +302,9 @@ rules
     resolveModuleList_1(s, [], _, last_name, module, _) = emptyScope(s) :- false | error $[Undefined submodule [last_name] in [module]] @last_name.
     resolveModuleList_1(s, scopes, [], _, module, _) = resolveModuleList_2(s, scopes, module).
     resolveModuleList_1(s, scopes, [name|names], last_name, module, FALSE()) =
-      result@resolveModuleList_1(s, next_scopes@flattenScopeList(resolveModulesOpt(scopes, name)), names, last_name, module, FALSE()).
+      result@resolveModuleList_1(s, next_scopes@flattenScopeList(resolveModulesOpt(scopes, name)), names, name, module, FALSE()).
     resolveModuleList_1(s, scopes, [name|names], last_name, module, TRUE()) =
-      result@resolveModuleList_1(s, next_scopes@flattenScopeList(resolveModulesOpt(scopes, name)), names, last_name, module, TRUE()) :-
+      result@resolveModuleList_1(s, next_scopes@flattenScopeList(resolveModulesOpt(scopes, name)), names, name, module, TRUE()) :-
       addFileReferences(next_scopes, name).
 
     resolveModuleList_2 : scope * list(scope) * ModuleList -> scope
