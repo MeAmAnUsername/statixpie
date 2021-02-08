@@ -180,6 +180,20 @@ test file import rename [[
   func [[test]]() -> int = file:[[test]]()
 ]] analysis succeeds
    resolve #2 to #1
+test file import rename to pseudo module [[
+  import test:import:mod as pseudo:sub
+  func [[test]]() -> int = pseudo:sub:[[test]]()
+]] analysis succeeds
+   resolve #2 to #1
+test file import nonexistent [[
+  import test:import:[[none]]
+]] 1 error at #1
+test file import rename to pseudo module same name as existing top-level module [[
+  import test:import:mod as test:sub
+  func [[test]]() -> int = test:sub:[[test]]()
+]] analysis succeeds
+   resolve #2 to #1
+
 
 test module empty multi import [[
   import test:[[{}]]
@@ -215,6 +229,10 @@ test module multi import rename both [[
 ]] 1 error at #1
    resolve #3 to #2
 
+test undefined submodule [[
+  import test:[[none]]:[[mod]]
+]] 2 errors at #1, #2 // todo: don't show an error at #2
+
 test submodule empty multi import [[
   import test:[[{}]]:nope
 ]] analysis succeeds
@@ -231,6 +249,21 @@ test submodule multi import single element [[
 test submodule empty multi import no rename [[
   import test:{import, [[none]]}:[[mod]]
   func [[test]]() -> int = mod:[[test]]()
+]] 2 errors at #1, #2
+   resolve #4 to #3
+test submodule empty multi import rename first [[
+  import test:{import as imp, [[none]]}:[[mod]]
+  func [[test]]() -> int = imp:mod:[[test]]()
+]] 2 errors at #1, #2
+   resolve #4 to #3
+test submodule empty multi import rename second [[
+  import test:{import, [[none]] as nope}:[[mod]]
+  func [[test]]() -> int = mod:[[test]]()
+]] 2 errors at #1, #2
+   resolve #4 to #3
+test submodule empty multi import rename both [[
+  import test:{import as imp, [[none]] as nope}:[[mod]]
+  func [[test]]() -> int = imp:mod:[[test]]()
 ]] 2 errors at #1, #2
    resolve #4 to #3
 

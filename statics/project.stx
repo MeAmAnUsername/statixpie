@@ -170,6 +170,7 @@ rules
     reportErrors(funcs, data, mods, import_name, imported),
     new s_pseudo, // todo: rename to s_import_tree; move to declareFuncsAndData?
     !root[getRoot(s)] in s_pseudo,
+    setModuleName(s_pseudo, name),
     declareFuncsAndData(s, s_pseudo, submodule, import_name, name, funcs, data),
     createModulesForScopes(renaming, mods) == modules.
 
