@@ -181,10 +181,55 @@ test file import rename [[
 ]] analysis succeeds
    resolve #2 to #1
 
+test module empty multi import [[
+  import test:[[{}]]
+]] analysis succeeds
+   1 warning at #1
+   warning like "Empty" at #1
+test module multi import single element [[
+  import test:[[{import}]]
+  func [[test]]() -> int = import:mod:[[test]]()
+]] analysis succeeds
+   1 warning at #1
+   warning like "Single element" at #1
+   resolve #3 to #2
+
+test module multi import no rename [[
+  import test:{import, [[none]]}
+  func [[test]]() -> int = import:mod:[[test]]()
+]] 1 error at #1
+   resolve #3 to #2
+test module multi import rename first [[
+  import test:{import as self, [[none]]}
+  func [[test]]() -> int = self:mod:[[test]]()
+]] 1 error at #1
+   resolve #3 to #2
+test module multi import rename last [[
+  import test:{import, [[none]] as nope}
+  func [[test]]() -> int = import:mod:[[test]]()
+]] 1 error at #1
+   resolve #3 to #2
+test module multi import rename both [[
+  import test:{import as self, [[none]] as nope}
+  func [[test]]() -> int = self:mod:[[test]]()
+]] 1 error at #1
+   resolve #3 to #2
+
+test submodule empty multi import [[
+  import test:[[{}]]:nope
+]] analysis succeeds
+   1 warning at #1
+   warning like "Empty" at #1
+test submodule multi import single element [[
+  import test:[[{import}]]:mod
+  func [[test]]() -> int = mod:[[test]]()
+]] analysis succeeds
+   1 warning at #1
+   warning like "Single element" at #1
+   resolve #3 to #2
+
 /* todo:
    - `import {foo, bar}:func` warning: no-op
    - `import example:foo as example:foo` warning: no-op
    - `import example:{foo as example:foo}` warning: no-op
-   - zero element multi-submodule
-   - single element multi-submodule
 */
