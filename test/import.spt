@@ -228,6 +228,13 @@ test submodule multi import single element [[
    warning like "Single element" at #1
    resolve #3 to #2
 
+test submodule empty multi import no rename [[
+  import test:{import, [[none]]}:[[mod]]
+  func [[test]]() -> int = mod:[[test]]()
+]] analysis fails
+//   2 errors at #1, #2 - todo: fix bug
+   resolve #4 to #3
+
 /* todo:
    - `import {foo, bar}:func` warning: no-op
    - `import example:foo as example:foo` warning: no-op
