@@ -267,8 +267,36 @@ test submodule empty multi import rename both [[
 ]] 2 errors at #1, #2
    resolve #4 to #3
 
+// no-op imports
+test toplevel multi-import gives no-op warning [[
+  import {foo, bar}:[[func]]
+]] analysis fails // foo and bar don't exist
+   0 warnings // todo: add warnings
+//   2 warnings at #1
+//   warning like "same name" at #1
+test toplevel multi-import with rename gives no warning [[
+  import {foo, bar}:func as fun
+]] analysis fails // foo and bar don't exist
+   0 warnings
+test renaming to same qualified name gives warning [[
+  import test:import:mod:[[main]] as test:import:mod:[[main]]
+]] analysis succeeds
+   0 warnings // todo: add warnings
+//   1 warning at #2
+//   warning like "same name" at #2
+   resolve #1
+test renaming to same qualified name in multi-import gives warning [[
+  import test:import:mod:{main as test:import:mod:[[main]]}
+]] analysis succeeds
+   1 warning // todo: add warnings
+//   2 warnings at #1
+//   warning like "same name" at #1
+
+
 /* todo:
    - `import {foo, bar}:func` warning: no-op
    - `import example:foo as example:foo` warning: no-op
    - `import example:{foo as example:foo}` warning: no-op
+   - duplicate definition between pseudo module and existing module
+   - duplicate definition between two pseudo modules
 */
