@@ -96,8 +96,8 @@ rules
     addAllToModuleTree(root_2, occs) == root_3.
 
   /**
-   * addToModuleTree(root_in, wip_module_occurrence) -> root_out
-   * Add module from [wip_module_occurrence] to module tree [root_in].
+   * addToModuleTree(root_in, module) -> root_out
+   * Add MODULE [module] to module tree [root_in].
    * root_in is required to be a ModuleTreeRoot
    * The module is added recursively and deduplicated as necessary.
    */
