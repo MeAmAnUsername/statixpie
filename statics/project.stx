@@ -23,7 +23,7 @@ signature
 rules
 
   projectOk : scope
-  projectOk(s_root) :- 
+  projectOk(s_root) :-
     !root[s_root] in s_root,
     declareDeduplicatedModules(s_root).
     // todo: create scopes for built-in types
