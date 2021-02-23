@@ -271,9 +271,8 @@ test submodule empty multi import rename both [[
 test toplevel multi-import gives no-op warning [[
   import {foo, bar}:[[func]]
 ]] analysis fails // foo and bar don't exist
-   0 warnings // todo: fix warnings
-//   2 warnings at #1
-//   warning like "already available" at #1
+   2 warnings at #1
+   warning like "already available" at #1
 test toplevel multi-import with rename gives no warning [[
   import {foo, bar}:func as fun
 ]] analysis fails // foo and bar don't exist

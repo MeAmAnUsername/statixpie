@@ -168,6 +168,7 @@ rules
     removeLast(imported) == (_, import_name),
     removeLast(renaming) == (submodule, name),
     reportErrors(funcs, data, mods, import_name, imported, name, renaming),
+    try {renaming != imported} | warning $[[renaming] is already available] @name,
     new s_pseudo, // todo: rename to s_import_tree; move to declareFuncsAndData?
     !root[getRoot(s)] in s_pseudo,
     setModuleName(s_pseudo, name),
@@ -226,8 +227,7 @@ rules
   reportErrors(funcs, data, mods, name, module, rename, renaming) :-
     checkTooManyFuncs(funcs, name, module),
     checkTooManyData(data, name, module),
-    checkTooManyMods(mods, name, module),
-    try {renaming != module} | warning $[[renaming] is already available] @rename.
+    checkTooManyMods(mods, name, module).
 
     checkTooManyFuncs : list((FUNCID * TYPE)) * ANYID * list(MODID)
     checkTooManyFuncs([], _, _).
