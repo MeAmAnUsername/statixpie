@@ -240,7 +240,7 @@ test submodule empty multi import [[
    warning like "Empty" at #1
 test submodule multi import single element [[
   import test:[[{import}]]:mod
-  func [[test]]() -> int = mod:[[test]]()
+  func [[test]]() -> int = import:mod:[[test]]()
 ]] analysis succeeds
    1 warning at #1
    warning like "Single element" at #1
@@ -248,7 +248,7 @@ test submodule multi import single element [[
 
 test submodule multi import no rename [[
   import test:{import, [[none]]}:[[mod]]
-  func [[test]]() -> int = mod:[[test]]()
+  func [[test]]() -> int = import:mod:[[test]]()
 ]] 2 errors at #1, #2
    resolve #4 to #3
 test submodule multi import rename first [[
@@ -258,7 +258,7 @@ test submodule multi import rename first [[
    resolve #4 to #3
 test submodule multi import rename second [[
   import test:{import, [[none]] as nope}:[[mod]]
-  func [[test]]() -> int = mod:[[test]]()
+  func [[test]]() -> int = import:mod:[[test]]()
 ]] 2 errors at #1, #2
    resolve #4 to #3
 test submodule empty multi import rename both [[

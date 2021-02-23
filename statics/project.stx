@@ -123,7 +123,7 @@ rules
 
   normalizeSubModule : ImportSubModule -> Renaming
   normalizeSubModules maps normalizeSubModule(list(*)) = list(*)
-  normalizeSubModule(NoRename(SubModule(mods))) = Renaming(mods, []).
+  normalizeSubModule(NoRename(SubModule(mods))) = Renaming(mods, mods).
   normalizeSubModule(Rename(SubModule(mods), renaming@SubModule(renames))) = Renaming(mods, renames) :-
     try {mods != renames} | warning "Renaming to the same name" @renaming.
 
