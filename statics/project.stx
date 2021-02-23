@@ -167,7 +167,7 @@ rules
     resolveImport(s, import) == (funcs, data, mods),
     removeLast(imported) == (_, import_name),
     removeLast(renaming) == (submodule, name),
-    reportErrors(funcs, data, mods, import_name, imported),
+    reportErrors(funcs, data, mods, import_name, imported, name, renaming),
     new s_pseudo, // todo: rename to s_import_tree; move to declareFuncsAndData?
     !root[getRoot(s)] in s_pseudo,
     setModuleName(s_pseudo, name),
@@ -220,13 +220,14 @@ rules
     getData((_, data)) = data.
 
   // todo: documentation
-  // reportErrors(funcs, data, mods, import_name, module)
-  reportErrors : list((FUNCID * TYPE)) * list((TYPEID * scope)) * list(scope) * ANYID * list(MODID)
-  reportErrors([], [], [], name, module) :- false | error $[[name] does not resolve to anything in [module]] @name.
-  reportErrors(funcs, data, mods, name, module) :-
+  // reportErrors(funcs, data, mods, import_name, module, rename, renaming)
+  reportErrors : list((FUNCID * TYPE)) * list((TYPEID * scope)) * list(scope) * ANYID * list(MODID) * ANYID * list(MODID)
+  reportErrors([], [], [], name, module, _, _) :- false | error $[[name] does not resolve to anything in [module]] @name.
+  reportErrors(funcs, data, mods, name, module, rename, renaming) :-
     checkTooManyFuncs(funcs, name, module),
     checkTooManyData(data, name, module),
-    checkTooManyMods(mods, name, module).
+    checkTooManyMods(mods, name, module),
+    try {renaming != module} | warning $[[renaming] is already available] @rename.
 
     checkTooManyFuncs : list((FUNCID * TYPE)) * ANYID * list(MODID)
     checkTooManyFuncs([], _, _).
