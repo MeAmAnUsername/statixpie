@@ -246,17 +246,17 @@ test submodule multi import single element [[
    warning like "Single element" at #1
    resolve #3 to #2
 
-test submodule empty multi import no rename [[
+test submodule multi import no rename [[
   import test:{import, [[none]]}:[[mod]]
   func [[test]]() -> int = mod:[[test]]()
 ]] 2 errors at #1, #2
    resolve #4 to #3
-test submodule empty multi import rename first [[
+test submodule multi import rename first [[
   import test:{import as imp, [[none]]}:[[mod]]
   func [[test]]() -> int = imp:mod:[[test]]()
 ]] 2 errors at #1, #2
    resolve #4 to #3
-test submodule empty multi import rename second [[
+test submodule multi import rename second [[
   import test:{import, [[none]] as nope}:[[mod]]
   func [[test]]() -> int = mod:[[test]]()
 ]] 2 errors at #1, #2
