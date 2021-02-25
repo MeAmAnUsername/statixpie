@@ -63,7 +63,7 @@ rules
   declareDeduplicatedModules : scope
   declareDeduplicatedModules(s) :- {occs}
     query mod_wip filter e in s |-> occs,
-    declareModules(s, getWipModules(occs)).
+    declareModules(s, getWipModules(occs), TRUE()).
 
   // todo: documentation
   getWipModule : (path * MODULE) -> MODULE
@@ -71,11 +71,11 @@ rules
   getWipModule((_, module)) = module.
 
   // todo: documentation
-  declareModules : scope * list(MODULE)
-  declareModules(s, modules) :- {tree}
+  declareModules : scope * list(MODULE) * BOOLEAN
+  declareModules(s, modules, add_duplicate_errors) :- {tree}
 //    try { false } | note $[DEBUG: declareModules - Declaring module tree in [s]: [modules] -> [tree]], // todo: remove
     createModuleTree(modules) == tree,
-    declareModulesFromTree(s, tree).
+    declareModulesFromTree(s, tree, add_duplicate_errors).
 
   // todo: documentation
   createModuleTree : list(MODULE) -> ModuleTree
@@ -133,38 +133,40 @@ rules
       [node|addToModuleTree_1(modules, names, module)] :- name' != name.
 
   /**
-   * declareModulesFromTree(s, tree)
+   * declareModulesFromTree(s, tree, add_duplicate_errors)
    * Declares all modules in the tree with a new scope and adds a pointer to
    * the file scopes where applicible (see statics/module!instantiateModule).
+   * Adds errors for duplicate files if add_duplicate_errors is TRUE().
    */
-  declareModulesFromTree : scope * ModuleTree
-  declareModulesFromTrees maps declareModulesFromTree(*, list(*))
-  declareModulesFromTree(s, ModuleTreeRoot(root_scopes, sub_modules)) :- {s_tree_root}
+  declareModulesFromTree : scope * ModuleTree * BOOLEAN
+  declareModulesFromTrees maps declareModulesFromTree(*, list(*), *)
+  declareModulesFromTree(s, ModuleTreeRoot(root_scopes, sub_modules), add_duplicate_errors) :- {s_tree_root}
     new s_tree_root,
     !root[getRoot(s)] in s_tree_root,
     setModuleName(s_tree_root, "<ROOT>"),
     s -MODULE_TREE_ROOT-> s_tree_root,
     declareModuleInstances(s_tree_root, root_scopes),
-    declareModulesFromTrees(s_tree_root, sub_modules).
-  declareModulesFromTree(s, ModuleTreeNode(name, file_scopes, tree_scopes, sub_modules)) :- {s_mod_tree}
+    declareModulesFromTrees(s_tree_root, sub_modules, add_duplicate_errors).
+  declareModulesFromTree(s, ModuleTreeNode(name, file_scopes, tree_scopes, sub_modules), add_duplicate_errors) :- {s_mod_tree}
     new s_mod_tree,
     !root[getRoot(s)] in s_mod_tree,
     declareModule(s, name, s_mod_tree),
     setModuleName(s_mod_tree, name),
     declareModuleInstances(s_mod_tree, file_scopes),
     declareAlternateTreeScopes(s_mod_tree, tree_scopes),
-    declareModulesFromTrees(s_mod_tree, sub_modules),
-    addDuplicateNameErrors(file_scopes).
+    declareModulesFromTrees(s_mod_tree, sub_modules, add_duplicate_errors),
+    addDuplicateNameErrors(file_scopes, add_duplicate_errors).
     
     declareAlternateTreeScope : scope * scope
     declareAlternateTreeScopes maps declareAlternateTreeScope(*, list(*))
     declareAlternateTreeScope(s_mod_tree, s_mod_tree_alternate) :-
       s_mod_tree -I-> s_mod_tree_alternate.
 
-    addDuplicateNameErrors : list(scope)
-    addDuplicateNameErrors([]).
-    addDuplicateNameErrors([_]).
-    addDuplicateNameErrors(scopes@[_, _|_]) :-
+    addDuplicateNameErrors : list(scope) * BOOLEAN
+    addDuplicateNameErrors(_, FALSE()).
+    addDuplicateNameErrors([], TRUE()).
+    addDuplicateNameErrors([_], TRUE()).
+    addDuplicateNameErrors(scopes@[_, _|_], TRUE()) :-
       addDuplicateNameErrors_1s(scopes, scopes).
 
     // give an error on name of s_mod and set references to all other names from scopes in list

@@ -229,6 +229,7 @@ test module multi import rename both [[
 ]] 1 error at #1
    resolve #3 to #2
 
+// submodules
 test undefined submodule [[
   import test:[[none]]:[[mod]]
 ]] 2 errors at #1, #2 // todo: don't show an error at #2
@@ -267,6 +268,21 @@ test submodule empty multi import rename both [[
 ]] 2 errors at #1, #2
    resolve #4 to #3
 
+test multiple defintions in pseudomodule allowed [[
+  import test:import:mod as imp:mod1
+  import test:import:mod as imp:mod2
+  
+  func test() -> int = imp:mod1:main() + imp:mod2:main()
+]] analysis succeeds
+test duplicate defintition in submodule [[
+  import test:import:mod as imp:[[mod]]
+  import test:import:mod as imp:[[mod]]
+]] analysis succeeds // todo: add errors
+//   2 errors at #1, #2
+//   error like "duplicate definition" at #1
+//   error like "duplicate definition" at #2
+
+
 // no-op imports
 test toplevel multi-import gives no-op warning [[
   import {foo, bar}:[[func]]
@@ -292,5 +308,4 @@ test renaming to same qualified name in multi-import gives warning [[
 
 /* todo:
    - duplicate definition between pseudo module and existing module
-   - duplicate definition between two pseudo modules
 */

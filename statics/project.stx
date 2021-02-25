@@ -51,7 +51,7 @@ rules
   importsOk(s, imports) :- {pseudo_modules flattened}
 //    try { false } | note $[importsOk | imports: [imports]; pseudo_modules: [pseudo_modules]; flattened: [flattened]], // todo remove
     importsOkSeparate(s, imports) == pseudo_modules,
-    declareModules(s, flattened@flattenModuleList(pseudo_modules)).
+    declareModules(s, flattened@flattenModuleList(pseudo_modules), FALSE()).
 
     // flattens/concatenates all lists into a single list
     flattenModuleList : list(list(MODULE)) -> list(MODULE)
