@@ -99,6 +99,7 @@ rules
   getLast([_|mods]) = getLast(mods).
 
   // todo: documentation
+  // todo: rename to splitLast
   removeLast : list(string) -> (list(string) * string)
   removeLast([]) = res :- false | error "BUG: called removeLast with empty list.".
   removeLast([str]) = ([], str).
