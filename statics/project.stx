@@ -48,10 +48,9 @@ rules
 
   // todo: move to separate file
   importsOk : scope * list(ImportStmt)
-  importsOk(s, imports) :- {pseudo_modules flattened}
-//    try { false } | note $[importsOk | imports: [imports]; pseudo_modules: [pseudo_modules]; flattened: [flattened]], // todo remove
+  importsOk(s, imports) :- {pseudo_modules}
     importsOkSeparate(s, imports) == pseudo_modules,
-    declareModules(s, flattened@flattenModuleList(pseudo_modules), FALSE()).
+    declareModules(s, flattenModuleList(pseudo_modules), FALSE()).
 
     // flattens/concatenates all lists into a single list
     flattenModuleList : list(list(MODULE)) -> list(MODULE)
@@ -61,18 +60,15 @@ rules
   importOk : scope * ImportStmt -> list(MODULE)
   importsOkSeparate maps importOk(*, list(*)) = list(*)
   importOk(s, import) = pseudo_modules :- {normalized}
-//    try { false } | note $[importOk | import: [import]; normalized: [normalized]; pseudo_modules: [pseudo_modules]], // todo remove
     normalizeImport(import) == normalized,
     normalizedImportsOk(s, normalized) == pseudo_modules.
 
   normalizeImport : ImportStmt -> list(NormalizedImport)
   normalizeImport(ImportStmt(elements, final)) = normalizedImports :-
     {renamings final_renamings}
-    {carthesianProduct submodule_carthesianProducts} // todo: remove
-//    try { false } | note $[DEBUG: normalizeImport | elements: [elements]; final: [final]; renamings: [renamings]; final_renamings: [final_renamings]; carthesianProduct: [carthesianProduct]; submodule_carthesianProducts: [submodule_carthesianProducts]; normalizedImports: [normalizedImports]], // todo remove
     normalizeElements(elements) == renamings,
     normalizeFinal(final) == final_renamings,
-    renamingingsToNormalizedImports(carthesianProduct@carthesianProduct(submodule_carthesianProducts@carthesianProducts(renamings), final_renamings)) == normalizedImports.
+    renamingingsToNormalizedImports(carthesianProduct(carthesianProducts(renamings), final_renamings)) == normalizedImports.
 
     renamingingToNormalizedImport : Renaming -> NormalizedImport
     renamingingsToNormalizedImports maps renamingingToNormalizedImport(list(*)) = list(*)
@@ -190,11 +186,10 @@ rules
       * list(scope)
     )
   resolveImport(s, NormalizedImport(Renaming(import, renaming))) = (funcs, data, mods) :-
-    {submodule name s_mod_tree s_mod_files}
-//    try {false} | note $[DEBUG: resolveImport - import: [import]; s: [s]; renaming: [renaming]; submodule: [submodule]; name: [name]; s_mod_tree: [s_mod_tree]; s_mod_files: [s_mod_files]; funcs: [funcs]; data: [data]; mods: [mods]], // todo remove
+    {submodule name s_mod_tree}
     removeLast(import) == (submodule, name),
     resolveModuleList(s, ModuleList(submodule), FALSE(), FALSE()) == s_mod_tree,
-    resolveImportInFile(s_mod_files@moduleTreeScopeToFiles(s_mod_tree, name), name) == (funcs, data),
+    resolveImportInFile(moduleTreeScopeToFiles(s_mod_tree, name), name) == (funcs, data),
     resolveModuleOpt(s_mod_tree, name) == mods.
 
     resolveImportInFile : list(scope) * ANYID -> (list((FUNCID * TYPE)) * list((TYPEID * scope)))

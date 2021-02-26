@@ -72,7 +72,6 @@ rules
   // todo: documentation
   declareModules : scope * list(MODULE) * BOOLEAN
   declareModules(s, modules, add_duplicate_errors) :- {tree}
-//    try { false } | note $[DEBUG: declareModules - Declaring module tree in [s]: [modules] -> [tree]], // todo: remove
     createModuleTree(modules) == tree,
     declareModulesFromTree(s, tree, add_duplicate_errors).
 
@@ -270,7 +269,6 @@ rules
    */
   moduleTreeScopeToFile : scope * MODID -> scope
   moduleTreeScopeToFile(s_mod_tree, name_node) = s_mod_file :- {file_scopes name}
-//    try {false} | note $[DEBUG: moduleTreeScopeToFile - s_mod_tree: [s_mod_tree]; name_node: [name_node]; file_scopes: [file_scopes]; name: [name]; s_mod_file: [s_mod_file]], // todo remove
     moduleTreeScopeToFiles(s_mod_tree, name_node) == file_scopes,
     getModuleName(s_mod_tree) == name,
     file_scopes == [s_mod_file|_] | error $[Submodule [name] is not instantiated] @name_node,
@@ -280,7 +278,6 @@ rules
   moduleTreeScopeToFiles : scope * MODID -> list(scope)
   moduleTreeScopesToFiles_1 maps moduleTreeScopeToFiles(list(*), *) = list(*)
   moduleTreeScopeToFiles(s_mod_tree, name_node) = result@getScopes(occs) :-
-//    try {false} | note $[DEBUG: moduleTreeScopeToFiles - s_mod_tree: [s_mod_tree]; name_node: [name_node]; occs: [occs]; result: [result]], // todo remove
     query () filter I? FILE in s_mod_tree |-> occs.
 
   // todo: documentation  
@@ -301,15 +298,12 @@ rules
   resolveModuleList(s, NoModuleList(), _, _) = s.
   resolveModuleList(s, ModuleList([]), _, _) = s :- try {false} | note "BUG?: called resolveModuleList with empty ModuleList".
   resolveModuleList(s, module@ModuleList(mods@[name|_]), follow_imports, add_references) =
-    result@resolveModuleList_1(s, tree_roots@getModuleTreeRoots(s, follow_imports), mods, name, module, add_references).
-//    try {false} | note $[DEBUG: resolveModuleList - s: [s]; module: [module]; mods: [mods]; name: [name]; follow_imports: [follow_imports], tree_roots: [tree_roots]; result: [result]]. // todo: remove
+    resolveModuleList_1(s, getModuleTreeRoots(s, follow_imports), mods, name, module, add_references).
 
     // gets the roots of all module trees reachable from s (should be root and file module tree)
     getModuleTreeRoots : scope * BOOLEAN -> list(scope)
-    getModuleTreeRoots(s, TRUE()) = result@getModuleTreeRoots_1s([root@getRoot(s)|file@getFileIfExists(s)]).
-//      try {false} | note $[DEBUG: getModuleTreeRoots - s: [s]; follow_imports: TRUE(); root: [root]; file: [file]; result: [result]]. // todo: remove
-    getModuleTreeRoots(s, FALSE()) = result@[getModuleTreeRoots_1(root@getRoot(s))].
-//      try {false} | note $[DEBUG: getModuleTreeRoots - s: [s]; follow_imports: FALSE(); root: [root]; result: [result]]. // todo: remove
+    getModuleTreeRoots(s, TRUE()) = getModuleTreeRoots_1s([getRoot(s)|getFileIfExists(s)]).
+    getModuleTreeRoots(s, FALSE()) = [getModuleTreeRoots_1(getRoot(s))].
 
       // resolve module tree root scope from root / file scope
       getModuleTreeRoots_1 : scope -> scope
@@ -356,7 +350,6 @@ rules
     addRef : (path * scope) * MODID
     addRefs maps addRef(list(*), *)
     addRef((_, s), ref_name) :- {orig_name}
-//      try {false} | note $[DEBUG: addRef - s: [s]; ref_name: [ref_name]; orig_name: [orig_name]] @ref_name, // todo: remove
       getContext(s, "module_name_simple") == ContextName(orig_name),
       @ref_name.ref := orig_name.
 
@@ -364,7 +357,6 @@ rules
   resolveModuleOpt : scope * MODID -> list(scope)
   resolveModulesOpt maps resolveModuleOpt(list(*), *) = list(*)
   resolveModuleOpt(s, name) = result@getModules(occs) :-
-//    try {false} | note $[DEBUG: resolveModuleOpt - s: [s]; name: [name]; occs: [occs]; result: [result]], // todo: remove
     query mod filter I? and {name' :- name' == name} in s |-> occs.
 
     // get the module from an occurrence
