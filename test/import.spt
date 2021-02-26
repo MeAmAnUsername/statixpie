@@ -277,6 +277,16 @@ test multiple defintions in pseudomodule allowed [[
 test duplicate defintition in submodule [[
   import test:import:mod as imp:[[mod]]
   import test:import:mod as imp:[[mod]]
+]]    2 errors at #1, #2
+   error like "duplicate definition" at #1
+   error like "duplicate definition" at #2
+test duplicate definition in submodule [[
+  import test:import:mod:main as sub:[[duplicate]]
+  import test:import:mod:Foo  as sub:[[duplicate]]
+]] analysis succeeds
+test duplicate defintition in submodule [[
+  import test:import:mod:main as sub:[[duplicate]]
+  import test:import:mod:main as sub:[[duplicate]]
 ]] analysis succeeds // todo: add errors
 //   2 errors at #1, #2
 //   error like "duplicate definition" at #1
