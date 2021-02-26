@@ -160,7 +160,7 @@ rules
     {submodule name s_mod_tree}
     removeLast(import) == (submodule, name),
     resolveModuleList(s, ModuleList(submodule), FALSE(), FALSE()) == s_mod_tree,
-    resolveImportInFile(moduleTreeScopeToFiles(s_mod_tree, name), name) == (funcs, data),
+    resolveImportInFile(moduleTreeScopeToFiles(s_mod_tree), name) == (funcs, data),
     resolveModuleOpt(s_mod_tree, name) == mods.
 
     resolveImportInFile : list(scope) * ANYID -> (list((FUNCID * TYPE)) * list((TYPEID * scope)))

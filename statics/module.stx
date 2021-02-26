@@ -267,20 +267,15 @@ rules
    */
   moduleTreeScopeToFile : scope * MODID -> scope
   moduleTreeScopeToFile(s_mod_tree, name_node) = s_mod_file :- {file_scopes name}
-    moduleTreeScopeToFiles(s_mod_tree, name_node) == file_scopes,
+    moduleTreeScopeToFiles(s_mod_tree) == file_scopes,
     getModuleName(s_mod_tree) == name,
     file_scopes == [s_mod_file|_] | error $[Submodule [name] is not instantiated] @name_node,
     try { file_scopes != [_,_|_] } | error $[Duplicate module [name]] @name_node.
 
   // todo: documentation  
-  moduleTreeScopeToFiles : scope * MODID -> list(scope)
-  moduleTreeScopesToFiles_1 maps moduleTreeScopeToFiles(list(*), *) = list(*)
-  moduleTreeScopeToFiles(s_mod_tree, name_node) = result@getScopes(occs) :-
+  moduleTreeScopeToFiles : scope -> list(scope)
+  moduleTreeScopeToFiles(s_mod_tree) = getScopes(occs) :-
     query () filter I? FILE in s_mod_tree |-> occs.
-
-  // todo: documentation  
-  moduleTreeScopesToFiles : list(scope) * MODID -> list(scope)
-  moduleTreeScopesToFiles(tree_scopes, name) = flattenScopeList(moduleTreeScopesToFiles_1(tree_scopes, name)).
 
   /**
    * resolveModuleList(s, moduleList, follow_imports, add_references) = s_mod_tree
@@ -339,16 +334,8 @@ rules
   // todo: documentation
   addFileReference : scope * MODID
   addFileReferences maps addFileReference(list(*), *)
-  addFileReference(s_mod_tree, name_node) :- {instance_occs}
-    // todo: delegate to moduleTreeScopeToFiles?
-    query () filter FILE in s_mod_tree |-> instance_occs,
-    addRefs(instance_occs, name_node).
-
-    // adds references to files if file exists
-    addRef : (path * scope) * MODID
-    addRefs maps addRef(list(*), *)
-    addRef((_, s), ref_name) :-
-      @ref_name.ref := getModuleName(s).
+  addFileReference(s_mod_tree, name_node) :-
+    setModuleReferences(moduleTreeScopeToFiles(s_mod_tree), name_node).
 
   // todo: documentation
   resolveModuleOpt : scope * MODID -> list(scope)
