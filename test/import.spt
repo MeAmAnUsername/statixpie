@@ -311,17 +311,12 @@ test toplevel multi-import with rename gives no warning [[
    0 warnings
 test renaming to same qualified name gives warning [[
   import test:import:mod:[[main]] as test:import:mod:[[main]]
-]] analysis succeeds
+]] analysis succeeds // todo: analysis should fail with duplicate function error
    1 warning at #2
    warning like "already available" at #2
    resolve #1
 test renaming to same qualified name in multi-import gives warning [[
   import test:import:mod:{main as test:import:mod:[[main]]}
-]] analysis succeeds
+]] analysis succeeds // todo: analysis should fail with duplicate function error
    2 warnings at #1
    warning like "already available" at #1
-
-
-/* todo:
-   - duplicate definition between pseudo module and existing module
-*/
