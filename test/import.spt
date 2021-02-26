@@ -287,11 +287,17 @@ test duplicate definition in submodule [[
 test duplicate defintition in submodule [[
   import test:import:mod:main as sub:[[duplicate]]
   import test:import:mod:main as sub:[[duplicate]]
-]] analysis succeeds // todo: add errors
+]] analysis succeeds // todo: implement error on duplicate functions in a pseudomodule
 //   2 errors at #1, #2
-//   error like "duplicate definition" at #1
-//   error like "duplicate definition" at #2
-
+//   error like "Duplicate function" at #1
+//   error like "Duplicate function" at #2
+test duplicate defintition in submodule [[
+  import test:import:mod:Foo as sub:[[duplicate]]
+  import test:import:mod:Foo as sub:[[duplicate]]
+]] analysis succeeds // todo: implement error on duplicate data definition in a pseudomodule
+//   2 errors at #1, #2
+//   error like "Duplicate data definition" at #1
+//   error like "Duplicate data definition" at #2
 
 // no-op imports
 test toplevel multi-import gives no-op warning [[
