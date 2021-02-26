@@ -58,11 +58,6 @@ rules
     flattenModuleList([]) = [].
     flattenModuleList([list|lists]) = concatModuleLists(list, flattenModuleList(lists)).
 
-    // concatenates the two lists
-    concatModuleLists : list(MODULE) * list(MODULE) -> list(MODULE)
-    concatModuleLists([], modules) = modules.
-    concatModuleLists([mod|mods], modules) = [mod|concatModuleLists(mods, modules)].
-
   importOk : scope * ImportStmt -> list(MODULE)
   importsOkSeparate maps importOk(*, list(*)) = list(*)
   importOk(s, import) = pseudo_modules :- {normalized}
@@ -162,28 +157,27 @@ rules
   normalizedImportOk : scope * NormalizedImport -> list(MODULE)
   normalizedImportsOk_1 maps normalizedImportOk(*, list(*)) = list(*)
   normalizedImportOk(s, import@NormalizedImport(Renaming(imported, renaming))) =
-    [MODULE(s_pseudo, submodule)|modules] :- {funcs data mods name import_name}
-//    try {false} | note $[DEBUG: normalizedImportOk - s: [s]; import: [import]; imported: [imported]; renaming: [renaming]; funcs: [funcs]; data: [data]; mods: [mods]; import_name: [import_name]; submodule: [submodule]; name: [name]; s_pseudo: [s_pseudo]],
+    concatModuleLists(declared_modules, modules) :- {funcs data mods import_name submodule name}
     resolveImport(s, import) == (funcs, data, mods),
     removeLast(imported) == (_, import_name),
     removeLast(renaming) == (submodule, name),
     reportErrors(funcs, data, mods, import_name, imported, name, renaming),
     try {renaming != imported} | warning $[[renaming] is already available] @name,
-    new s_pseudo, // todo: rename to s_import_tree; move to declareFuncsAndData?
-    !root[getRoot(s)] in s_pseudo,
-    setModuleName(s_pseudo, name),
-    declareFuncsAndData(s, s_pseudo, submodule, import_name, name, funcs, data),
+    declareFuncsAndData(s, submodule, import_name, name, funcs, data) == declared_modules,
     createModulesForScopes(renaming, mods) == modules.
 
-    // declareFuncsAndData(s, s_pseudo, submodule, import_name, rename, funcs, data)
-    // Declare in s or s_pseudo depending on whether submodule is empty
-    declareFuncsAndData : scope * scope * list(MODID) * ANYID * ANYID * list((FUNCID * TYPE)) * list((TYPEID * scope))
-    declareFuncsAndData(s, _, [], import_name, rename, funcs, data) :-
+    // declareFuncsAndData(s, submodule, import_name, rename, funcs, data) = s_import_tree
+    // Declare in s or s_import_tree depending on whether submodule is empty
+    declareFuncsAndData : scope * list(MODID) * ANYID * ANYID * list((FUNCID * TYPE)) * list((TYPEID * scope)) -> list(MODULE)
+    declareFuncsAndData(s, [], import_name, rename, funcs, data) = [] :-
       declareFuncImports(s, rename, import_name, funcs),
       declareDataImports(s, rename, import_name, data).
-    declareFuncsAndData(_, s_pseudo, [_|_], import_name, rename, funcs, data) :-
-      declareFuncImports(s_pseudo, rename, import_name, funcs),
-      declareDataImports(s_pseudo, rename, import_name, data).
+    declareFuncsAndData(s, submodule@[_|_], import_name, rename, funcs, data) = [MODULE(s_import_tree, submodule)] :-
+      new s_import_tree,
+      !root[getRoot(s)] in s_import_tree,
+      setModuleName(s_import_tree, rename),
+      declareFuncImports(s_import_tree, rename, import_name, funcs),
+      declareDataImports(s_import_tree, rename, import_name, data).
 
     // todo: documentation
     createModuleForScope : list(MODID) * scope -> MODULE

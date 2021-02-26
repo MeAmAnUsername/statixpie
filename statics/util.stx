@@ -84,6 +84,15 @@ rules
   moduleToList(Module(ModuleList(mods), name)) = appendString(mods, name).
 
   /**
+   * concatModuleLists(moduleList1, moduleList2) = moduleList
+   * concatenates the two lists of MODULEs
+   */
+  concatModuleLists : list(MODULE) * list(MODULE) -> list(MODULE)
+  concatModuleLists([], modules) = modules.
+  concatModuleLists([mod|mods], modules) = [mod|concatModuleLists(mods, modules)].
+
+
+  /**
    * appendString(strs, newStr)
    * append string [newStr] to list of strings [strs].
    */
