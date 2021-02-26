@@ -6,6 +6,7 @@ imports
   signatures/func_body-sig
   statics/base
   statics/type
+  statics/module
   statics/func_body
 
 rules
@@ -49,7 +50,7 @@ rules
   emptyScope(s) = s_empty :-
     new s_empty,
     !root[getRoot(s)] in s_empty,
-    setContext(s_empty, "module_name_simple", ContextName("<NONE>")).
+    setModuleName(s_empty, "<NONE>").
 
   /**
    * expect Exp [exp] to be a subtype of type [expected_ty] in scope [s]

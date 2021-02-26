@@ -22,7 +22,7 @@ rules
     new s_mod,
     s_mod -P-> s_project,
     !file[s_mod] in s_mod,
-    setContext(s_mod, "module_name_simple", ContextName(name)),
+    setModuleName(s_mod, name),
     setContext(s_mod, "module_name_qualified", ContextModule(module)),
     declareWipModule(s_project, s_mod, module),
     importsOk(s_mod, imports),

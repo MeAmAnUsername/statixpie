@@ -174,16 +174,15 @@ rules
     addDuplicateModuleErrors_1(s_mod, scopes) :- {module module_pp name}
       getContext(s_mod, "module_name_qualified") == ContextModule(module) | error $[BUG: cannot get qualified module name from [s_mod]],
       moduleToList(module) == module_pp,
-      getContext(s_mod, "module_name_simple") == ContextName(name) | error $[BUG: cannot get simple module name from [s_mod]],
+      getModuleName(s_mod) == name,
       false | error $[Duplicate module [module_pp]. Ctrl/Cmd + click on [name] to go to duplicate definition.] @module,
       setModuleReferences(filterScope(scopes, s_mod), name).
 
     // set a reference from name to s_cur
     setModuleReference : scope * string
     setModuleReferences maps setModuleReference(list(*), *)
-    setModuleReference(s_cur, ref_name) :- {cur_name}
-      getContext(s_cur, "module_name_simple") == ContextName(cur_name) | error $[BUG: cannot get module name from [s_cur]],
-      @ref_name.ref := cur_name.
+    setModuleReference(s_cur, ref_name) :-
+      @ref_name.ref := getModuleName(s_cur).
 
     // filter scope from list of scopes
     // assumes that scope only occurs once.
@@ -243,7 +242,6 @@ rules
    * Get the simple name of a module from its scope.
    * Works with both module tree scopes and module file scopes.
    */
-  // todo: use where applicable (serach for "module_name_simple")
   getModuleName : scope -> MODID
   getModuleName(s_mod) = name :-
     getContext(s_mod, "module_name_simple") == ContextName(name)
@@ -349,9 +347,8 @@ rules
     // adds references to files if file exists
     addRef : (path * scope) * MODID
     addRefs maps addRef(list(*), *)
-    addRef((_, s), ref_name) :- {orig_name}
-      getContext(s, "module_name_simple") == ContextName(orig_name),
-      @ref_name.ref := orig_name.
+    addRef((_, s), ref_name) :-
+      @ref_name.ref := getModuleName(s).
 
   // todo: documentation
   resolveModuleOpt : scope * MODID -> list(scope)
