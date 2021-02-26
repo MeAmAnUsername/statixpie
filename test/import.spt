@@ -268,13 +268,13 @@ test submodule empty multi import rename both [[
 ]] 2 errors at #1, #2
    resolve #4 to #3
 
-test multiple defintions in pseudomodule allowed [[
+test multiple definitions in pseudomodule allowed [[
   import test:import:mod as imp:mod1
   import test:import:mod as imp:mod2
   
   func test() -> int = imp:mod1:main() + imp:mod2:main()
 ]] analysis succeeds
-test duplicate defintition in submodule [[
+test disallow duplicate definition of submodule in pseudomodule[[
   import test:import:mod as imp:[[mod]]
   import test:import:mod as imp:[[mod]]
 ]]    2 errors at #1, #2
