@@ -14,8 +14,8 @@ rules
    * getRoot(s)
    * Get the root scope. The root scope is the scope passed to
    * statics/project!projectOk.
-   * All scopes have a path to the root scope and all paths to the root scope
-   * end with a ROOT edge.
+   * All scopes have a path of 0 or more P edges to a scope that declares the
+   * root scope in the !root relation.
    */
   getRoot : scope -> scope
   getRoot(s) = s_root :- {occs}
