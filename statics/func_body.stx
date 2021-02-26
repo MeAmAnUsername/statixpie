@@ -117,18 +117,18 @@ rules
     try { ty != TopType()               } | error $[Type mismatch: true branch ([ty_true]) and false branch ([ty_false]) combine to the top type],
     try { ty != NullableType(TopType()) } | error $[Type mismatch: true branch ([ty_true]) and false branch ([ty_false]) combine to the top type].
 
- typeOfExpImpl(s1, ListComprehension(exp_map, binder, exp_list)) = (s1, ListType(ty_map)) :- {s2 s3 ty_list expected_ty ty_arg}
-   typeOfExp(s1, exp_list) == (s2, ty_list),
-   subtype(ty_list, expected_ty@ListType(ty_arg)) | error $[Type mismatch: expected [expected_ty], got [ty_list]] @exp_list,
-   try { ty_list != EmptyListType() } | warning $[Dead code: list comprehension over empty list] @exp_list,
-   // todo: better error messages
-   // If not a list: expected a list
-   // If Empty list: dead code
-   // If non-empty list but wrong element type: wrong element type
-   new s3,
-   s3 -P-> s2,
-   typeOfBinder(s3, ty_arg, binder) == _,
-   typeOfExp(s3, exp_map) == (_, ty_map).
+  typeOfExpImpl(s1, ListComprehension(exp_map, binder, exp_list)) = (s1, ListType(ty_map)) :- {s2 s3 ty_list expected_ty ty_arg}
+    typeOfExp(s1, exp_list) == (s2, ty_list),
+    subtype(ty_list, expected_ty@ListType(ty_arg)) | error $[Type mismatch: expected [expected_ty], got [ty_list]] @exp_list,
+    try { ty_list != EmptyListType() } | warning $[Dead code: list comprehension over empty list] @exp_list,
+    // todo: better error messages
+    // If not a list: expected a list
+    // If Empty list: dead code
+    // If non-empty list but wrong element type: wrong element type
+    new s3,
+    s3 -P-> s2,
+    typeOfBinder(s3, ty_arg, binder) == _,
+    typeOfExp(s3, exp_map) == (_, ty_map).
 
 // Value declaration and use.
   
