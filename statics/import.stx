@@ -146,7 +146,6 @@ rules
       declareFuncImports(s_import_tree, rename, import_name, funcs),
       declareDataImports(s_import_tree, rename, import_name, data).
 
-    // todo: documentation
     createModuleForScope : list(MODID) * scope -> MODULE
     createModulesForScopes maps createModuleForScope(*, list(*)) = list(*)
     createModuleForScope(name, s) = SUBMODULE(s, name).
@@ -180,8 +179,11 @@ rules
     getDatas maps getData(list(*)) = list(*)
     getData((_, data)) = data.
 
-  // todo: documentation
-  // reportErrors(funcs, data, mods, import_name, module, rename, renaming)
+  /**
+   * reportErrors(funcs, data, mods, name, module, rename, renaming)
+   * Reports errors on the imports if they refer to multiple elements or if
+   * none of the imports resolve.
+   */
   reportErrors : list((FUNCID * TYPE)) * list((TYPEID * scope)) * list(scope) * ANYID * list(MODID) * ANYID * list(MODID)
   reportErrors([], [], [], name, module, _, _) :- false | error $[[name] does not resolve to anything in [module]] @name.
   reportErrors(funcs, data, mods, name, module, rename, renaming) :-

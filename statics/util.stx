@@ -23,7 +23,13 @@ rules
     query root filter P* in s |-> occs,
     occs == [(_, s_root)|_] | error $[BUG: cannot resolve root scope from [s]. occs: [occs]].
 
-  // todo: documentation
+  /**
+   * getFileIfExists(s) = s_files
+   * Finds the file scope that a scope is defined in (i.e. given a scope in a
+   * function it returns the scope of the file that the function is declared
+   * in).
+   * Returns a list of zero or one element.
+   */
   getFileIfExists : scope -> list(scope)
   getFileIfExists(s) = getScopes(occs) :-
     query file
@@ -32,8 +38,10 @@ rules
       and {s1, s2 :- s1 == s2}
       in s |-> occs.
 
-  // todo: documentation
-  // get the scope from an occurence
+  /**
+   * getScope(occ) = s
+   * Gets the scope [s] from an occurence [occ].
+   */
   getScope : (path * scope) -> scope
   getScopes maps getScope(list(*)) = list(*)
   getScope((_, s)) = s.
@@ -101,14 +109,24 @@ rules
   appendString([], newStr) = [newStr].
   appendString([str|strs], newStr) = [str|appendString(strs, newStr)].
 
-  // todo: documentation
-  // Returns the last name in the ModuleList.
+  /**
+   * getLast(names) = name
+   * Gets the last name in a list of names.
+   * This is a more efficient version of removeLast if case you only want the
+   * last name and not the names before that.
+   * Reports a bug if the list is empty.
+   */
   getLast : list(string) -> string
   getLast([]) = "<<ERROR>>" :- false | error "BUG: called getLast with empty list".
   getLast([name]) = name.
   getLast([_|name]) = getLast(name).
 
-  // todo: documentation
+  /**
+   * removeLast(strs) = (start_strs, last)
+   * splits a list of strings into the starting strings and the last string.
+   * Reports a bug if the list is empty.
+   * Use getLast if you only need the last element.
+   */
   // todo: rename to splitLast
   removeLast : list(string) -> (list(string) * string)
   removeLast([]) = res :- false | error "BUG: called removeLast with empty list.".

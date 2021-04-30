@@ -113,7 +113,15 @@ rules // Declararing and resolving
          min and false
           in s |-> occs.
 
-  // todo: documentation
+  /**
+   * resolveUniqueVal(s, name) = ty
+   * Resolves a value [name] to a unique type [ty] in scope [s].
+   * Sets a type and a reference to the declaration on this name.
+   * Gives a undeclared value error if no declaration is found.
+   * Does not give an error if there are multiple definitions as there are
+   * already errors on the declarations.
+   * See also resolveVal
+   */
   resolveUniqueVal : scope * string -> TYPE
   resolveUniqueVal(s, name) = ty :- {occs name'}
     resolveVal(s, name) == occs,

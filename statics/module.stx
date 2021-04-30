@@ -11,8 +11,20 @@ signature
     MODULE
 
   constructors
-    // ModuleTreeRoot(scopes, subnodes)
-    // todo: documentation
+    /**
+     * ModuleTreeRoot(tree_scopes, subnodes)
+     * The root of a module tree. Contains ModuleTreeNodes in [subnodes].
+     * The scopes [tree_scopes] represent scopes to be imported into this
+     * module tree.
+     * tree_scopes: A list of names and tree scopes that represent the same
+     *              submodule. Used to point import module tree to root module
+     *              tree on module imports. Each scope will be pointed to with
+     *              an I edge.
+     * subnodes:    The nodes representing the submodules of this module.
+     *              This should be a list of only ModuleTreeNodes without
+     *              duplicate names, anything else is a bug in this Statix
+     *              specification.
+     */
     ModuleTreeRoot : list(scope) * list(ModuleTree) -> ModuleTree
     
     /**
@@ -34,8 +46,32 @@ signature
      */
     ModuleTreeNode : MODID * list(scope) * list((MODID * scope)) * list(ModuleTree) -> ModuleTree
 
-    // todo: documentation
+    /**
+     * MODULE(module_scope, qualified_name)
+     * Data class representing module [qualified_name] and its scope
+     * [module_scope].
+     * A MODULE holds the same data as a SUBMODULE, but a MODULE signifies to
+     * module.stx!addToModuleTree that this module should be added within the
+     * new tree.
+     * Also see the constructors for ModuleTree (ModuleTreeRoot and
+     * ModuleTreeNode) above.
+     * module_scope:   scope that this module represents.
+     * qualified_name: qualified name of this module.
+     */
     MODULE : scope * list(MODID) -> MODULE
+
+    /**
+     * SUBMODULE(module_scope, qualified_name)
+     * Data class representing module [qualified_name] and its scope
+     * [module_scope].
+     * A SUBMODULE holds the same data as a MODULE, but a SUBMODULE signifies
+     * to module.stx!addToModuleTree that this module should refer to the same
+     * module in the root tree.
+     * Also see the constructors for ModuleTree (ModuleTreeRoot and
+     * ModuleTreeNode) above.
+     * module_scope:   scope that this module represents.
+     * qualified_name: qualified name of this module.
+     */
     SUBMODULE : scope * list(MODID) -> MODULE
 
 rules
@@ -64,18 +100,30 @@ rules
     query mod_wip filter e in s |-> occs,
     declareModules(s, getWipModules(occs), TRUE()).
 
-  // todo: documentation
+  /**
+   * getWipModule(occ) = module
+   * Gets the MODULE [module] from an occurence [occ].
+   */
   getWipModule : (path * MODULE) -> MODULE
   getWipModules maps getWipModule(list(*)) = list(*)
   getWipModule((_, module)) = module.
 
-  // todo: documentation
+  /**
+   * declareModules(s, modules, add_duplicate_errors)
+   * Declares the MODULEs [modules] in scope [s].
+   * Adds errors for duplicate files if [add_duplicate_errors] is TRUE().
+   * This should be FALSE() when declaring modules from imports because a check
+   * will lead to circular dependencies.
+   */
   declareModules : scope * list(MODULE) * BOOLEAN
   declareModules(s, modules, add_duplicate_errors) :- {tree}
     createModuleTree(modules) == tree,
     declareModulesFromTree(s, tree, add_duplicate_errors).
 
-  // todo: documentation
+  /**
+   * createModuleTree(modules) = module_tree
+   * Transforms a list of MODULEs into a tree structure.
+   */
   createModuleTree : list(MODULE) -> ModuleTree
   createModuleTree(modules) = addAllToModuleTree(ModuleTreeRoot([], []), modules).
 
@@ -262,8 +310,13 @@ rules
     moduleTreeScopeToFile(resolveModuleList(s, moduleList, TRUE(), TRUE()), getLast(mods)).
 
   /**
-   * moduleTreeScopeToFile(
-   * todo
+   * moduleTreeScopeToFile(s_mod_tree, name_node) = s_mod_file
+   * Gets the single file scope [s_mod_file] associated with a tree scope
+   * [s_mod_tree].
+   * Gives a duplicate module error of there are multiple files, and a not
+   * instantiated error in case no file is associated with the scope.
+   * errors are reported on [name_node].
+   * See also moduleTreeScopeToFiles.
    */
   moduleTreeScopeToFile : scope * MODID -> scope
   moduleTreeScopeToFile(s_mod_tree, name_node) = s_mod_file :- {file_scopes name}
@@ -272,7 +325,11 @@ rules
     file_scopes == [s_mod_file|_] | error $[Submodule [name] is not instantiated] @name_node,
     try { file_scopes != [_,_|_] } | error $[Duplicate module [name]] @name_node.
 
-  // todo: documentation  
+  /**
+   * moduleTreeScopeToFiles(s_mod_tree) = file_scopes
+   * returns the file scopes [file_scopes] associated with a tree scope
+   * [s_mod_tree].
+   */
   moduleTreeScopeToFiles : scope -> list(scope)
   moduleTreeScopeToFiles(s_mod_tree) = getScopes(occs) :-
     query () filter I? FILE in s_mod_tree |-> occs.
@@ -319,8 +376,11 @@ rules
     resolveModuleList_2(s, [s_mod|rest@[s_mod|_]], module) = resolveModuleList_2(s, rest, module).
     resolveModuleList_2(s, [s_mod,s_mod'|_], module) = emptyScope(s) :- false | error $[[module] resolved to different scopes].
 
-  // todo: documentation
-  // flattens a nested list of scopes. Gives an error if any list contains more than 1 element.
+  /**
+   * flattenScopeList(lists) = list
+   * flattens a nested list [lists] of scopes. Gives an error if any list
+   * contains more than 1 element.
+   */
   flattenScopeList : list(list(scope)) -> list(scope)
   flattenScopeList([]) = [].
   flattenScopeList([list|lists]) = concatScopes(list, flattenScopeList(lists)).
@@ -331,13 +391,21 @@ rules
     concatScopes([s], scopes) = [s|scopes].
     concatScopes([s|rest@[_|_]], scopes) = [s|concatScopes(rest, scopes)] :- false | error "BUG: resolved multiple scopes".
 
-  // todo: documentation
+  /*
+   * addFileReference(s_mod_tree, name_node)
+   * Sets a reference on [name_node] to the name of [s_mod_tree].
+   */
   addFileReference : scope * MODID
   addFileReferences maps addFileReference(list(*), *)
   addFileReference(s_mod_tree, name_node) :-
     setModuleReferences(moduleTreeScopeToFiles(s_mod_tree), name_node).
 
-  // todo: documentation
+  /**
+   * resolveModuleOpt(s, name) = tree_scopes
+   * Get all modules named [name] defined/reachable from tree scope [s].
+   * "Reachable" means either defined directly in the module that [s] is a part
+   * of, or another module tree that [name] is imported from.
+   */
   resolveModuleOpt : scope * MODID -> list(scope)
   resolveModulesOpt maps resolveModuleOpt(list(*), *) = list(*)
   resolveModuleOpt(s, name) = getModules(occs) :-
