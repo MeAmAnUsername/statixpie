@@ -340,7 +340,7 @@ rules
   // todo: documentation
   resolveModuleOpt : scope * MODID -> list(scope)
   resolveModulesOpt maps resolveModuleOpt(list(*), *) = list(*)
-  resolveModuleOpt(s, name) = result@getModules(occs) :-
+  resolveModuleOpt(s, name) = getModules(occs) :-
     query mod filter I? and {name' :- name' == name} in s |-> occs.
 
     // get the module from an occurrence
