@@ -103,10 +103,10 @@ rules
 
   // todo: documentation
   // Returns the last name in the ModuleList.
-  getLast : list(MODID) -> MODID
+  getLast : list(string) -> string
   getLast([]) = "<<ERROR>>" :- false | error "BUG: called getLast with empty list".
   getLast([name]) = name.
-  getLast([_|mods]) = getLast(mods).
+  getLast([_|name]) = getLast(name).
 
   // todo: documentation
   // todo: rename to splitLast
