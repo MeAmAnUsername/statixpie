@@ -77,7 +77,7 @@ context-free syntax // References
   Exp.QCall = <<Exp>.<FUNCID>(<{Exp ", "}*>)>       {left}
 
   Exp.CreateSupplier = <supplier (<Exp>)>
-  Exp.TaskSupplier   = <<FUNCID>.supplier(<{Exp ", "}*>)>
+  Exp.TaskSupplier   = <<ModuleList><FUNCID>.supplier(<{Exp ", "}*>)>
   Exp.SupplierGet    = <<Exp>.get\<\>()>
 
 context-free syntax // Paths

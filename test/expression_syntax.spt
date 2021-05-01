@@ -168,6 +168,7 @@ test create supplier all caps [[ SUPPLIER(0) ]] parse to Call(NoModuleList(), "S
 test task supplier no arguments [[ parse.supplier() ]] parse succeeds
 test task supplier one argument [[ parse.supplier(true) ]] parse succeeds
 test task supplier two arguments [[ parse.supplier("no", [some_value]) ]] parse succeeds
+test task supplier qualified task name [[ example:test:expression:parse.supplier(ast) ]] parse succeeds
 test task supplier spaces around brackets [[ parse.supplier ( ) ]] parse succeeds
 test task supplier space before period [[ parse .supplier() ]] parse succeeds
 test task supplier space after period [[ parse. supplier() ]] parse fails // todo: allow
