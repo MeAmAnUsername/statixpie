@@ -172,7 +172,7 @@ rules
   typeOf(s, BaseType2Type(DataTy2BaseType(data_ty))) = typeOfDataTy(s, data_ty).
   typeOf(s, BaseType2Type(TupleTy(tys))) = TupleType(typesOf(s, tys)).
   typeOf(s, BaseType2Type(ListTy(ty))) = ListType(typeOf(s, ty)).
-  // todo: SupplierTy
+  typeOf(s, BaseType2Type(SupplierTy(ty))) = SupplierType(typeOf(s, ty)).
   typeOf(s, TypeMod2Type(NullableTy(ty))) = NullableType(typeOf(s, BaseType2Type(ty))).
 
   typeOfDataTy : scope * DataTy -> TYPE

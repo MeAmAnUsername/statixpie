@@ -235,7 +235,20 @@ test method call incorrect arg count [[ foo.set(foo, 8) ]] >= 1 error
 test method call incorrect arg type [[ foo.set([[bok]]) ]] >= 1 error at #1
 // todo: method calls on built-in types
 
-// todo: create & get suppliers
+test create supplier [[ [[ supplier(42) ]] ]] analysis succeeds run pie-ast-type on #1 to SupplierType(IntType())
+test create supplier, supplier as argument [[ [[ supplier(supplier(42)) ]] ]] analysis succeeds run pie-ast-type on #1 to SupplierType(SupplierType(IntType()))
+
+test task supplier [[ [[ anotherFunc.supplier() ]] ]] analysis succeeds run pie-ast-type on #1 to SupplierType(IntType())
+test task supplier one argument [[ [[ double.supplier(7) ]] ]] analysis succeeds run pie-ast-type on #1 to SupplierType(IntType())
+test task supplier three arguments [[ [[ argsFunc.supplier(8, -5, "Mandy") ]] ]] analysis succeeds run pie-ast-type on #1 to SupplierType(StrType())
+test task supplier undefined function [[ [[missing]].supplier() ]] >= 1 error at #1 // todo: error like "undefined function"
+test task supplier not enough arguments [[ [[ double.supplier() ]] ]] 1 error at #1  error like "arguments"
+test task supplier too many arguments [[ [[ double.supplier(4, 6) ]] ]] 1 error at #1  error like "arguments"
+test task supplier argument with wrong type [[ argsFunc.supplier(8, [[ true ]], "Mandy") ]] 1 error at #1 // todo: error like "Type mismatch"
+
+test supplier get [[ [[ supplier("hello").get<>() ]] ]] analysis succeeds run pie-ast-type on #1 to StrType()
+test supplier get [[ [[ double.supplier(78).get<>() ]] ]] analysis succeeds run pie-ast-type on #1 to IntType()
+test supplier get [[ [[ supplier(double.supplier(-3)).get<>() ]] ]] analysis succeeds run pie-ast-type on #1 to SupplierType(IntType())
 
 test list without filter [[ [[ list ./example/ ]] ]] analysis succeeds run pie-ast-type on #1 to ListType(PathType())
 test list with filter regex      [[ list /tmp/test/ with regex "file[0-9]+" ]] analysis succeeds
