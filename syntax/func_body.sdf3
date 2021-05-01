@@ -9,6 +9,7 @@ imports
 template options
 
   keyword -/- [a-zA-Z0-9\-\_\"\/\.\[\!\+]
+  tokenize : "(<."
 
 context-free sorts
 

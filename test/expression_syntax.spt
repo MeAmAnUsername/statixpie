@@ -171,17 +171,17 @@ test task supplier two arguments [[ parse.supplier("no", [some_value]) ]] parse 
 test task supplier qualified task name [[ example:test:expression:parse.supplier(ast) ]] parse succeeds
 test task supplier spaces around brackets [[ parse.supplier ( ) ]] parse succeeds
 test task supplier space before period [[ parse .supplier() ]] parse succeeds
-test task supplier space after period [[ parse. supplier() ]] parse fails // todo: allow
+test task supplier space after period [[ parse. supplier() ]] parse succeeds
 test task supplier space in keyword [[ parse.suppl ier() ]] parse fails
 test task supplier capitalized keyword [[ parse.Supplier() ]] parse to QCall(Ref("parse"), "Supplier", [])
 
 test supplier get [[ supp.get<>() ]] parse succeeds
 test supplier get space before period [[ supp .get<>() ]] parse succeeds
-test supplier get space after period [[ supp. get<>() ]] parse fails // todo: allow
-test supplier get space after get [[ supp.get <>() ]] parse fails // todo: allow
-test supplier get space in diamond [[ supp.get< >() ]] parse fails // todo: allow
+test supplier get space after period [[ supp. get<>() ]] parse succeeds
+test supplier get space after get [[ supp.get <>() ]] parse succeeds
+test supplier get space in diamond [[ supp.get< >() ]] parse succeeds
 test supplier get space after diamond [[ supp.get<> () ]] parse succeeds
-test supplier get space within brackets [[ supp.get<>( ) ]] parse fails // todo: allow
+test supplier get space within brackets [[ supp.get<>( ) ]] parse succeeds
 test supplier get missing diamond [[ supp.get( ) ]] parse to QCall(Ref("supp"), "get", [])
 test supplier get capatalized [[ supp.Get<>( ) ]] parse fails
 test supplier get random capatalized [[ supp.gEt<>( ) ]] parse fails
