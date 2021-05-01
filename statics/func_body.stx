@@ -151,9 +151,16 @@ rules
    * The caller just needs to provide s_data.
    */
   typeOfCall : scope * scope * string * list(Exp) -> (scope * TYPE)
-  typeOfCall(s1, s_data, name, arg_exps) = (s2, out_ty) :- {param_tys arg_tys}
-    resolveUniqueFunc(s_data, name) == FuncType(param_tys, out_ty),
-    expectSubtypesPassScopes(s1, arg_exps, param_tys, "Unexpected number of arguments") == s2.
+  typeOfCall(s, s_data, name, arg_exps) =
+    typeOfCall_1(s, arg_exps, resolveUniqueFunc(s_data, name)).
+
+    typeOfCall_1 : scope * list(Exp) * (TYPE * BOOLEAN) -> (scope * TYPE)
+    typeOfCall_1(s1, arg_exps, (FuncType(param_tys, out_ty), TRUE())) = (s2, out_ty) :-
+      expectSubtypesPassScopes(s1, arg_exps, param_tys, "Unexpected number of arguments") == s2.
+
+    // Function didn't resolve. No need to check arguments.
+    // Errors for non-resolving are created by resolveUniqueFunc.
+    typeOfCall_1(s, _, (_, FALSE())) = (s, _).
 
   typeOfExpImpl(s, Call(moduleList, name, arg_exps)) =
     typeOfCall(s, resolveModuleListToFile(s, moduleList), name, arg_exps).
