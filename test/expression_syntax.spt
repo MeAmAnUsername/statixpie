@@ -203,8 +203,8 @@ test list missing pattern    expression [[ list ./b with pattern    ]] parse fai
 test list missing patterns   expression [[ list ./c with patterns   ]] parse fails
 test list missing extension  expression [[ list ./d with extension  ]] parse fails
 test list missing extensions expression [[ list ./e with extensions ]] parse fails
-test list pattern s   [[ list ./e with pattern s   ]] parse succeeds
-test list extension s [[ list ./e with extension s ]] parse succeeds
+test list pattern s   [[ list ./e with pattern s   ]] parse to ListPath(PathLit("./",[Path("e")]),Some(FilterPart(Pattern(Ref("s")))))
+test list extension s [[ list ./e with extension s ]] parse to ListPath(PathLit("./",[Path("e")]),Some(FilterPart(Extension(Ref("s")))))
 
 test walk absolute path literal [[ walk /foo ]] parse succeeds
 test walk relative path literal [[ walk ./foo ]] parse succeeds
@@ -223,8 +223,8 @@ test walk missing pattern    expression [[ walk ./b with pattern    ]] parse fai
 test walk missing patterns   expression [[ walk ./c with patterns   ]] parse fails
 test walk missing extension  expression [[ walk ./d with extension  ]] parse fails
 test walk missing extensions expression [[ walk ./e with extensions ]] parse fails
-test walk pattern s   [[ walk ./e with pattern s   ]] parse succeeds
-test walk extension s [[ walk ./e with extension s ]] parse succeeds
+test walk pattern s   [[ walk ./e with pattern s   ]] parse to WalkPath(PathLit("./",[Path("e")]),Some(FilterPart(Pattern(Ref("s")))))
+test walk extension s [[ walk ./e with extension s ]] parse to WalkPath(PathLit("./",[Path("e")]),Some(FilterPart(Extension(Ref("s")))))
 
 test read absolute path literal [[ read /foo.txt ]] parse succeeds
 test read relative path literal [[ read ./foo.txt ]] parse succeeds
