@@ -129,6 +129,7 @@ rules // Declararing and resolving
     @name.ref := name',
     @name.type := ty,
     // If there are multiple, the declaration will give an error.
+    // todo: apply same pattern as resolveUniqueFunc to make this error work
     try { occs != [] } | error $[Cannot resolve [name]] @name.
 
 
@@ -282,6 +283,7 @@ rules // Declararing and resolving
     @name.ref := name',
     @name.type := DataType(s_data),
     // If there are multiple, the declaration will give an error.
+    // todo: apply same pattern as resolveUniqueFunc to make this error work
     try { occs != [] } | error $[Could not resolve data [name]] @name.
 
   /**

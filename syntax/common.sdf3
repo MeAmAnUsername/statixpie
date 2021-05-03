@@ -10,5 +10,6 @@ context-free sorts
 
 context-free syntax
 
+  // todo: rename ModuleList to Qualifier
   ModuleList.NoModuleList = <>
   ModuleList.ModuleList = <<{MODID ":"}+>:>
