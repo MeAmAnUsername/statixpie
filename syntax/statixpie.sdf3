@@ -38,6 +38,7 @@ context-free start-symbols
   DataDef
   Type
   ImportStmt
+  FuncImpl
 
 context-free syntax
 
