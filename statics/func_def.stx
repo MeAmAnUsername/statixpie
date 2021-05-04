@@ -14,6 +14,9 @@ signature
     FuncImplKind
 
   constructors
+    JavaForeignFuncKind : FuncImplKind
+    JavaForeignConstructorKind : FuncImplKind
+    PieForeignFuncKind : FuncImplKind
     PieFuncKind : FuncImplKind
 
 rules
@@ -45,9 +48,9 @@ rules
     declareVal(s_func, name, semantic_type, InputValKind()).
 
   funcImplOk : scope * FuncImpl * TYPE -> FuncImplKind
-  
-  // todo: JavaForeignFuncImpl, JavaForeignConstructorImpl, PieForeignFuncImpl
-  
+  funcImplOk(_, PieForeignFuncImpl(_), _) = PieForeignFuncKind().
+  funcImplOk(_, JavaForeignFuncImpl(_, _), _) = JavaForeignFuncKind().
+  funcImplOk(_, JavaForeignConstructorImpl(_), _) = JavaForeignConstructorKind().
   funcImplOk(s_func_outer, PieFuncImpl(Exp2PieFuncBody(exp), keyFunc), expected_type) = PieFuncKind() :- {s_func_inner}
     // todo: set FuncDef moduleList
     new s_func_inner,
