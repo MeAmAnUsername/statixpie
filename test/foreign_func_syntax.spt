@@ -1,4 +1,4 @@
-module foreign_func
+module foreign_func_syntax
 
 language statixpie
 start symbol FuncImpl
