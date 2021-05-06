@@ -4,6 +4,9 @@ imports
   
   libspoofax/stratego/debug
   statix/api
+  
+  signatures/-
+  statics/constructors
 
 // todo: remove commented code
 rules // Generic strategies for getting properties and types of anything
@@ -145,3 +148,23 @@ rules
   
   fold-left(s):
     [x | [y | rest]] -> <fold-left(s)> [<s> (x, y) | rest]
+
+rules // project specific helper strategies
+
+  // transforms a PIE ModuleList to a list
+  moduleListToList: NoModuleList() -> []
+  moduleListToList: ModuleList(list) -> list
+
+  // transforms a PIE Module or a PIE ModuleStmt to a list of module names
+  moduleToList: Module(moduleList, name) -> <concat> [<moduleListToList> moduleList, [name]]
+  moduleToList: ModuleStmt(mod) -> <moduleToList> mod
+
+  syntacticToSemanticType: UnitTy() -> UnitType()
+  syntacticToSemanticType: BoolTy() -> BoolType()
+  syntacticToSemanticType: IntTy() -> IntType()
+  syntacticToSemanticType: StrTy() -> StrType()
+  syntacticToSemanticType: PathTy() -> PathType()
+  syntacticToSemanticType: NullableTy(ty) -> NullableType(<syntacticToSemanticType> ty)
+  syntacticToSemanticType: ListTy(ty) -> ListType(<syntacticToSemanticType> ty)
+  syntacticToSemanticType: TupleTy(tys) -> TupleType(<map(syntacticToSemanticType)> tys)
+  syntacticToSemanticType: SupplierTy(ty) -> SupplierType(<syntacticToSemanticType> ty)

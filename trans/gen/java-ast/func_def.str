@@ -33,7 +33,7 @@ rules // PIE function definitions
     with
     {| InputKind, InjectValues:
       (inputType, inputDataClasses)   := <p2j-ast-pie-func-impl-inputsig(|className)> params
-    ; (outputType, outputDataClasses) := <p2j-ast-pie-func-impl-outputsig(|className)> type
+    ; (outputType, outputDataClasses) := <p2j-ast-pie-func-impl-outputsig(|className)> <syntacticToSemanticType> type
     ; (stmts, lastValue)              := <p2j-ast-pie-func-impl-body> body
     ; keyImpl                         := <p2j-ast-pie-func-key-body> optKeyBody
     ; injectTuples                    := <bagof-InjectValues; make-set>
