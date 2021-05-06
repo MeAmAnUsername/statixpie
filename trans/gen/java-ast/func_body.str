@@ -2,6 +2,8 @@ module gen/java-ast/func_body
 
 imports
 
+  // todo: fix errors on Java constructors (properly import them)
+
   libspoofax/stratego/debug
   
   src-gen/signatures/-
@@ -20,6 +22,7 @@ imports
 
 rules
 
+  // todo: remove try-p2j-ast-exp, call p2j-ast-exp directly
   // tries to apply p2j-ast-exp, returns ""
   try-p2j-ast-exp = pie-try-debug(p2j-ast-exp|"p2j-ast-exp") <+ !([], NewInstance(None(), [], "Object", [], None(), []))
 
