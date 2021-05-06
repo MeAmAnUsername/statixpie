@@ -25,6 +25,7 @@ rules
   p2j-ast-type-sig: TopType()  -> ClassType([], Id("Object"), None())
   p2j-ast-type-sig: NullType() -> ClassType([], Id("Void"), None())
 
+  // todo: set JavaTypeKind in Statix
   p2j-ast-type-sig:
     DataType(occ) -> ClassType([], Id(javaClassId), None())
     where
