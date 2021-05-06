@@ -94,11 +94,9 @@ rules // Declararing and resolving
    */
   declareValWithoutSettingType : scope * string * TYPE * ValKind
   declareValWithoutSettingType(s, name, type, kind) :-
-    {occs} // todo: remove
-//    try { false } | note $[Declare val [name] in [s]: occs=[occs]], // todo: remove
     !val[name, type] in s,
     @name.kind := kind,
-    occs@resolveVal(s, name) == [_]
+    resolveVal(s, name) == [_]
       | error $[Duplicate definition of value [name]].
 
   /**
@@ -106,7 +104,6 @@ rules // Declararing and resolving
    */
   resolveVal : scope * string -> list((path * (string * TYPE)))
   resolveVal(s, name) = occs :-
-//    try { false } | note $[Resolve val [name] in [s]: occs=[occs]], // todo: remove
     query val
       filter P*
          and { name' :- name' == name }
@@ -220,10 +217,8 @@ rules // Declararing and resolving
    */
   declareData : scope * TYPEID * scope
   declareData(s, name, s_data) :-
-    {occs} // todo: remove
-//    try { false } | note $[Declare data type [name] in [s]: occs=[occs]], // todo: remove
     !data[name, s_data] in s,
-    occs@resolveData(s, name) == [_]
+    resolveData(s, name) == [_]
       | error $[Duplicate definition of Datatype [name]] @name,
     @name.type := DataType(s_data).
 

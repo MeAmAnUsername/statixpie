@@ -15,7 +15,6 @@ imports
 
 rules
 
-  // todo: update constructors (replace *Ty with *Type
   p2j-ast-type-sig: UnitType() -> ClassType([], Id("None"), None())
   p2j-ast-type-sig: BoolType() -> ClassType([], Id("Boolean"), None())
   p2j-ast-type-sig: IntType()  -> ClassType([], Id("Integer"), None())
