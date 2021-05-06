@@ -1,0 +1,108 @@
+module gen/java-ast/main
+
+imports
+
+  gen/util
+  gen/java-ast/ast-util
+  gen/java-ast/func_def
+
+  src-gen/signatures/-
+  signatures/-
+  signatures/statixpie-sig
+  signatures/java/packages/-
+  signatures/java/names/-
+  signatures/java/classes/-
+  signatures/java/lexical/-
+  signatures/java/types/-
+  signatures/java/interfaces/-
+  signatures/java/statements/-
+
+  pp
+
+  libspoofax/stratego/debug
+
+rules
+
+  generate-java-file-ast:
+    (pieAst, _, _, file, _) -> result
+    with
+      fileName         := <base-filename;remove-extension> file
+    ; fileNamePrefix   := <generate-classname> (fileName, pieAst)
+    ; dirName          := <output-dir> (file, pieAst)
+    ; namesAndClasses  := <p2j-ast> pieAst
+    ; (names, classes) := <unzip> namesAndClasses
+    ; files            := <map(p2j-ast-to-filestring(|fileName))> classes
+    ; fullNames        := <map(\name -> $[[dirName]/[name].java]\)> names
+    ; result           := (fullNames, files)
+    ; <debug(|$[Successfully transformed Java ASTs to files: [fileName] -> ])> <concat-strings> <separate-by(|"; ")> names
+
+rules
+
+  generate-classname:
+    (fileName, Program(ModuleStmt(Module(moduleList, mod)), imps, defs)) ->
+      // todo: use moduleList
+      $[[<concat-strings-separator(|"_")> mod]_[fileName]]
+
+  /**
+   * output-dir:
+   *   (file, Program(Module(mod), _, _)) -> result
+   *   type: (String, Pie Program AST node) -> String
+   * get the output directory for the given Pie file
+   */
+  output-dir:
+    (file, Program(ModuleStmt(Module(moduleList, mod)), _, _)) -> result
+    with
+    // todo: use moduleList
+    // Note: this strategy assumes files of the form "path/to/file.pie"
+      relativeTargetDir    := <config-get-output-dir>
+    ; ['.' | ['/' | rest]] := <explode-string> relativeTargetDir
+    ; '/'                  := <last> rest // assert that last character is a /
+    ; rootPackageDir       := <implode-string> rest
+    ; packageStr           := <concat-strings> <separate-by(|"/")> mod
+    ; result               := $[[rootPackageDir][packageStr]]
+
+  config-get-output-dir = <read-text-file> <file-exists> "pie/config.txt"
+  config-get-output-dir = !"./build/generated/sources/"
+
+  p2j-ast-to-filestring(|pieFile):
+    ast ->
+$[// This file was generated from Pie source file [pieFile].
+[<pp-java-string> ast]
+// last cache update: 2020-01-09 13:52
+]
+
+  /**
+   * p2j-ast:
+   *   Program(Module(mod), Package(package), imps, defs) ->
+   *     list of (filename, java ast) pairs
+   *   type: Pie Program constructor -> (String, java ast)[]
+   * transforms a Pie Program to a list of Java filenames + CompilationUnits
+   */
+  p2j-ast:
+    p@Program(ModuleStmt(Module(moduleList, mod)), imps, defs) -> result
+    with
+    // todo: use moduleList
+    {| AstAnalysis, ModuleBindings, JavaImports:
+      <pie-set-ast-analysis> defs
+    ; classes  := <filter(p2j-ast-def)> defs
+    ; result    := <map(java-class-to-file(|mod))> classes
+    |}
+
+  java-class-to-file(|mod): (name, class) -> result
+    with
+      imports         := <uniq> <bagof-JavaImports>
+    ; compilationUnit := CompilationUnit(
+        Some(PackageDeclaration(
+          []
+        , <map(p2j-ast-wrap-string-with-id)> mod
+        ))
+      , imports
+      , [ class ]
+      )
+      // Note: meaning of this AST:
+      //   package [mod];
+      //
+      //   [imports]
+      //
+      //   [class]
+    ; result := (name, compilationUnit)
